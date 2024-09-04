@@ -6,6 +6,24 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "fonts": [
+      {
+        "asset": "assets/fonts/Athelas-Regular.ttf",
+        "family": "Athelas"
+      },
+      {
+        "asset": "assets/fonts/SFProText-Regular.otf",
+        "family": "SFProText-Regular"
+      },
+      {
+        "asset": "assets/fonts/SFProText-Bold.otf",
+        "family": "SFProText-Bold"
+      },
+      {
+        "asset": "assets/fonts/SFProText-Semibold.otf",
+        "family": "SFProText-Semibold"
+      }
+    ],
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
