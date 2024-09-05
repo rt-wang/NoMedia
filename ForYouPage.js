@@ -1,100 +1,165 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, SafeAreaView, TouchableOpacity } from 'react-native';
-import { StatusBar } from 'expo-status-bar';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as Font from 'expo-font';
+import Popover from 'react-native-popover-view';
 
-// Load custom fonts
-const loadFonts = async () => {
-  await Font.loadAsync({
-    'Athelas': require('./assets/fonts/Athelas-Regular.ttf'),
-    'SFProText-Regular': require('./assets/fonts/SFProText-Regular.otf'),
-    'SFProText-Bold': require('./assets/fonts/SFProText-Bold.otf'),
-    'SFProText-Semibold': require('./assets/fonts/SFProText-Semibold.otf'),
-  });
-};
-
-const Header = () => (
-  <View style={styles.header}>
-    <Text style={styles.headerText}>NoMedia</Text>
-  </View>
-);
+const LIGHT_GREY = '#CCCCCC';
 
 const SearchBar = () => (
   <View style={styles.searchBarContainer}>
-    <TextInput style={styles.searchBar} placeholder="Search NoMedia" />
+    <TextInput style={styles.searchBar} placeholder="Search NoMedia" placeholderTextColor="#999" />
+    <Ionicons name="search" size={24} color="#999" style={styles.searchIcon} />
   </View>
 );
 
-const NavigationBar = () => (
-  <View style={styles.navBar}>
-    <Ionicons name="home" size={24} color="black" />
-    <Ionicons name="mic" size={24} color="black" />
-    <View style={styles.createButton}>
-      <Ionicons name="add" size={24} color="white" />
-    </View>
-    <Ionicons name="notifications" size={24} color="black" />
-    <Ionicons name="person" size={24} color="black" />
+const MoreOptions = ({ onDislike, onReport }) => (
+  <View style={styles.moreOptionsContainer}>
+    <TouchableOpacity style={styles.moreOptionItem} onPress={onDislike}>
+      <Ionicons name="thumbs-down-outline" size={20} color="white" />
+      <Text style={styles.moreOptionText}>Dislike</Text>
+    </TouchableOpacity>
+    <TouchableOpacity style={styles.moreOptionItem} onPress={onReport}>
+      <Ionicons name="flag-outline" size={20} color="white" />
+      <Text style={styles.moreOptionText}>Report</Text>
+    </TouchableOpacity>
   </View>
 );
 
-const ArticlePreview = ({ item }) => (
-  <View style={styles.postContainer}>
-    <Text style={styles.title}>{item.title}</Text>
-    <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
-    <View style={styles.previewBox}>
-      <Text style={styles.content} numberOfLines={3}>{item.content}</Text>
-      <TouchableOpacity>
-        <Text style={styles.moreButton}>more</Text>
-      </TouchableOpacity>
-    </View>
-    <View style={styles.toolBar}>
-      <View style={styles.toolItem}>
-        <Ionicons name="chatbubble-outline" size={20} color="gray" />
-        <Text style={styles.toolCount}>{item.comments}</Text>
-      </View>
-      <View style={styles.toolItem}>
-        <Ionicons name="repeat" size={20} color="gray" />
-        <Text style={styles.toolCount}>{item.reposts}</Text>
-      </View>
-      <View style={styles.toolItem}>
-        <Ionicons name="heart-outline" size={20} color="gray" />
-        <Text style={styles.toolCount}>{item.likes}</Text>
-      </View>
-      <Ionicons name="share-outline" size={20} color="gray" />
-    </View>
-  </View>
-);
+const ArticlePreview = ({ item }) => {
+  const [showOptions, setShowOptions] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
 
-const Post = ({ item }) => (
-  <View style={styles.postContainer}>
-    <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
-    <Text style={styles.content}>{item.content}</Text>
-    <View style={styles.toolBar}>
-      <View style={styles.toolItem}>
-        <Ionicons name="chatbubble-outline" size={20} color="gray" />
-        <Text style={styles.toolCount}>{item.comments}</Text>
-      </View>
-      <View style={styles.toolItem}>
-        <Ionicons name="repeat" size={20} color="gray" />
-        <Text style={styles.toolCount}>{item.reposts}</Text>
-      </View>
-      <View style={styles.toolItem}>
-        <Ionicons name="heart-outline" size={20} color="gray" />
-        <Text style={styles.toolCount}>{item.likes}</Text>
-      </View>
-      <Ionicons name="share-outline" size={20} color="gray" />
-    </View>
-  </View>
-);
+  const handleDislike = () => {
+    Alert.alert('Disliked', 'You have disliked this article');
+    setShowOptions(false);
+  };
 
-const ForYouPage = () => {
+  const handleReport = () => {
+    Alert.alert('Reported', 'You have reported this article');
+    setShowOptions(false);
+  };
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    // Here you would typically update the like count on the server
+  };
+
+  const indentedContent = '  ' + item.content; // Add two space characters at the beginning
+
+  return (
+    <View style={styles.postContainer}>
+      <View style={styles.postHeader}>
+        <Text style={styles.title}>{item.title}</Text>
+        <Popover
+          isVisible={showOptions}
+          onRequestClose={() => setShowOptions(false)}
+          from={(
+            <TouchableOpacity onPress={() => setShowOptions(true)} style={styles.moreIconContainer}>
+              <Ionicons name="ellipsis-horizontal" size={16} color={LIGHT_GREY} />
+            </TouchableOpacity>
+          )}
+          popoverStyle={styles.popover}
+        >
+          <MoreOptions onDislike={handleDislike} onReport={handleReport} />
+        </Popover>
+      </View>
+      <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
+      <View style={styles.previewBox}>
+        <Text style={styles.previewContent}>
+          {indentedContent.slice(0, 197)}...{' '}
+          <Text style={styles.moreButton} onPress={() => {}}>more</Text>
+        </Text>
+      </View>
+      <View style={styles.toolBar}>
+        <View style={styles.toolItem}>
+          <Ionicons name="chatbubble-outline" size={18} color="gray" />
+          <Text style={styles.toolCount}>{item.comments}</Text>
+        </View>
+        <View style={styles.toolItem}>
+          <Ionicons name="repeat" size={18} color="gray" />
+          <Text style={styles.toolCount}>{item.reposts}</Text>
+        </View>
+        <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
+          <Ionicons 
+            name={isLiked ? "heart" : "heart-outline"} 
+            size={18} 
+            color={isLiked ? "white" : "gray"} 
+          />
+          <Text style={styles.toolCount}>{item.likes}</Text>
+        </TouchableOpacity>
+        <Ionicons name="share-outline" size={18} color="gray" />
+      </View>
+    </View>
+  );
+};
+
+const Post = ({ item }) => {
+  const [showOptions, setShowOptions] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+
+  const handleDislike = () => {
+    Alert.alert('Disliked', 'You have disliked this post');
+    setShowOptions(false);
+  };
+
+  const handleReport = () => {
+    Alert.alert('Reported', 'You have reported this post');
+    setShowOptions(false);
+  };
+
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    // Here you would typically update the like count on the server
+  };
+
+  return (
+    <View style={styles.postContainer}>
+      <View style={styles.postHeader}>
+        <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
+        <Popover
+          isVisible={showOptions}
+          onRequestClose={() => setShowOptions(false)}
+          from={(
+            <TouchableOpacity onPress={() => setShowOptions(true)} style={styles.moreIconContainer}>
+              <Ionicons name="ellipsis-horizontal" size={16} color="#CCCCCC" />
+            </TouchableOpacity>
+          )}
+          popoverStyle={styles.popover}
+        >
+          <MoreOptions onDislike={handleDislike} onReport={handleReport} />
+        </Popover>
+      </View>
+      <Text style={styles.postContent}>
+        {item.content.slice(0, 150)}
+      </Text>
+      <View style={styles.toolBar}>
+        <View style={styles.toolItem}>
+          <Ionicons name="chatbubble-outline" size={18} color="gray" />
+          <Text style={styles.toolCount}>{item.comments}</Text>
+        </View>
+        <View style={styles.toolItem}>
+          <Ionicons name="repeat" size={18} color="gray" />
+          <Text style={styles.toolCount}>{item.reposts}</Text>
+        </View>
+        <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
+          <Ionicons 
+            name={isLiked ? "heart" : "heart-outline"} 
+            size={18} 
+            color={isLiked ? "white" : "gray"} 
+          />
+          <Text style={styles.toolCount}>{item.likes}</Text>
+        </TouchableOpacity>
+        <Ionicons name="share-outline" size={18} color="gray" />
+      </View>
+    </View>
+  );
+};
+
+const ForYouPage = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [fontsLoaded, setFontsLoaded] = useState(false);
 
   useEffect(() => {
-    loadFonts().then(() => setFontsLoaded(true));
     fetchPosts();
   }, []);
 
@@ -102,17 +167,25 @@ const ForYouPage = () => {
     setLoading(true);
     // Simulating API call
     setTimeout(() => {
-      const newPosts = Array(10).fill().map((_, index) => ({
-        id: Date.now() + index,
-        type: Math.random() > 0.5 ? 'article' : 'post',
-        title: 'Sample Article Title',
-        username: `User${Math.floor(Math.random() * 1000)}`,
-        handle: `handle${Math.floor(Math.random() * 1000)}`,
-        content: 'This is a sample content for the post or article preview. It can be longer or shorter depending on the actual content.',
-        comments: Math.floor(Math.random() * 100),
-        reposts: Math.floor(Math.random() * 100),
-        likes: Math.floor(Math.random() * 1000),
-      }));
+      const newPosts = Array(10).fill().map((_, index) => {
+        const isArticle = Math.random() > 0.5;
+        const baseContent = 'This is a sample content for the post or article preview. It can be longer or shorter depending on the actual content.';
+        const content = isArticle 
+          ? baseContent.repeat(Math.ceil(200 / baseContent.length)) 
+          : baseContent.slice(0, 150);
+
+        return {
+          id: Date.now() + index,
+          type: isArticle ? 'article' : 'post',
+          title: isArticle ? 'Sample Article Title' : undefined,
+          username: `User${Math.floor(Math.random() * 1000)}`,
+          handle: `handle${Math.floor(Math.random() * 1000)}`,
+          content: content,
+          comments: Math.floor(Math.random() * 100),
+          reposts: Math.floor(Math.random() * 100),
+          likes: Math.floor(Math.random() * 1000),
+        };
+      });
       setPosts(prevPosts => [...prevPosts, ...newPosts]);
       setLoading(false);
     }, 1000);
@@ -126,14 +199,8 @@ const ForYouPage = () => {
     }
   };
 
-  if (!fontsLoaded) {
-    return <Text>Loading...</Text>;
-  }
-
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar style="auto" />
-      <Header />
+    <View style={styles.container}>
       <SearchBar />
       <FlatList
         data={posts}
@@ -142,69 +209,51 @@ const ForYouPage = () => {
         onEndReached={fetchPosts}
         onEndReachedThreshold={0.1}
         ListFooterComponent={loading ? <Text>Loading...</Text> : null}
+        contentContainerStyle={styles.scrollContent}
       />
-      <NavigationBar />
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
   },
-  header: {
-    height: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  headerText: {
-    fontFamily: 'Athelas',
-    fontSize: 22,
-  },
-  searchBarContainer: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  searchBar: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 20,
-    paddingLeft: 10,
-  },
-  navBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    height: 50,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  createButton: {
-    backgroundColor: 'blue',
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+  scrollContent: {
+    paddingBottom: 20,
   },
   postContainer: {
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    paddingTop: 12,    // Reduced top padding
+    paddingBottom: 8,  // Reduced bottom padding
+    marginBottom: 4,   // Reduced margin between posts
+  },
+  postHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 2,
+  },
+  moreIconContainer: {
+    padding: 4,
+    marginTop: -4,
+    marginRight: -4,
   },
   title: {
-    fontFamily: 'SFProText-Semibold',
-    fontSize: 18,
-    marginBottom: 4,
+    fontFamily: 'Athelas',
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#fff',
+    flex: 1,
+    marginRight: 8,
+    marginBottom: 2,
   },
   username: {
-    fontFamily: 'SFProText-Bold',
+    fontFamily: 'SFProText-Regular',
     fontSize: 16,
+    color: '#fff',
+    marginBottom: 4,
   },
   handle: {
     fontFamily: 'SFProText-Regular',
@@ -212,34 +261,84 @@ const styles = StyleSheet.create({
     color: '#687684',
   },
   previewBox: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: '#000',
+    borderColor: LIGHT_GREY,
+    borderWidth: 1,
     padding: 8,
     marginTop: 4,
-    borderRadius: 5,
+    borderRadius: 10,
   },
-  content: {
-    fontFamily: 'SFProText-Regular',
+  previewContent: {
+    fontFamily: 'SFProText',
     fontSize: 16,
+    lineHeight: 22,
+    color: '#fff',
   },
   moreButton: {
-    color: 'blue',
-    marginTop: 4,
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  underline: {
+    textDecorationLine: 'underline',
   },
   toolBar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     marginTop: 8,
-    paddingHorizontal: 8,
+    paddingLeft: 8,
   },
   toolItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16
+    marginRight: 16,
   },
   toolCount: {
-    marginLeft: 2,
+    marginLeft: 4,
     fontSize: 14,
-    color: 'gray',
+    color: '#687684',
+    lineHeight: 18,
+  },
+  popover: {
+    backgroundColor: '#333',
+    borderRadius: 8,
+  },
+  moreOptionsContainer: {
+    backgroundColor: 'transparent',
+  },
+  moreOptionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 8,
+  },
+  moreOptionText: {
+    color: 'white',
+    marginLeft: 8,
+    fontSize: 16,
+  },
+  postContent: {
+    fontFamily: 'SFProText',
+    fontSize: 16,
+    lineHeight: 22,
+    color: '#fff',
+    marginBottom: 0,
+    paddingLeft: 8,  // Add left padding to align with toolbar
+  },
+  searchBarContainer: {
+    padding: 10,
+    backgroundColor: '#000',
+  },
+  searchBar: {
+    backgroundColor: '#333',
+    borderRadius: 12,
+    padding: 10,
+    paddingLeft: 40,
+    color: '#fff',
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 20,
+    top: 18,
   },
 });
 
