@@ -65,8 +65,8 @@ const ArticlePreview = ({ item }) => {
         <View style={styles.previewBox}>
           <Text style={styles.previewContent}>
             {truncatedContent}
-            {indentedContent.length > 150 && (
-              <Text style={styles.moreButton} onPress={() => {}}> more</Text>
+            {item.content.length > 150 && (
+              <Text style={styles.moreButton}> more</Text>
             )}
           </Text>
         </View>
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   moreButton: {
-    color: '#ccc',
+    color: '#000000', // Explicitly set to black
     fontWeight: 'bold',
     fontSize: 16,
   },

@@ -10,6 +10,11 @@ const DARK_GREY = '#333333';
 
 const NavigationBar = ({ activePage = 'home' }) => {
   const navigation = useNavigation();
+
+  const navigateTo = (screen) => {
+    navigation.navigate(screen);
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity 
@@ -17,6 +22,7 @@ const NavigationBar = ({ activePage = 'home' }) => {
           styles.iconContainer, 
           activePage === 'home' && styles.activeIconContainer
         ]}
+        onPress={() => navigateTo('Home')}
       >
         <Ionicons 
           name="home" 
@@ -29,6 +35,7 @@ const NavigationBar = ({ activePage = 'home' }) => {
           styles.iconContainer, 
           activePage === 'ai' && styles.activeIconContainer
         ]}
+        onPress={() => navigateTo('AI')}
       >
         <Text style={[
           styles.aiText, 
@@ -37,10 +44,16 @@ const NavigationBar = ({ activePage = 'home' }) => {
           AI
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.addButtonContainer}>
+      <TouchableOpacity 
+        style={styles.addButtonContainer}
+        onPress={() => navigateTo('CreatePost')}
+      >
         <Ionicons name="add" size={32} color={WHITE} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.iconContainer}>
+      <TouchableOpacity 
+        style={styles.iconContainer}
+        onPress={() => navigateTo('Notifications')}
+      >
         <Ionicons name="notifications" size={24} color={LIGHT_GREY} />
       </TouchableOpacity>
       <TouchableOpacity 
@@ -48,7 +61,7 @@ const NavigationBar = ({ activePage = 'home' }) => {
           styles.iconContainer, 
           activePage === 'account' && styles.activeIconContainer
         ]}
-        onPress={() => navigation.navigate('Account')}
+        onPress={() => navigateTo('Account')}
       >
         <Ionicons 
           name="person" 

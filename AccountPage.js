@@ -12,8 +12,12 @@ const PersonalInfo = ({ username, handle, bio, following, followers }) => (
     <Text style={styles.handle}>@{handle}</Text>
     <Text style={styles.bio}>{bio}</Text>
     <View style={styles.followInfo}>
-      <Text style={styles.followText}>{following} Following</Text>
-      <Text style={styles.followText}>{followers} Followers</Text>
+      <Text style={styles.followText}>
+        <Text style={styles.followCount}>{following}</Text> Following
+      </Text>
+      <Text style={styles.followText}>
+        <Text style={styles.followCount}>{followers}</Text> Followers
+      </Text>
     </View>
   </View>
 );
@@ -144,25 +148,32 @@ const styles = StyleSheet.create({
     color: '#687684',
     marginRight: 16,
   },
+  followCount: {
+    fontFamily: 'SFProText-Bold', // Use the semibold font
+    color: '#fff', // This makes the number white
+  },
   stickyHeader: {
     backgroundColor: '#000',
     paddingTop: 8,
   },
   actionButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     marginBottom: 16,
+    paddingHorizontal: 16, // Add horizontal padding
   },
   button: {
     backgroundColor: '#333',
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    paddingVertical: 6, // Increased vertical padding
+    paddingHorizontal: 0, // Remove horizontal padding
+    borderRadius: 10,
+    width: '48%', // Set width to 48% of container width
+    alignItems: 'center', // Center content horizontally
   },
   buttonText: {
     fontFamily: 'SFProText-Semibold',
     color: '#fff',
-    fontSize: 14,
+    fontSize: 14, // Slightly increased font size
   },
   contentTabs: {
     flexDirection: 'row',
