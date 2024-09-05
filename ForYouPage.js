@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Popover from 'react-native-popover-view';
+// Make sure to import Platform for platform-specific shadow styles
+import { Platform } from 'react-native';
 
 const LIGHT_GREY = '#CCCCCC';
 
@@ -64,11 +66,14 @@ const ArticlePreview = ({ item }) => {
         </Popover>
       </View>
       <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
-      <View style={styles.previewBox}>
-        <Text style={styles.previewContent}>
-          {indentedContent.slice(0, 197)}...{' '}
-          <Text style={styles.moreButton} onPress={() => {}}>more</Text>
-        </Text>
+      <View style={styles.previewBoxContainer}>
+        <View style={styles.previewBoxShadow} />
+        <View style={styles.previewBox}>
+          <Text style={styles.previewContent}>
+            {indentedContent.slice(0, 197)}...{' '}
+            <Text style={styles.moreButton} onPress={() => {}}>more</Text>
+          </Text>
+        </View>
       </View>
       <View style={styles.toolBar}>
         <View style={styles.toolItem}>
@@ -168,7 +173,8 @@ const ForYouPage = ({ navigation }) => {
     // Simulating API call
     setTimeout(() => {
       const newPosts = Array(10).fill().map((_, index) => {
-        const isArticle = Math.random() > 0.5;
+        // Adjust this probability to control the ratio of posts to articles
+        const isArticle = Math.random() > 0.6; // 20% chance of being an article
         const baseContent = 'This is a sample content for the post or article preview. It can be longer or shorter depending on the actual content.';
         const content = isArticle 
           ? baseContent.repeat(Math.ceil(200 / baseContent.length)) 
@@ -260,25 +266,47 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#687684',
   },
+  previewBoxContainer: {
+    marginTop: 8,
+    marginBottom: 8,
+    marginHorizontal: 0,
+  },
+  previewBoxShadow: {
+    position: 'absolute',
+    top: 4,
+    left: 4,
+    right: -4,
+    bottom: -4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // Slightly transparent white
+    borderRadius: 12,
+  },
   previewBox: {
-    backgroundColor: '#000',
-    borderColor: LIGHT_GREY,
-    borderWidth: 1,
-    padding: 8,
-    marginTop: 4,
-    borderRadius: 10,
-    marginRight:6,
-    marginLeft: 6
+    backgroundColor: '#333', // Dark grey background
+    padding: 16,
+    borderRadius: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+      },
+      android: {
+        elevation: 5,
+      },
+    }),
   },
   previewContent: {
     fontFamily: 'SFProText',
     fontSize: 16,
     lineHeight: 22,
     color: '#fff',
-    marginLeft: 6
   },
   moreButton: {
-    color: 'white',
+    color: '#ccc',
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -289,7 +317,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 8,
-    marginLeft: 6, // Adjusted to align with the content
+    marginLeft: 4, // Adjusted to align with the content
   },
   toolItem: {
     flexDirection: 'row',
@@ -326,7 +354,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 0,
     paddingLeft: 4,  // Reduced left padding to align with new container padding
-    marginLeft: 6
   },
   searchBarContainer: {
     padding: 10,
