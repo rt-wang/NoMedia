@@ -47,6 +47,22 @@ const ContentTabs = ({ activeTab, setActiveTab }) => (
   </View>
 );
 
+const ReplyContainer = ({ item, reply }) => {
+  if (!item || !reply) {
+    return null; // or return a placeholder component
+  }
+
+  return (
+    <View style={styles.replyContainer}>
+      {item.type === 'article' ? <ArticlePreview item={item} /> : <Post item={item} />}
+      <View style={styles.replyLine} />
+      <View style={styles.reply}>
+        <Post item={reply} />
+      </View>
+    </View>
+  );
+};
+
 const AccountPage = () => {
   const [activeTab, setActiveTab] = useState('Posts');
   const [content, setContent] = useState([]);
@@ -58,33 +74,52 @@ const AccountPage = () => {
   const fetchContent = () => {
     // Simulating API call
     setTimeout(() => {
-      const newContent = Array(10).fill().map((_, index) => ({
-        id: Date.now() + index,
-        type: Math.random() > 0.6 ? 'article' : 'post',
-        title: 'Sample Article Title',
-        username: `User${Math.floor(Math.random() * 1000)}`,
-        handle: `handle${Math.floor(Math.random() * 1000)}`,
-        content: `${CONTENT_INDENT}This is a sample content for the post or article preview. It is designed to be longer than 150 \ncharacters to demonstrate how the content truncation works in our application. This extended text allows us to see how the "more" button appears and functions when the content exceeds the character limit.`,
-        comments: Math.floor(Math.random() * 100),
-        reposts: Math.floor(Math.random() * 100),
-        likes: Math.floor(Math.random() * 1000),
-        isLiked: activeTab === 'Likes',
-      }));
+      const newContent = Array(10).fill().map((_, index) => {
+        const isArticle = Math.random() > 0.5;
+        const baseItem = {
+          id: Date.now() + index,
+          type: isArticle ? 'article' : 'post',
+          title: isArticle ? 'Sample Article Title' : undefined,
+          username: `User${Math.floor(Math.random() * 1000)}`,
+          handle: `handle${Math.floor(Math.random() * 1000)}`,
+          content: `${CONTENT_INDENT}This is a sample content for the ${isArticle ? 'article preview' : 'post'}. It is designed to be longer than 150 characters to demonstrate how the content truncation works in our application.`,
+          comments: Math.floor(Math.random() * 100),
+          reposts: Math.floor(Math.random() * 100),
+          likes: Math.floor(Math.random() * 1000),
+          isLiked: activeTab === 'Likes',
+        };
+
+        if (activeTab === 'Replies') {
+          return {
+            ...baseItem,
+            reply: {
+              id: Date.now() + index + 1000,
+              type: 'post',
+              username: 'YourUsername',
+              handle: 'yourhandle',
+              content: `${CONTENT_INDENT}This is a sample reply to the ${isArticle ? 'article' : 'post'} above. It demonstrates how replies are displayed in the account page.`,
+              comments: Math.floor(Math.random() * 50),
+              reposts: Math.floor(Math.random() * 50),
+              likes: Math.floor(Math.random() * 500),
+            }
+          };
+        }
+
+        return baseItem;
+      });
       setContent(newContent);
     }, 1000);
   };
 
   const renderItem = ({ item }) => {
     if (activeTab === 'Replies') {
-      return (
-        <View style={styles.replyContainer}>
-          <Post item={item} />
-          <View style={styles.replyLine} />
-          <View style={styles.reply}>
-            <Post item={{...item, username: 'YourUsername', handle: 'yourhandle'}} />
-          </View>
-        </View>
-      );
+      if (!item || !item.reply) {
+        return null; // or return a placeholder component
+      }
+      return <ReplyContainer item={item} reply={item.reply} />;
+    }
+    if (!item) {
+      return null; // or return a placeholder component
     }
     return item.type === 'article' ? <ArticlePreview item={item} /> : <Post item={item} />;
   };
@@ -149,7 +184,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   followCount: {
-    fontFamily: 'SFProText-Bold', // Use the semibold font
+    fontFamily: 'SFProText-Semibold', // Use the semibold font
     color: '#fff', // This makes the number white
   },
   stickyHeader: {
