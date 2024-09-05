@@ -9,6 +9,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import ForYouPage from './ForYouPage';
 import NavigationBar from './NavigationBar';
 import Header from './Header';
+import AccountPage from './AccountPage';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -84,6 +85,13 @@ function App() {
             {(props) => (
               <AppContent>
                 <ForYouPage {...props} />
+              </AppContent>
+            )}
+          </Stack.Screen>
+          <Stack.Screen name="Account">
+            {(props) => (
+              <AppContent activePage="account">
+                <AccountPage {...props} />
               </AppContent>
             )}
           </Stack.Screen>

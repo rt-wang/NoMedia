@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 const LIGHT_GREY = '#CCCCCC';
 const WHITE = '#FFFFFF';
@@ -8,6 +9,7 @@ const BLACK = '#000000';
 const DARK_GREY = '#333333';
 
 const NavigationBar = ({ activePage = 'home' }) => {
+  const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <TouchableOpacity 
@@ -41,8 +43,18 @@ const NavigationBar = ({ activePage = 'home' }) => {
       <TouchableOpacity style={styles.iconContainer}>
         <Ionicons name="notifications" size={24} color={LIGHT_GREY} />
       </TouchableOpacity>
-      <TouchableOpacity style={styles.iconContainer}>
-        <Ionicons name="person" size={24} color={LIGHT_GREY} />
+      <TouchableOpacity 
+        style={[
+          styles.iconContainer, 
+          activePage === 'account' && styles.activeIconContainer
+        ]}
+        onPress={() => navigation.navigate('Account')}
+      >
+        <Ionicons 
+          name="person" 
+          size={24} 
+          color={activePage === 'account' ? BLACK : LIGHT_GREY} 
+        />
       </TouchableOpacity>
     </View>
   );
