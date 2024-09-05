@@ -222,12 +222,12 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 20,
+    paddingHorizontal: 16, // Add horizontal padding to the entire scroll content
   },
   postContainer: {
-    padding: 16,
-    paddingTop: 12,    // Reduced top padding
-    paddingBottom: 8,  // Reduced bottom padding
-    marginBottom: 4,   // Reduced margin between posts
+    paddingVertical: 12,    // Combine top and bottom padding
+    paddingHorizontal: 4,   // Reduce horizontal padding as we've added it to scrollContent
+    marginBottom: 4,        // Kept the reduced margin between posts
   },
   postHeader: {
     flexDirection: 'row',
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
   moreIconContainer: {
     padding: 4,
     marginTop: -4,
-    marginRight: -4,
+    marginRight: -8, // Adjusted to account for the new padding
   },
   title: {
     fontFamily: 'Athelas',
@@ -267,12 +267,15 @@ const styles = StyleSheet.create({
     padding: 8,
     marginTop: 4,
     borderRadius: 10,
+    marginRight:6,
+    marginLeft: 6
   },
   previewContent: {
     fontFamily: 'SFProText',
     fontSize: 16,
     lineHeight: 22,
     color: '#fff',
+    marginLeft: 6
   },
   moreButton: {
     color: 'white',
@@ -286,7 +289,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 8,
-    paddingLeft: 8,
+    marginLeft: 6, // Adjusted to align with the content
   },
   toolItem: {
     flexDirection: 'row',
@@ -322,10 +325,12 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: '#fff',
     marginBottom: 0,
-    paddingLeft: 8,  // Add left padding to align with toolbar
+    paddingLeft: 4,  // Reduced left padding to align with new container padding
+    marginLeft: 6
   },
   searchBarContainer: {
     padding: 10,
+    paddingHorizontal: 16, // Increased horizontal padding
     backgroundColor: '#000',
   },
   searchBar: {
@@ -337,7 +342,7 @@ const styles = StyleSheet.create({
   },
   searchIcon: {
     position: 'absolute',
-    left: 20,
+    left: 26, // Adjusted to account for the new padding
     top: 18,
   },
 });
