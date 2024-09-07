@@ -51,10 +51,17 @@ const NavigationBar = ({ activePage = 'home' }) => {
         <Ionicons name="add" size={32} color={WHITE} />
       </TouchableOpacity>
       <TouchableOpacity 
-        style={styles.iconContainer}
+        style={[
+          styles.iconContainer,
+          activePage === 'notifications' && styles.activeIconContainer
+        ]}
         onPress={() => navigateTo('Notifications')}
       >
-        <Ionicons name="notifications" size={24} color={LIGHT_GREY} />
+        <Ionicons 
+          name="notifications" 
+          size={24} 
+          color={activePage === 'notifications' ? BLACK : LIGHT_GREY}
+        />
       </TouchableOpacity>
       <TouchableOpacity 
         style={[
