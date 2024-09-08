@@ -46,7 +46,7 @@ const NavigationBar = ({ activePage = 'home' }) => {
       </TouchableOpacity>
       <TouchableOpacity 
         style={styles.addButtonContainer}
-        onPress={() => navigateTo('CreatePost')}
+        onPress={() => navigateTo('Create')}
       >
         <Ionicons name="add" size={32} color={WHITE} />
       </TouchableOpacity>

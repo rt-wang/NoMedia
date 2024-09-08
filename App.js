@@ -9,6 +9,7 @@ import AccountPage from './AccountPage';
 import NavigationBar from './NavigationBar';
 import Header from './Header'; // Make sure you have this component
 import NotificationsPage from './NotificationsPage'; // Add this import
+import CreatePage from './CreatePage'; // Add this import
 // Import other pages as needed
 
 const Tab = createBottomTabNavigator();
@@ -78,6 +79,13 @@ const App = () => {
             {(props) => (
               <AppContent {...props}>
                 <NotificationsPage {...props} />
+              </AppContent>
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="Create">
+            {(props) => (
+              <AppContent {...props}>
+                <CreatePage {...props} />
               </AppContent>
             )}
           </Tab.Screen>
