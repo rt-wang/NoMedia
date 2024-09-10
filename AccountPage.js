@@ -76,13 +76,16 @@ const AccountPage = () => {
     setTimeout(() => {
       const newContent = Array(10).fill().map((_, index) => {
         const isArticle = Math.random() > 0.5;
+        const baseContent = 'This is a sample content for the post or article preview. It is designed to be longer than 150 characters to demonstrate how the content truncation works in our application.';
+        const content = isArticle ? `${CONTENT_INDENT}${baseContent}` : baseContent;
+
         const baseItem = {
           id: Date.now() + index,
           type: isArticle ? 'article' : 'post',
           title: isArticle ? 'Sample Article Title' : undefined,
           username: `User${Math.floor(Math.random() * 1000)}`,
           handle: `handle${Math.floor(Math.random() * 1000)}`,
-          content: `${CONTENT_INDENT}This is a sample content for the ${isArticle ? 'article preview' : 'post'}. It is designed to be longer than 150 characters to demonstrate how the content truncation works in our application.`,
+          content: content,
           comments: Math.floor(Math.random() * 100),
           reposts: Math.floor(Math.random() * 100),
           likes: Math.floor(Math.random() * 1000),
@@ -97,7 +100,7 @@ const AccountPage = () => {
               type: 'post',
               username: 'YourUsername',
               handle: 'yourhandle',
-              content: `${CONTENT_INDENT}This is a sample reply to the ${isArticle ? 'article' : 'post'} above. It demonstrates how replies are displayed in the account page.`,
+              content: 'This is a sample reply to the ' + (isArticle ? 'article' : 'post') + ' above. It demonstrates how replies are displayed in the account page.',
               comments: Math.floor(Math.random() * 50),
               reposts: Math.floor(Math.random() * 50),
               likes: Math.floor(Math.random() * 500),
