@@ -1,118 +1,108 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, SafeAreaView } from 'react-native';
+import React from 'react';
+import { View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-import { StatusBar } from 'expo-status-bar';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Font from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { Animated, Easing } from 'react-native';
 import ForYouPage from './ForYouPage';
+import AccountPage from './AccountPage';
 import NavigationBar from './NavigationBar';
-import Header from './Header';
+import Header from './Header'; // Make sure you have this component
+import NotificationsPage from './NotificationsPage'; // Add this import
+import CreatePage from './CreatePage'; // Add this import
+// Import other pages as needed
 
-// Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
+const Tab = createBottomTabNavigator();
 
-const Stack = createStackNavigator();
-
-const AppContent = ({ children, activePage }) => {
-  const insets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <StatusBar style="light" />
-      <Header />
-      <View style={styles.content}>
-        {children}
-      </View>
-      <View style={[styles.navBarContainer, { paddingBottom: insets.bottom }]}>
-        <NavigationBar activePage={activePage} />
-      </View>
-    </View>
+const CustomTransition = ({ current, next, inverted, layouts: { screen } }) => {
+  const progress = Animated.add(
+    current.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 1],
+      extrapolate: 'clamp',
+    }),
+    next ? next.progress.interpolate({
+      inputRange: [0, 1],
+      outputRange: [0, 1],
+      extrapolate: 'clamp',
+    }) : 0
   );
+
+  return {
+    cardStyle: {
+      transform: [{
+        rotateY: progress.interpolate({
+          inputRange: [0, 1, 2],
+          outputRange: ['0deg', '90deg', '180deg'],
+        }),
+      }],
+    },
+  };
 };
 
-function App() {
-  const [appIsReady, setAppIsReady] = useState(false);
+const screenOptions = {
+  headerShown: false,
+  tabBarStyle: { display: 'none' },
+  cardStyleInterpolator: CustomTransition,
+};
 
-  useEffect(() => {
-    async function prepare() {
-      try {
-        // Pre-load fonts, make any API calls you need to do here
-        await Font.loadAsync({
-          'SFProText-Regular': require('./assets/fonts/SFProText-Regular.otf'),
-          'SFProText-Bold': require('./assets/fonts/SFProText-Bold.otf'),
-          'SFProText-Semibold': require('./assets/fonts/SFProText-Semibold.otf'),
-          'Athelas': require('./assets/fonts/Athelas-Regular.ttf'),
-        });
-      } catch (e) {
-        console.warn(e);
-      } finally {
-        // Tell the application to render
-        setAppIsReady(true);
-      }
-    }
+const AppContent = ({ children, navigation, route }) => (
+  <SafeAreaView style={styles.container}>
+    <Header />
+    <View style={styles.content}>
+      {children}
+    </View>
+    <NavigationBar activePage={route.name.toLowerCase()} />
+  </SafeAreaView>
+);
 
-    prepare();
-  }, []);
-
-  const onLayoutRootView = React.useCallback(async () => {
-    if (appIsReady) {
-      // This tells the splash screen to hide immediately! If we call this after
-      // `setAppIsReady`, then we may see a blank screen while the app is
-      // loading its initial state and rendering its first pixels. So instead,
-      // we hide the splash screen once we know the root view has already
-      // performed layout.
-      await SplashScreen.hideAsync();
-    }
-  }, [appIsReady]);
-
-  if (!appIsReady) {
-    return null;
-  }
-
+const App = () => {
   return (
-    <NavigationContainer>
-      <SafeAreaView style={styles.safeArea} onLayout={onLayoutRootView}>
-        <Stack.Navigator
-          screenOptions={{
-            headerShown: false,
-            cardStyle: { backgroundColor: '#000' },
-          }}
-        >
-          <Stack.Screen name="Home">
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <Tab.Navigator screenOptions={screenOptions}>
+          <Tab.Screen name="Home">
             {(props) => (
-              <AppContent>
+              <AppContent {...props}>
                 <ForYouPage {...props} />
               </AppContent>
             )}
-          </Stack.Screen>
+          </Tab.Screen>
+          <Tab.Screen name="Account">
+            {(props) => (
+              <AppContent {...props}>
+                <AccountPage {...props} />
+              </AppContent>
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="Notifications">
+            {(props) => (
+              <AppContent {...props}>
+                <NotificationsPage {...props} />
+              </AppContent>
+            )}
+          </Tab.Screen>
+          <Tab.Screen name="Create">
+            {(props) => (
+              <AppContent {...props}>
+                <CreatePage {...props} />
+              </AppContent>
+            )}
+          </Tab.Screen>
           {/* Add other screens here */}
-        </Stack.Navigator>
-      </SafeAreaView>
-    </NavigationContainer>
+        </Tab.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
-}
+};
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#000000',
   },
   content: {
     flex: 1,
-    marginBottom: 60, // Add margin to account for the NavigationBar height
-  },
-  navBarContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#000',
   },
 });
 

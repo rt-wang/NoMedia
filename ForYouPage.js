@@ -306,7 +306,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   moreButton: {
-    color: '#ccc',
+    color: '#000000', // Explicitly set to black
     fontWeight: 'bold',
     fontSize: 16,
   },
