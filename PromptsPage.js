@@ -9,7 +9,7 @@ const TOPICS = [
 
 const PROMPT_BOXES = [
   { id: '1', title: '<Bitcoin discussion>' },
-  { id: '2', title: '<Opinions on NVIDIA stock?>' },
+  { id: '2', title: '<Opinions on NVIDIA stock>' },
   { id: '3', title: '<New discovery in quantum physics?>' },
   { id: '4', title: '<Best way to learn Python?>' },
   { id: '5', title: '<What do you guys think of "Dune"?>' },

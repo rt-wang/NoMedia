@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Popover from 'react-native-popover-view';
-// Make sure to import Platform for platform-specific shadow styles
 import { Platform } from 'react-native';
+import CommentModal from './CommentModal'; // Import the new CommentModal component
 
 const LIGHT_GREY = '#CCCCCC';
 
@@ -98,7 +98,7 @@ const ArticlePreview = ({ item }) => {
   );
 };
 
-const Post = ({ item }) => {
+const Post = ({ item, onCommentPress }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -138,10 +138,10 @@ const Post = ({ item }) => {
         {item.content.slice(0, 150)}
       </Text>
       <View style={styles.toolBar}>
-        <View style={styles.toolItem}>
+        <TouchableOpacity style={styles.toolItem} onPress={() => onCommentPress(item)}>
           <Ionicons name="chatbubble-outline" size={18} color="gray" />
           <Text style={styles.toolCount}>{item.comments}</Text>
-        </View>
+        </TouchableOpacity>
         <View style={styles.toolItem}>
           <Ionicons name="repeat" size={18} color="gray" />
           <Text style={styles.toolCount}>{item.reposts}</Text>
@@ -163,6 +163,8 @@ const Post = ({ item }) => {
 const ForYouPage = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [commentModalVisible, setCommentModalVisible] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     fetchPosts();
@@ -197,11 +199,29 @@ const ForYouPage = ({ navigation }) => {
     }, 1000);
   };
 
+  const handleCommentPress = (post) => {
+    setSelectedPost(post);
+    setCommentModalVisible(true);
+  };
+
+  const handlePostComment = (comment) => {
+    // Here you would typically send the comment to your backend
+    console.log(`New comment on post ${selectedPost.id}: ${comment}`);
+    // Update the local state to reflect the new comment
+    setPosts(prevPosts => 
+      prevPosts.map(post => 
+        post.id === selectedPost.id 
+          ? { ...post, comments: post.comments + 1 } 
+          : post
+      )
+    );
+  };
+
   const renderItem = ({ item }) => {
     if (item.type === 'article') {
       return <ArticlePreview item={item} />;
     } else {
-      return <Post item={item} />;
+      return <Post item={item} onCommentPress={handleCommentPress} />;
     }
   };
 
@@ -214,8 +234,14 @@ const ForYouPage = ({ navigation }) => {
         keyExtractor={item => item.id.toString()}
         onEndReached={fetchPosts}
         onEndReachedThreshold={0.1}
-        ListFooterComponent={loading ? <Text>Loading...</Text> : null}
+        ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
         contentContainerStyle={styles.scrollContent}
+      />
+      <CommentModal
+        isVisible={commentModalVisible}
+        onClose={() => setCommentModalVisible(false)}
+        originalPost={selectedPost}
+        onPostComment={handlePostComment}
       />
     </View>
   );
@@ -371,6 +397,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 26, // Adjusted to account for the new padding
     top: 18,
+  },
+  loadingText: {
+    color: '#fff',
+    textAlign: 'center',
+    padding: 10,
   },
 });
 
