@@ -116,7 +116,7 @@ const NotificationsPage = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>NoMedia.</Text>
+        <Text style={styles.headerTitle}>Notifications</Text>
       </View>
       <FlatList
         data={notifications}
@@ -125,7 +125,6 @@ const NotificationsPage = () => {
         onEndReached={fetchNotifications}
         onEndReachedThreshold={0.1}
         ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
-        contentContainerStyle={styles.scrollContent}
       />
     </View>
   );
@@ -137,9 +136,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   header: {
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
+    padding: 8,
   },
   headerTitle: {
     fontFamily: 'Athelas',

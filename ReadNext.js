@@ -6,12 +6,15 @@ import Post from './Post';
 const { width, height } = Dimensions.get('window');
 
 const ReadNextBox = ({ item, onPress }) => (
-  <TouchableOpacity style={styles.readNextBox} onPress={onPress}>
-    <View style={styles.readNextContent}>
-      <Text style={styles.readNextTitle} numberOfLines={2} ellipsizeMode="tail">{item.title}</Text>
-      <Text style={styles.readNextUsername} numberOfLines={1} ellipsizeMode="tail">{item.username} <Text style={styles.readNextHandle}>@{item.handle}</Text></Text>
-    </View>
-  </TouchableOpacity>
+  <View style={styles.readNextBoxWrapper}>
+    <View style={styles.readNextBoxShadow} />
+    <TouchableOpacity style={styles.readNextBox} onPress={onPress}>
+      <View style={styles.readNextContent}>
+        <Text style={styles.readNextTitle} numberOfLines={2} ellipsizeMode="tail">{item.title}</Text>
+        <Text style={styles.readNextUsername} numberOfLines={1} ellipsizeMode="tail">{item.username} <Text style={styles.readNextHandle}>@{item.handle}</Text></Text>
+      </View>
+    </TouchableOpacity>
+  </View>
 );
 
 const Comment = ({ comment }) => (
@@ -176,15 +179,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  readNextBox: {
+  readNextBoxWrapper: {
     width: (width - 48) / 2, // Adjusted width
     height: 100, // Fixed height
+    marginBottom: 16,
+    position: 'relative',
+  },
+  readNextBoxShadow: {
+    position: 'absolute',
+    top: 3, // Adjust for desired shadow offset
+    left: 3, // Adjust for desired shadow offset
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.5)', // Slightly off-white, adjust alpha for intensity
+    borderRadius: 8,
+  },
+  readNextBox: {
+    width: '100%',
+    height: '100%',
     backgroundColor: '#222',
     borderRadius: 8,
     padding: 12,
-    marginBottom: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'absolute',
+    top: 0,
+    left: 0,
   },
   readNextContent: {
     alignItems: 'center',
@@ -234,15 +254,18 @@ const styles = StyleSheet.create({
   commentContainer: {
     flexDirection: 'row',
     marginBottom: 5,
+    paddingHorizontal: 20,
   },
   commentLine: {
     width: 2,
     backgroundColor: '#333',
     marginRight: 6,
+    marginTop: 12,
+    height: '83%',
   },
   commentContent: {
     flex: 1,
-    marginLeft: 20, // This creates the indentation
+    marginLeft: 0, // This creates the indentation
   },
 });
 
