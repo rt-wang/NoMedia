@@ -1,18 +1,28 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
 
 const LIGHT_GREY = '#CCCCCC';
 const WHITE = '#FFFFFF';
 const BLACK = '#000000';
 const DARK_GREY = '#333333';
 
-const NavigationBar = ({ activePage = 'home' }) => {
-  const navigation = useNavigation();
-
+const NavigationBar = ({ state, descriptors, navigation }) => {
   const navigateTo = (screen) => {
-    navigation.navigate(screen);
+    if (screen === 'Home') {
+      // Always navigate to the ForYouPage when Home is tapped
+      navigation.navigate('Home', { screen: 'ForYou' });
+    } else {
+      navigation.navigate(screen);
+    }
+  };
+
+  const isActive = (screenName) => {
+    const currentRoute = state.routes[state.index];
+    if (screenName === 'Home') {
+      return currentRoute.name === 'Home' || currentRoute.name === 'Threads' || currentRoute.name === 'ReadNext' || currentRoute.name === 'ForYou';
+    }
+    return currentRoute.name === screenName && screenName !== 'Create';
   };
 
   return (
@@ -20,26 +30,26 @@ const NavigationBar = ({ activePage = 'home' }) => {
       <TouchableOpacity 
         style={[
           styles.iconContainer, 
-          activePage === 'home' && styles.activeIconContainer
+          isActive('Home') && styles.activeIconContainer
         ]}
         onPress={() => navigateTo('Home')}
       >
         <Ionicons 
           name="home" 
           size={24} 
-          color={activePage === 'home' ? BLACK : LIGHT_GREY} 
+          color={isActive('Home') ? BLACK : LIGHT_GREY} 
         />
       </TouchableOpacity>
       <TouchableOpacity 
         style={[
           styles.iconContainer, 
-          activePage === 'ai' && styles.activeIconContainer
+          isActive('AI') && styles.activeIconContainer
         ]}
         onPress={() => navigateTo('AI')}
       >
         <Text style={[
           styles.aiText, 
-          { color: activePage === 'ai' ? BLACK : LIGHT_GREY }
+          { color: isActive('AI') ? BLACK : LIGHT_GREY }
         ]}>
           AI
         </Text>
@@ -53,27 +63,27 @@ const NavigationBar = ({ activePage = 'home' }) => {
       <TouchableOpacity 
         style={[
           styles.iconContainer,
-          activePage === 'notifications' && styles.activeIconContainer
+          isActive('Notifications') && styles.activeIconContainer
         ]}
         onPress={() => navigateTo('Notifications')}
       >
         <Ionicons 
           name="notifications" 
           size={24} 
-          color={activePage === 'notifications' ? BLACK : LIGHT_GREY}
+          color={isActive('Notifications') ? BLACK : LIGHT_GREY}
         />
       </TouchableOpacity>
       <TouchableOpacity 
         style={[
           styles.iconContainer, 
-          activePage === 'account' && styles.activeIconContainer
+          isActive('Account') && styles.activeIconContainer
         ]}
         onPress={() => navigateTo('Account')}
       >
         <Ionicons 
           name="person" 
           size={24} 
-          color={activePage === 'account' ? BLACK : LIGHT_GREY} 
+          color={isActive('Account') ? BLACK : LIGHT_GREY} 
         />
       </TouchableOpacity>
     </View>

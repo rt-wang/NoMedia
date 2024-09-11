@@ -1,148 +1,180 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Dimensions, SafeAreaView, Platform } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, Image, FlatList, Dimensions, SafeAreaView, Platform, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import Header from './Header';
-import NavigationBar from './NavigationBar';
-import { useFonts } from 'expo-font';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const { width, height } = Dimensions.get('window');
 
-const CONTENT_INDENT = '    '; // Two spaces for indentation
+const CONTENT_INDENT = '    ';
+const IMAGE_ASPECT_RATIO = 4 / 3;
+const IMAGE_WIDTH = width * 0.8;
+const IMAGE_HEIGHT = Math.min(IMAGE_WIDTH / IMAGE_ASPECT_RATIO, height - 400);
 
-const Thread = ({ content, pageNumber, totalPages, image }) => (
-  <View style={styles.threadContainer}>
-    <Text style={styles.pageCounter}>{`${pageNumber}/${totalPages}`}</Text>
-    <Text style={styles.threadContent}>{CONTENT_INDENT + content}</Text>
-    {image && <Image source={{ uri: image }} style={styles.threadImage} />}
-  </View>
-);
+const EXAMPLE_IMAGE = 'https://source.unsplash.com/800x600/?nature';
 
-const formatNumber = (num) => {
-  if (num >= 1000000) {
-    return (num / 1000000).toFixed(1) + 'm';
-  }
-  if (num >= 1000) {
-    return (num / 1000).toFixed(1) + 'k';
-  }
-  return num.toString();
+const DEFAULT_CONTENT = [
+  "Welcome to this sample thread! This is the first page of default content. As you can see, we've expanded this text to reach approximately 250 characters. This gives you a better idea of how a longer piece of content might look when displayed in the thread view. It's a good way to test layout and scrolling behavior.",
+  "Here's the second page of our default content. It's not much, but it's honest work. We've also extended this page to about 250 characters to maintain consistency. This allows you to see how multiple pages of content will appear and how the navigation between pages functions. It's a great way to ensure everything is working as expected.",
+  "And finally, the third page of our default content. Thanks for reading! Once again, we've stretched this to around 250 characters. This final page gives you a sense of how the end of a thread might look. It's also useful for testing any 'end of content' behavior you might have implemented, such as navigating to a 'Read Next' screen or showing a completion message.",
+];
+
+const Thread = ({ content, pageNumber, totalPages, image }) => {
+  const [imageError, setImageError] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  return (
+    <View style={styles.threadContainer}>
+      <Text style={styles.pageCounter}>{`${pageNumber}/${totalPages}`}</Text>
+      <View style={styles.contentWrapper}>
+        <Text style={styles.threadContent}>{CONTENT_INDENT + content}</Text>
+        {image && (
+          <>
+            <ActivityIndicator style={styles.loader} animating={loading} />
+            <Image 
+              source={{ uri: image }} 
+              style={[styles.threadImage, { display: loading ? 'none' : 'flex' }]}
+              resizeMode="cover"
+              onLoadStart={() => setLoading(true)}
+              onLoadEnd={() => setLoading(false)}
+              onError={() => {
+                setImageError(true);
+                setLoading(false);
+              }}
+            />
+            {imageError && <Text style={styles.errorText}>Failed to load image</Text>}
+          </>
+        )}
+      </View>
+    </View>
+  );
 };
 
 const Toolbox = ({ likes, comments, reposts }) => (
   <View style={styles.toolbox}>
-    <TouchableOpacity style={styles.toolItem}>
+    <View style={styles.toolItem}>
       <Ionicons name="heart-outline" size={18} color="#fff" />
-      <Text style={styles.toolText}>{formatNumber(likes)}</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.toolItem}>
+      <Text style={styles.toolText}>{likes}</Text>
+    </View>
+    <View style={styles.toolItem}>
       <Ionicons name="chatbubble-outline" size={18} color="#fff" />
-      <Text style={styles.toolText}>{formatNumber(comments)}</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.toolItem}>
+      <Text style={styles.toolText}>{comments}</Text>
+    </View>
+    <View style={styles.toolItem}>
       <Ionicons name="repeat-outline" size={18} color="#fff" />
-      <Text style={styles.toolText}>{formatNumber(reposts)}</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.toolItem}>
+      <Text style={styles.toolText}>{reposts}</Text>
+    </View>
+    <View style={styles.toolItem}>
       <Ionicons name="share-outline" size={18} color="#fff" />
-    </TouchableOpacity>
+    </View>
   </View>
 );
 
-const Threads = ({ route, navigation }) => {
-  const { item } = route.params;
-
+const Threads = () => {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { item = {} } = route.params || {};
+  const flatListRef = useRef(null);
   const [currentPage, setCurrentPage] = useState(0);
 
-  const threads = [
-    { content: "This is the first page of our article. It contains the introduction and sets the stage for what's to come. We'll discuss various topics and provide insights into the subject matter. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
-    { content: "On the second page, we delve deeper into our main points. We explore the nuances and provide examples to illustrate our arguments. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.", image: "https://picsum.photos/400/300" },
-    { content: "The third and final page wraps up our discussion. We summarize the key points and provide a conclusion that ties everything together. Thank you for reading! Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." },
-  ];
+  const threads = item.threads && item.threads.length > 0
+    ? item.threads
+    : DEFAULT_CONTENT.map((content, index) => ({ 
+        content, 
+        pageNumber: index + 1,
+        image: index === 1 ? EXAMPLE_IMAGE : null
+      }));
 
-  const handleScroll = (event) => {
-    const offsetX = event.nativeEvent.contentOffset.x;
-    const page = Math.round(offsetX / width);
-    if (page !== currentPage) {
-      setCurrentPage(page);
+  const handleViewableItemsChanged = ({ viewableItems }) => {
+    if (viewableItems.length > 0) {
+      setCurrentPage(viewableItems[0].index);
     }
   };
 
-  useEffect(() => {
-    if (currentPage === threads.length) {
-      console.log('Reached the end of the article');
-      // Uncomment this when you have created the ReadNext screen
-      // navigation.navigate('ReadNext');
+  const handleMomentumScrollEnd = (event) => {
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const page = Math.round(offsetX / width);
+    if (page >= threads.length) {
+      navigation.navigate('ReadNext', { item });
     }
-  }, [currentPage]);
+  };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <Header />
-      <View style={styles.container}>
-        <View style={styles.articleHeader}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
-        </View>
-        <View style={styles.threadWrapper}>
-          <ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            onScroll={handleScroll}
-            scrollEventThrottle={16}
-          >
-            {threads.map((thread, index) => (
-              <Thread
-                key={index}
-                content={thread.content}
-                pageNumber={index + 1}
-                totalPages={threads.length}
-                image={thread.image}
-              />
-            ))}
-          </ScrollView>
-        </View>
-        <Toolbox likes={1000} comments={50} reposts={25} />
+    <SafeAreaView style={styles.container}>
+      <View style={styles.titleContainer}>
+        <Text style={styles.title}>{item.title || 'Sample Thread'}</Text>
       </View>
-      <NavigationBar />
+      <View style={styles.authorInfo}>
+        <Text style={styles.username}>{item.username || 'John Doe'}</Text>
+        <Text style={styles.handle}> @{item.handle || 'johndoe'}</Text>
+      </View>
+      <FlatList
+        ref={flatListRef}
+        data={[...threads, { isLastItem: true }]}
+        renderItem={({ item, index }) => 
+          item.isLastItem ? 
+            <View style={{ width }} /> : 
+            <Thread
+              content={item.content || ''}
+              pageNumber={index + 1}
+              totalPages={threads.length}
+              image={item.image}
+            />
+        }
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onViewableItemsChanged={handleViewableItemsChanged}
+        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
+        keyExtractor={(item, index) => index.toString()}
+      />
+      <Toolbox 
+        likes={item.likes || 0}
+        comments={item.comments || 0}
+        reposts={item.reposts || 0}
+      />
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
   container: {
     flex: 1,
     backgroundColor: '#000',
   },
-  articleHeader: {
-    padding: 16,
+  titleContainer: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
   },
   title: {
     fontFamily: Platform.OS === 'ios' ? 'Athelas' : 'Roboto',
     fontSize: 22,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 4,
+  },
+  authorInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
   },
   username: {
     fontFamily: Platform.OS === 'ios' ? 'SF Pro Text' : 'Roboto',
     fontSize: 16,
+    fontWeight: 'bold',
     color: '#fff',
   },
   handle: {
+    fontFamily: Platform.OS === 'ios' ? 'SF Pro Text' : 'Roboto',
+    fontSize: 16,
     color: '#687684',
-  },
-  threadWrapper: {
-    flex: 1,
-    justifyContent: 'center',
   },
   threadContainer: {
     width: width,
     padding: 16,
     justifyContent: 'center',
+    alignContent: 'center',
   },
   pageCounter: {
     position: 'absolute',
@@ -151,35 +183,52 @@ const styles = StyleSheet.create({
     color: '#687684',
     fontSize: 14,
   },
+  contentWrapper: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   threadContent: {
-    fontFamily: Platform.OS === 'ios' ? 'SF Pro Text' : 'Roboto',
-    fontSize: 18,
+    fontFamily: Platform.OS === 'ios' ? 'Athelas' : 'Roboto',
+    fontSize: 17,
     color: '#fff',
-    lineHeight: 24,
+    lineHeight: 20,
     marginBottom: 16,
   },
   threadImage: {
-    width: '100%',
-    height: 200,
-    resizeMode: 'cover',
+    width: IMAGE_WIDTH,
+    height: IMAGE_HEIGHT,
+    maxWidth: width-150,
     borderRadius: 8,
+    alignSelf: 'center',
+  },
+  loader: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginLeft: -20,
+    marginTop: -20,
+  },
+  errorText: {
+    color: 'red',
+    marginTop: 10,
   },
   toolbox: {
     position: 'absolute',
     bottom: 8,
     right: 8,
-    alignItems: 'flex-end',
+    alignItems: 'flex-start',
   },
   toolItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
-    width: 40, // Set a fixed width for alignment
   },
   toolText: {
+    fontFamily: Platform.OS === 'ios' ? 'SF Pro Text' : 'Roboto',
     color: '#fff',
     marginLeft: 4,
-    fontSize: 10,
+    fontSize: 14,
   },
 });
 

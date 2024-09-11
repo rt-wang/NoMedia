@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, StatusBar } from 'react-native'; // Add StatusBar import
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack'; // Add this line
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { Animated, Easing } from 'react-native';
 import ForYouPage from './ForYouPage';
@@ -18,6 +19,15 @@ import * as Font from 'expo-font';
 import { useState, useEffect } from 'react';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+
+const HomeStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="ForYou" component={ForYouPage} />
+    <Stack.Screen name="Threads" component={Threads} />
+    <Stack.Screen name="ReadNext" component={ReadNext} />
+  </Stack.Navigator>
+);
 
 const CustomTransition = ({ current, next, inverted, layouts: { screen } }) => {
   const progress = Animated.add(
@@ -45,21 +55,11 @@ const CustomTransition = ({ current, next, inverted, layouts: { screen } }) => {
   };
 };
 
-const screenOptions = {
+const screenOptions = ({ route }) => ({
   headerShown: false,
   tabBarStyle: { display: 'none' },
-  cardStyleInterpolator: CustomTransition,
-};
-
-const AppContent = ({ children, navigation, route }) => (
-  <SafeAreaView style={styles.container}>
-    <Header />
-    <View style={styles.content}>
-      {children}
-    </View>
-    <NavigationBar activePage={route.name.toLowerCase()} />
-  </SafeAreaView>
-);
+  tabBar: (props) => <NavigationBar {...props} currentRoute={route.name} />
+});
 
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -84,39 +84,23 @@ const App = () => {
 
   return (
     <SafeAreaProvider>
-      <NavigationContainer>
-        <Tab.Navigator screenOptions={screenOptions}>
-          <Tab.Screen name="Home">
-            {(props) => (
-              <AppContent {...props}>
-                <ForYouPage {...props} />
-              </AppContent>
-            )}
-          </Tab.Screen>
-          <Tab.Screen name="Account">
-            {(props) => (
-              <AppContent {...props}>
-                <AccountPage {...props} />
-              </AppContent>
-            )}
-          </Tab.Screen>
-          <Tab.Screen name="Notifications">
-            {(props) => (
-              <AppContent {...props}>
-                <NotificationsPage {...props} />
-              </AppContent>
-            )}
-          </Tab.Screen>
-          <Tab.Screen name="Create">
-            {(props) => (
-              <AppContent {...props}>
-                <CreatePage {...props} />
-              </AppContent>
-            )}
-          </Tab.Screen>
-          <Tab.Screen name="Threads" component={Threads} />
-        </Tab.Navigator>
-      </NavigationContainer>
+      <StatusBar barStyle="light-content" /> 
+      <SafeAreaView style={styles.container}>
+        <NavigationContainer>
+          <View style={styles.content}>
+            <Header />
+            <Tab.Navigator
+              screenOptions={{ headerShown: false }}
+              tabBar={props => <NavigationBar {...props} />}
+            >
+              <Tab.Screen name="Home" component={HomeStack} />
+              <Tab.Screen name="Account" component={AccountPage} />
+              <Tab.Screen name="Notifications" component={NotificationsPage} />
+              <Tab.Screen name="Create" component={CreatePage} />
+            </Tab.Navigator>
+          </View>
+        </NavigationContainer>
+      </SafeAreaView>
     </SafeAreaProvider>
   );
 };
