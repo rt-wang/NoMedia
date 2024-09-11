@@ -160,11 +160,9 @@ const Post = ({ item, onCommentPress }) => {
   );
 };
 
-const ForYouPage = ({ navigation }) => {
+const ForYouPage = ({ navigation, showCommentModal }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [commentModalVisible, setCommentModalVisible] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     fetchPosts();
@@ -200,8 +198,8 @@ const ForYouPage = ({ navigation }) => {
   };
 
   const handleCommentPress = (post) => {
-    setSelectedPost(post);
-    setCommentModalVisible(true);
+    console.log('handleCommentPress called with post:', post.id);
+    showCommentModal(post);
   };
 
   const handlePostComment = (comment) => {
@@ -236,12 +234,6 @@ const ForYouPage = ({ navigation }) => {
         onEndReachedThreshold={0.1}
         ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
         contentContainerStyle={styles.scrollContent}
-      />
-      <CommentModal
-        isVisible={commentModalVisible}
-        onClose={() => setCommentModalVisible(false)}
-        originalPost={selectedPost}
-        onPostComment={handlePostComment}
       />
     </View>
   );

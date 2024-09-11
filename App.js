@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -10,6 +10,7 @@ import NavigationBar from './NavigationBar';
 import Header from './Header'; // Make sure you have this component
 import NotificationsPage from './NotificationsPage'; // Add this import
 import CreatePage from './CreatePage'; // Add this import
+import CommentModal from './CommentModal'; // Add this import
 // Import other pages as needed
 
 const Tab = createBottomTabNavigator();
@@ -57,6 +58,19 @@ const AppContent = ({ children, navigation, route }) => (
 );
 
 const App = () => {
+  const [commentModalVisible, setCommentModalVisible] = useState(false);
+  const [selectedPost, setSelectedPost] = useState(null);
+
+  const showCommentModal = (post) => {
+    setSelectedPost(post);
+    setCommentModalVisible(true);
+  };
+
+  const hideCommentModal = () => {
+    setCommentModalVisible(false);
+    setSelectedPost(null);
+  };
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
@@ -64,7 +78,7 @@ const App = () => {
           <Tab.Screen name="Home">
             {(props) => (
               <AppContent {...props}>
-                <ForYouPage {...props} />
+                <ForYouPage {...props} showCommentModal={showCommentModal} />
               </AppContent>
             )}
           </Tab.Screen>
@@ -91,6 +105,16 @@ const App = () => {
           </Tab.Screen>
           {/* Add other screens here */}
         </Tab.Navigator>
+        <CommentModal
+          isVisible={commentModalVisible}
+          onClose={hideCommentModal}
+          originalPost={selectedPost}
+          onPostComment={(comment) => {
+            // Handle posting comment
+            console.log('Posted comment:', comment);
+            hideCommentModal();
+          }}
+        />
       </NavigationContainer>
     </SafeAreaProvider>
   );
