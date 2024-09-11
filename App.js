@@ -10,7 +10,12 @@ import NavigationBar from './NavigationBar';
 import Header from './Header'; // Make sure you have this component
 import NotificationsPage from './NotificationsPage'; // Add this import
 import CreatePage from './CreatePage'; // Add this import
+import Threads from './Threads';
+import ReadNext from './ReadNext';
 // Import other pages as needed
+
+import * as Font from 'expo-font';
+import { useState, useEffect } from 'react';
 
 const Tab = createBottomTabNavigator();
 
@@ -57,6 +62,26 @@ const AppContent = ({ children, navigation, route }) => (
 );
 
 const App = () => {
+  const [fontsLoaded, setFontsLoaded] = useState(false);
+
+  useEffect(() => {
+    async function loadFonts() {
+      await Font.loadAsync({
+        'AbhayaLibre-Regular': require('./assets/fonts/AbhayaLibre-Regular.ttf'),
+        'AbhayaLibre-Medium': require('./assets/fonts/AbhayaLibre-Medium.ttf'),
+        'AbhayaLibre-SemiBold': require('./assets/fonts/AbhayaLibre-SemiBold.ttf'),
+        'AbhayaLibre-Bold': require('./assets/fonts/AbhayaLibre-Bold.ttf'),
+        'AbhayaLibre-ExtraBold': require('./assets/fonts/AbhayaLibre-ExtraBold.ttf'),
+      });
+      setFontsLoaded(true);
+    }
+    loadFonts();
+  }, []);
+
+  if (!fontsLoaded) {
+    return null; // or return a loading screen
+  }
+
   return (
     <SafeAreaProvider>
       <NavigationContainer>
@@ -89,7 +114,7 @@ const App = () => {
               </AppContent>
             )}
           </Tab.Screen>
-          {/* Add other screens here */}
+          <Tab.Screen name="Threads" component={Threads} />
         </Tab.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

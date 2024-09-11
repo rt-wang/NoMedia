@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Popover from 'react-native-popover-view';
+import { useNavigation } from '@react-navigation/native'; // Add this import
 
 const LIGHT_GREY = '#CCCCCC';
 
@@ -18,7 +19,7 @@ const MoreOptions = ({ onDislike, onReport }) => (
   </View>
 );
 
-const ArticlePreview = ({ item }) => {
+const ArticlePreview = ({ item, navigation }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -35,6 +36,10 @@ const ArticlePreview = ({ item }) => {
   const handleLike = () => {
     setIsLiked(!isLiked);
     // Here you would typically update the like count on the server
+  };
+
+  const handleMorePress = () => {
+    navigation.navigate('Threads', { item });
   };
 
   const indentedContent = '  ' + item.content;
@@ -66,7 +71,7 @@ const ArticlePreview = ({ item }) => {
           <Text style={styles.previewContent}>
             {truncatedContent}
             {item.content.length > 150 && (
-              <Text style={styles.moreButton}> more</Text>
+              <Text style={styles.moreButton} onPress={handleMorePress}> more</Text>
             )}
           </Text>
         </View>

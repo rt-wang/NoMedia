@@ -22,6 +22,26 @@
       {
         "asset": "assets/fonts/SFProText-Semibold.otf",
         "family": "SFProText-Semibold"
+      },
+      {
+        "asset": "./assets/fonts/AbhayaLibre-Regular.ttf",
+        "family": "AbhayaLibre-Regular"
+      },
+      {
+        "asset": "./assets/fonts/AbhayaLibre-Medium.ttf",
+        "family": "AbhayaLibre-Medium"
+      },
+      {
+        "asset": "./assets/fonts/AbhayaLibre-SemiBold.ttf",
+        "family": "AbhayaLibre-SemiBold"
+      },
+      {
+        "asset": "./assets/fonts/AbhayaLibre-Bold.ttf",
+        "family": "AbhayaLibre-Bold"
+      },
+      {
+        "asset": "./assets/fonts/AbhayaLibre-ExtraBold.ttf",
+        "family": "AbhayaLibre-ExtraBold"
       }
     ],
     "splash": {
