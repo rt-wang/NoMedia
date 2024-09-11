@@ -18,7 +18,7 @@ const MoreOptions = ({ onDislike, onReport }) => (
   </View>
 );
 
-const Post = ({ item }) => {
+const Post = ({ item, navigation, onCommentPress }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -58,10 +58,10 @@ const Post = ({ item }) => {
         {item.content}
       </Text>
       <View style={styles.toolBar}>
-        <View style={styles.toolItem}>
+        <TouchableOpacity style={styles.toolItem} onPress={() => onCommentPress(item)}>
           <Ionicons name="chatbubble-outline" size={18} color="gray" />
           <Text style={styles.toolCount}>{item.comments}</Text>
-        </View>
+        </TouchableOpacity>
         <View style={styles.toolItem}>
           <Ionicons name="repeat" size={18} color="gray" />
           <Text style={styles.toolCount}>{item.reposts}</Text>

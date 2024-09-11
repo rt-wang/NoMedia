@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Popover from 'react-native-popover-view';
+import { useNavigation } from '@react-navigation/native'; // Add this import
 
 const LIGHT_GREY = '#CCCCCC';
 
@@ -18,7 +19,7 @@ const MoreOptions = ({ onDislike, onReport }) => (
   </View>
 );
 
-const ArticlePreview = ({ item }) => {
+const ArticlePreview = ({ item, navigation, onCommentPress }) => {
   const [showOptions, setShowOptions] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
 
@@ -37,60 +38,66 @@ const ArticlePreview = ({ item }) => {
     // Here you would typically update the like count on the server
   };
 
+  const handleMorePress = () => {
+    navigation.navigate('Threads', { item });
+  };
+
   const indentedContent = '  ' + item.content;
   const truncatedContent = indentedContent.length > 150 
     ? indentedContent.slice(0, 147) + '...' 
     : indentedContent;
 
   return (
-    <View style={styles.container}>
-      <View style={styles.postHeader}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Popover
-          isVisible={showOptions}
-          onRequestClose={() => setShowOptions(false)}
-          from={(
-            <TouchableOpacity onPress={() => setShowOptions(true)} style={styles.moreIconContainer}>
-              <Ionicons name="ellipsis-horizontal" size={16} color={LIGHT_GREY} />
-            </TouchableOpacity>
-          )}
-          popoverStyle={styles.popover}
-        >
-          <MoreOptions onDislike={handleDislike} onReport={handleReport} />
-        </Popover>
-      </View>
-      <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
-      <View style={styles.previewBoxContainer}>
-        <View style={styles.previewBoxShadow} />
-        <View style={styles.previewBox}>
-          <Text style={styles.previewContent}>
-            {truncatedContent}
-            {item.content.length > 150 && (
-              <Text style={styles.moreButton}> more</Text>
+    <TouchableOpacity onPress={() => navigation.navigate('ReadNext', { article: item })}>
+      <View style={styles.container}>
+        <View style={styles.postHeader}>
+          <Text style={styles.title}>{item.title}</Text>
+          <Popover
+            isVisible={showOptions}
+            onRequestClose={() => setShowOptions(false)}
+            from={(
+              <TouchableOpacity onPress={() => setShowOptions(true)} style={styles.moreIconContainer}>
+                <Ionicons name="ellipsis-horizontal" size={16} color={LIGHT_GREY} />
+              </TouchableOpacity>
             )}
-          </Text>
+            popoverStyle={styles.popover}
+          >
+            <MoreOptions onDislike={handleDislike} onReport={handleReport} />
+          </Popover>
+        </View>
+        <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
+        <View style={styles.previewBoxContainer}>
+          <View style={styles.previewBoxShadow} />
+          <View style={styles.previewBox}>
+            <Text style={styles.previewContent}>
+              {truncatedContent}
+              {item.content.length > 150 && (
+                <Text style={styles.moreButton} onPress={handleMorePress}> more</Text>
+              )}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.toolBar}>
+          <TouchableOpacity style={styles.toolItem} onPress={() => onCommentPress(item)}>
+            <Ionicons name="chatbubble-outline" size={18} color="gray" />
+            <Text style={styles.toolCount}>{item.comments}</Text>
+          </TouchableOpacity>
+          <View style={styles.toolItem}>
+            <Ionicons name="repeat" size={18} color="gray" />
+            <Text style={styles.toolCount}>{item.reposts}</Text>
+          </View>
+          <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
+            <Ionicons 
+              name={isLiked ? "heart" : "heart-outline"} 
+              size={18} 
+              color={isLiked ? "white" : "gray"} 
+            />
+            <Text style={styles.toolCount}>{item.likes}</Text>
+          </TouchableOpacity>
+          <Ionicons name="share-outline" size={18} color="gray" />
         </View>
       </View>
-      <View style={styles.toolBar}>
-        <View style={styles.toolItem}>
-          <Ionicons name="chatbubble-outline" size={18} color="gray" />
-          <Text style={styles.toolCount}>{item.comments}</Text>
-        </View>
-        <View style={styles.toolItem}>
-          <Ionicons name="repeat" size={18} color="gray" />
-          <Text style={styles.toolCount}>{item.reposts}</Text>
-        </View>
-        <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
-          <Ionicons 
-            name={isLiked ? "heart" : "heart-outline"} 
-            size={18} 
-            color={isLiked ? "white" : "gray"} 
-          />
-          <Text style={styles.toolCount}>{item.likes}</Text>
-        </TouchableOpacity>
-        <Ionicons name="share-outline" size={18} color="gray" />
-      </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
