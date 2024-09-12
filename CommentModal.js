@@ -38,8 +38,8 @@ const CommentModal = ({ isVisible, onClose, originalPost, onPostComment }) => {
       >
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={onClose}>
-              <Ionicons name="close" size={24} color="#fff" />
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Ionicons name="arrow-back" size={24} color="#fff" />
             </TouchableOpacity>
             <TouchableOpacity onPress={handlePostComment} disabled={comment.trim().length === 0 || comment.length > MAX_CHARS}>
               <Text style={[styles.postButton, (comment.trim().length === 0 || comment.length > MAX_CHARS) && styles.postButtonDisabled]}>Post</Text>
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
-    paddingTop: Platform.OS === 'ios' ? 40 : 10,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
     paddingHorizontal: 16,
     paddingBottom: 30,
   },
@@ -90,12 +90,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
+  },
+  closeButton: {
+    padding: 5,
   },
   postButton: {
     color: '#1DA1F2',
     fontSize: 16,
     fontWeight: 'bold',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
   },
   postButtonDisabled: {
     opacity: 0.5,
@@ -110,20 +115,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 8,
   },
   originalPostContent: {
-    color: '#ccc',
-    fontSize: 14,
+    color: '#e6e6e6',
+    fontSize: 16,
+    lineHeight: 22,
   },
   commentInput: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
+    lineHeight: 24,
     minHeight: 100,
+    textAlignVertical: 'top',
+    paddingTop: 0,
   },
   charCount: {
-    color: '#666',
-    fontSize: 12,
+    color: '#888',
+    fontSize: 14,
     textAlign: 'right',
     marginTop: 8,
   },
