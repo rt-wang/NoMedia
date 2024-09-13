@@ -4,14 +4,23 @@ import { Ionicons } from '@expo/vector-icons';
 import Post from './Post';
 import ArticlePreview from './ArticlePreview';
 import { useReposts } from './RepostContext';
+import EditProfileModal from './EditProfileModal';
 
 const CONTENT_INDENT = '  '; // Two spaces for indentation
 
-const PersonalInfo = ({ username, handle, bio, following, followers }) => (
+const PersonalInfo = ({ username, handle, bio, following, followers, location }) => (
   <View style={styles.personalInfo}>
     <Text style={styles.username}>{username}</Text>
     <Text style={styles.handle}>@{handle}</Text>
     <Text style={styles.bio}>{bio}</Text>
+    <View style={styles.locationContainer}>
+      {location && (
+        <View style={styles.locationItem}>
+          <Ionicons name="location-outline" size={16} color="#687684" />
+          <Text style={styles.locationText}>{location}</Text>
+        </View>
+      )}
+    </View>
     <View style={styles.followInfo}>
       <Text style={styles.followText}>
         <Text style={styles.followCount}>{following}</Text> Following
@@ -23,9 +32,9 @@ const PersonalInfo = ({ username, handle, bio, following, followers }) => (
   </View>
 );
 
-const ActionButtons = () => (
+const ActionButtons = ({ onEditProfile }) => (
   <View style={styles.actionButtons}>
-    <TouchableOpacity style={styles.button}>
+    <TouchableOpacity style={styles.button} onPress={onEditProfile}>
       <Text style={styles.buttonText}>Edit Profile</Text>
     </TouchableOpacity>
     <TouchableOpacity style={styles.button}>
@@ -69,6 +78,15 @@ const AccountPage = () => {
   const [content, setContent] = useState([]);
   const [posts, setPosts] = useState([]);
   const { reposts } = useReposts();
+  const [isEditProfileModalVisible, setIsEditProfileModalVisible] = useState(false);
+  const [profile, setProfile] = useState({
+    name: 'John Doe',
+    handle: 'johndoe',
+    bio: 'This is a brief self-introduction that is under 150 characters. It showcases the user\'s personality and interests.',
+    following: 500,
+    followers: 1000,
+    location: '',
+  });
 
   useEffect(() => {
     fetchPosts();
@@ -125,18 +143,27 @@ const AccountPage = () => {
     return item.type === 'article' ? <ArticlePreview item={item} /> : <Post item={item} />;
   };
 
+  const handleEditProfile = () => {
+    setIsEditProfileModalVisible(true);
+  };
+
+  const handleSaveProfile = (updatedProfile) => {
+    setProfile({ ...profile, ...updatedProfile });
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView stickyHeaderIndices={[1]}>
         <PersonalInfo
-          username="John Doe"
-          handle="johndoe"
-          bio="This is a brief self-introduction that is under 150 characters. It showcases the user's personality and interests."
-          following={500}
-          followers={1000}
+          username={profile.name}
+          handle={profile.handle}
+          bio={profile.bio}
+          following={profile.following}
+          followers={profile.followers}
+          location={profile.location}
         />
         <View style={styles.stickyHeader}>
-          <ActionButtons />
+          <ActionButtons onEditProfile={handleEditProfile} />
           <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         </View>
         <FlatList
@@ -146,6 +173,12 @@ const AccountPage = () => {
           scrollEnabled={false}
         />
       </ScrollView>
+      <EditProfileModal
+        isVisible={isEditProfileModalVisible}
+        onClose={() => setIsEditProfileModalVisible(false)}
+        onSave={handleSaveProfile}
+        initialProfile={profile}
+      />
     </View>
   );
 };
@@ -173,6 +206,21 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     marginTop: 8,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    marginTop: 8,
+  },
+  locationItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+  locationText: {
+    fontFamily: 'SFProText-Regular',
+    fontSize: 14,
+    color: '#687684',
+    marginLeft: 4,
   },
   followInfo: {
     flexDirection: 'row',
