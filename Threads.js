@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, FlatList, Dimensions, SafeAreaView, Platform, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -94,9 +94,18 @@ const Threads = () => {
     const offsetX = event.nativeEvent.contentOffset.x;
     const page = Math.round(offsetX / width);
     if (page >= threads.length) {
-      navigation.navigate('ReadNext', { item });
+      navigation.navigate('ReadNext', { article: item });
     }
   };
+
+  useEffect(() => {
+    if (currentPage === threads.length - 1) {
+      const timer = setTimeout(() => {
+        navigation.navigate('ReadNext', { article: item });
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [currentPage, threads.length, navigation, item]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -109,17 +118,15 @@ const Threads = () => {
       </View>
       <FlatList
         ref={flatListRef}
-        data={[...threads, { isLastItem: true }]}
-        renderItem={({ item, index }) => 
-          item.isLastItem ? 
-            <View style={{ width }} /> : 
-            <Thread
-              content={item.content || ''}
-              pageNumber={index + 1}
-              totalPages={threads.length}
-              image={item.image}
-            />
-        }
+        data={threads}
+        renderItem={({ item, index }) => (
+          <Thread
+            content={item.content || ''}
+            pageNumber={index + 1}
+            totalPages={threads.length}
+            image={item.image}
+          />
+        )}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}

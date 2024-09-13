@@ -14,8 +14,11 @@ import CreatePage from './CreatePage';
 import CommentModal from './CommentModal';
 import Threads from './Threads';
 import ReadNext from './ReadNext';
+import QuoteScreen from './QuoteScreen';
+import RepostScreen from './RepostScreen';
 
 import * as Font from 'expo-font';
+import { RepostProvider } from './RepostContext';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -27,6 +30,8 @@ const HomeStack = ({ showCommentModal }) => (
     </Stack.Screen>
     <Stack.Screen name="Threads" component={Threads} />
     <Stack.Screen name="ReadNext" component={ReadNext} />
+    <Stack.Screen name="Quote" component={QuoteScreen} />
+    <Stack.Screen name="Repost" component={RepostScreen} />
   </Stack.Navigator>
 );
 
@@ -60,7 +65,6 @@ const App = () => {
   }, []);
 
   const showCommentModal = (post) => {
-    console.log("showCommentModal called with post:", post);
     setSelectedPost(post);
     setCommentModalVisible(true);
   };
@@ -75,38 +79,40 @@ const App = () => {
   }
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle="light-content" />
-      <SafeAreaView style={styles.container}>
-        <NavigationContainer>
-          <View style={styles.content}>
-            <Header />
-            <Tab.Navigator
-              screenOptions={screenOptions}
-              tabBar={props => <NavigationBar {...props} />}
-            >
-              <Tab.Screen name="Home">
-                {(props) => (
-                  <HomeStack {...props} showCommentModal={showCommentModal} />
-                )}
-              </Tab.Screen>
-              <Tab.Screen name="Account" component={AccountPage} />
-              <Tab.Screen name="Notifications" component={NotificationsPage} />
-              <Tab.Screen name="Create" component={CreatePage} />
-            </Tab.Navigator>
-          </View>
-        </NavigationContainer>
-        <CommentModal
-          isVisible={commentModalVisible}
-          onClose={hideCommentModal}
-          originalPost={selectedPost}
-          onPostComment={(comment) => {
-            console.log('Posted comment:', comment);
-            hideCommentModal();
-          }}
-        />
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <RepostProvider>
+      <SafeAreaProvider>
+        <StatusBar barStyle="light-content" />
+        <SafeAreaView style={styles.container}>
+          <NavigationContainer>
+            <View style={styles.content}>
+              <Header />
+              <Tab.Navigator
+                screenOptions={screenOptions}
+                tabBar={props => <NavigationBar {...props} />}
+              >
+                <Tab.Screen name="Home">
+                  {(props) => (
+                    <HomeStack {...props} showCommentModal={showCommentModal} />
+                  )}
+                </Tab.Screen>
+                <Tab.Screen name="Account" component={AccountPage} />
+                <Tab.Screen name="Notifications" component={NotificationsPage} />
+                <Tab.Screen name="Create" component={CreatePage} />
+              </Tab.Navigator>
+            </View>
+          </NavigationContainer>
+          <CommentModal
+            isVisible={commentModalVisible}
+            onClose={hideCommentModal}
+            originalPost={selectedPost}
+            onPostComment={(comment) => {
+              console.log('Posted comment:', comment);
+              hideCommentModal();
+            }}
+          />
+        </SafeAreaView>
+      </SafeAreaProvider>
+    </RepostProvider>
   );
 };
 

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ArticlePreview from './ArticlePreview';
 import Post from './Post';
+import { useReposts } from './RepostContext';
 
 const LIGHT_GREY = '#CCCCCC';
 
@@ -16,6 +17,7 @@ const SearchBar = () => (
 const ForYouPage = ({ navigation, showCommentModal }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { reposts } = useReposts();
 
   useEffect(() => {
     fetchPosts();
@@ -50,19 +52,33 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   };
 
   const handleCommentPress = (post) => {
-    console.log('handleCommentPress called with post:', post.id);
     if (showCommentModal) {
       showCommentModal(post);
-    } else {
-      console.error('showCommentModal is not defined');
     }
   };
 
+  const handleArticlePress = (item) => {
+    navigation.navigate('Threads', { 
+      item: {
+        ...item,
+        threads: [{ content: item.content, pageNumber: 1 }], // Assuming single page for now
+      }
+    });
+  };
+
   const renderItem = ({ item }) => {
+    const isReposted = reposts.some(repost => repost.originalPost.id === item.id);
     if (item.type === 'article') {
-      return <ArticlePreview item={item} navigation={navigation} onCommentPress={() => handleCommentPress(item)} />;
+      return (
+        <ArticlePreview 
+          item={item} 
+          onCommentPress={() => handleCommentPress(item)}
+          onArticlePress={() => handleArticlePress(item)}
+          isReposted={isReposted}
+        />
+      );
     } else {
-      return <Post item={item} navigation={navigation} onCommentPress={() => handleCommentPress(item)} />;
+      return <Post item={item} onCommentPress={() => handleCommentPress(item)} />;
     }
   };
 

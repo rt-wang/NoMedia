@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from '
 import { Ionicons } from '@expo/vector-icons';
 import Post from './Post';
 import ArticlePreview from './ArticlePreview';
+import { useReposts } from './RepostContext';
 
 const CONTENT_INDENT = '  '; // Two spaces for indentation
 
@@ -66,63 +67,60 @@ const ReplyContainer = ({ item, reply }) => {
 const AccountPage = () => {
   const [activeTab, setActiveTab] = useState('Posts');
   const [content, setContent] = useState([]);
+  const [posts, setPosts] = useState([]);
+  const { reposts } = useReposts();
+
+  useEffect(() => {
+    fetchPosts();
+  }, []);
 
   useEffect(() => {
     fetchContent();
-  }, [activeTab]);
+  }, [activeTab, reposts, posts]);
+
+  const fetchPosts = () => {
+    // Simulating API call to fetch user's original posts
+    setTimeout(() => {
+      const originalPosts = [
+        { id: '1', username: 'John Doe', handle: 'johndoe', content: 'This is an original post', timestamp: Date.now() },
+        { id: '2', username: 'John Doe', handle: 'johndoe', content: 'Another original post', timestamp: Date.now() - 1000 },
+      ];
+      setPosts(originalPosts);
+    }, 1000);
+  };
 
   const fetchContent = () => {
-    // Simulating API call
-    setTimeout(() => {
-      const newContent = Array(10).fill().map((_, index) => {
-        const isArticle = Math.random() > 0.5;
-        const baseContent = 'This is a sample content for the post or article preview. It is designed to be longer than 150 characters to demonstrate how the content truncation works in our application.';
-        const content = isArticle ? `${CONTENT_INDENT}${baseContent}` : baseContent;
-
-        const baseItem = {
-          id: Date.now() + index,
-          type: isArticle ? 'article' : 'post',
-          title: isArticle ? 'Sample Article Title' : undefined,
-          username: `User${Math.floor(Math.random() * 1000)}`,
-          handle: `handle${Math.floor(Math.random() * 1000)}`,
-          content: content,
-          comments: Math.floor(Math.random() * 100),
-          reposts: Math.floor(Math.random() * 100),
-          likes: Math.floor(Math.random() * 1000),
-          isLiked: activeTab === 'Likes',
-        };
-
-        if (activeTab === 'Replies') {
-          return {
-            ...baseItem,
-            reply: {
-              id: Date.now() + index + 1000,
-              type: 'post',
-              username: 'YourUsername',
-              handle: 'yourhandle',
-              content: 'This is a sample reply to the ' + (isArticle ? 'article' : 'post') + ' above. It demonstrates how replies are displayed in the account page.',
-              comments: Math.floor(Math.random() * 50),
-              reposts: Math.floor(Math.random() * 50),
-              likes: Math.floor(Math.random() * 500),
-            }
-          };
-        }
-
-        return baseItem;
-      });
-      setContent(newContent);
-    }, 1000);
+    let newContent;
+    if (activeTab === 'Posts') {
+      // Combine original posts and reposts (including quote-type reposts)
+      newContent = [...posts, ...reposts].sort((a, b) => b.timestamp - a.timestamp);
+    } else if (activeTab === 'Replies') {
+      // Simulating replies data
+      newContent = [
+        { id: '3', username: 'John Doe', handle: 'johndoe', content: 'A reply', timestamp: Date.now(), reply: { username: 'Jane', handle: 'jane', content: 'Original post' } },
+      ];
+    } else if (activeTab === 'Likes') {
+      // Simulating liked posts
+      newContent = [
+        { id: '4', username: 'Jane', handle: 'jane', content: 'A liked post', timestamp: Date.now() - 2000 },
+      ];
+    }
+    setContent(newContent.sort((a, b) => b.timestamp - a.timestamp));
   };
 
   const renderItem = ({ item }) => {
     if (activeTab === 'Replies') {
-      if (!item || !item.reply) {
-        return null; // or return a placeholder component
-      }
       return <ReplyContainer item={item} reply={item.reply} />;
     }
-    if (!item) {
-      return null; // or return a placeholder component
+    if (item.isRepost && item.quoteText) {
+      return (
+        <View style={styles.quoteRepostContainer}>
+          <Post item={{ ...item, content: item.quoteText }} />
+          <View style={styles.quotedPostContainer}>
+            <Post item={item.originalPost} />
+          </View>
+        </View>
+      );
     }
     return item.type === 'article' ? <ArticlePreview item={item} /> : <Post item={item} />;
   };
@@ -247,6 +245,15 @@ const styles = StyleSheet.create({
   },
   reply: {
     marginLeft: 24,
+  },
+  quoteRepostContainer: {
+    marginBottom: 16,
+  },
+  quotedPostContainer: {
+    marginLeft: 16,
+    borderLeftWidth: 2,
+    borderLeftColor: '#333',
+    paddingLeft: 8,
   },
 });
 

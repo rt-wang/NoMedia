@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Popover from 'react-native-popover-view';
-import { useNavigation } from '@react-navigation/native'; // Add this import
+import { useNavigation } from '@react-navigation/native';
+import { useReposts } from './RepostContext';
 
 const LIGHT_GREY = '#CCCCCC';
+const REPOST_BLUE = '#1A91DA'; // Darker blue that fits NoMedia's theme
 
 const MoreOptions = ({ onDislike, onReport }) => (
   <View style={styles.moreOptionsContainer}>
@@ -19,9 +21,26 @@ const MoreOptions = ({ onDislike, onReport }) => (
   </View>
 );
 
-const ArticlePreview = ({ item, navigation, onCommentPress }) => {
+const RepostMenu = ({ onRepost, onQuote, onClose }) => (
+  <View style={styles.repostMenuContainer}>
+    <TouchableOpacity style={styles.repostMenuItem} onPress={onRepost}>
+      <Ionicons name="repeat" size={16} color="white" />
+      <Text style={styles.repostMenuText}>Repost</Text>
+    </TouchableOpacity>
+    <TouchableOpacity style={styles.repostMenuItem} onPress={onQuote}>
+      <Ionicons name="create-outline" size={16} color="white" />
+      <Text style={styles.repostMenuText}>Quote</Text>
+    </TouchableOpacity>
+  </View>
+);
+
+const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted }) => {
+  const navigation = useNavigation();
+  const { addRepost } = useReposts();
   const [showOptions, setShowOptions] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [showRepostMenu, setShowRepostMenu] = useState(false);
+  const repostButtonRef = useRef();
 
   const handleDislike = () => {
     Alert.alert('Disliked', 'You have disliked this article');
@@ -38,8 +57,18 @@ const ArticlePreview = ({ item, navigation, onCommentPress }) => {
     // Here you would typically update the like count on the server
   };
 
-  const handleMorePress = () => {
-    navigation.navigate('Threads', { item });
+  const handleRepostPress = () => {
+    setShowRepostMenu(true);
+  };
+
+  const handleRepost = () => {
+    addRepost(item);
+    setShowRepostMenu(false);
+  };
+
+  const handleQuote = () => {
+    navigation.navigate('Quote', { post: item });
+    setShowRepostMenu(false);
   };
 
   const indentedContent = '  ' + item.content;
@@ -47,8 +76,12 @@ const ArticlePreview = ({ item, navigation, onCommentPress }) => {
     ? indentedContent.slice(0, 147) + '...' 
     : indentedContent;
 
+  const handleMorePress = () => {
+    onArticlePress(item);
+  };
+
   return (
-    <TouchableOpacity onPress={() => navigation.navigate('ReadNext', { article: item })}>
+    <TouchableOpacity onPress={() => onArticlePress(item)}>
       <View style={styles.container}>
         <View style={styles.postHeader}>
           <Text style={styles.title}>{item.title}</Text>
@@ -82,10 +115,20 @@ const ArticlePreview = ({ item, navigation, onCommentPress }) => {
             <Ionicons name="chatbubble-outline" size={18} color="gray" />
             <Text style={styles.toolCount}>{item.comments}</Text>
           </TouchableOpacity>
-          <View style={styles.toolItem}>
-            <Ionicons name="repeat" size={18} color="gray" />
-            <Text style={styles.toolCount}>{item.reposts}</Text>
-          </View>
+          <TouchableOpacity 
+            style={styles.toolItem} 
+            onPress={handleRepostPress}
+            ref={repostButtonRef}
+          >
+            <Ionicons 
+              name="repeat" 
+              size={18} 
+              color={isReposted ? REPOST_BLUE : "gray"} 
+            />
+            <Text style={[styles.toolCount, isReposted && styles.repostedText]}>
+              {item.reposts}
+            </Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
             <Ionicons 
               name={isLiked ? "heart" : "heart-outline"} 
@@ -97,6 +140,18 @@ const ArticlePreview = ({ item, navigation, onCommentPress }) => {
           <Ionicons name="share-outline" size={18} color="gray" />
         </View>
       </View>
+      <Popover
+        isVisible={showRepostMenu}
+        onRequestClose={() => setShowRepostMenu(false)}
+        from={repostButtonRef}
+        popoverStyle={styles.repostMenuPopover}
+      >
+        <RepostMenu 
+          onRepost={handleRepost}
+          onQuote={handleQuote}
+          onClose={() => setShowRepostMenu(false)}
+        />
+      </Popover>
     </TouchableOpacity>
   );
 };
@@ -215,6 +270,29 @@ const styles = StyleSheet.create({
     color: 'white',
     marginLeft: 8,
     fontSize: 16,
+  },
+  repostMenuPopover: {
+    backgroundColor: '#222',
+    borderRadius: 8,
+    padding: 0,
+  },
+  repostMenuContainer: {
+    width: 120,
+  },
+  repostMenuItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  repostMenuText: {
+    color: 'white',
+    marginLeft: 12,
+    fontSize: 14,
+  },
+  repostedText: {
+    color: REPOST_BLUE,
   },
 });
 

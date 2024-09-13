@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, Platform } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Animated, Dimensions, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Post from './Post';
 
 const { width, height } = Dimensions.get('window');
 
-const ReadNextBox = ({ item, onPress }) => (
+const ReadNextBox = React.memo(({ item, onPress }) => (
   <View style={styles.readNextBoxWrapper}>
     <View style={styles.readNextBoxShadow} />
     <TouchableOpacity style={styles.readNextBox} onPress={onPress}>
@@ -15,45 +15,49 @@ const ReadNextBox = ({ item, onPress }) => (
       </View>
     </TouchableOpacity>
   </View>
-);
+));
 
-const Comment = ({ comment }) => (
+const Comment = React.memo(({ comment }) => (
   <View style={styles.commentContainer}>
     <View style={styles.commentLine} />
     <View style={styles.commentContent}>
       <Post item={comment} />
     </View>
   </View>
-);
+));
 
 const ReadNext = ({ route, navigation }) => {
-  const { item } = route.params;
+  const { article } = route.params || {};
   const [readNextItems, setReadNextItems] = useState([]);
   const [comments, setComments] = useState([]);
   const scrollY = useRef(new Animated.Value(0)).current;
   const scrollViewRef = useRef(null);
 
   useEffect(() => {
-    // Populate readNextItems and comments (replace with actual API calls later)
-    setReadNextItems(Array(4).fill().map((_, index) => ({
-      id: index,
-      title: `Sample Article ${index + 1}`,
-      username: `User${index + 1}`,
-      handle: `handle${index + 1}`,
-      content: ["This is the first page of article " + (index + 1), "This is the second page", "This is the third page"],
-    })));
+    // Ensure article exists and has necessary properties
+    if (article && article.title) {
+      // Populate readNextItems (replace with actual API calls later)
+      setReadNextItems(Array(4).fill().map((_, index) => ({
+        id: `article-${index}`,
+        title: `Sample Article ${index + 1}`,
+        username: `User${index + 1}`,
+        handle: `handle${index + 1}`,
+        content: ["This is the first page of article " + (index + 1), "This is the second page", "This is the third page"],
+      })));
 
-    setComments(Array(10).fill().map((_, index) => ({
-      id: index,
-      type: 'post',
-      username: `Commenter${index + 1}`,
-      handle: `commenter${index + 1}`,
-      content: `This is a sample comment ${index + 1}. It demonstrates how comments are displayed in the ReadNext page.`,
-      comments: Math.floor(Math.random() * 50),
-      reposts: Math.floor(Math.random() * 50),
-      likes: Math.floor(Math.random() * 500),
-    })));
-  }, []);
+      // Populate comments (replace with actual API calls later)
+      setComments(Array(10).fill().map((_, index) => ({
+        id: `comment-${index}`,
+        type: 'post',
+        username: `Commenter${index + 1}`,
+        handle: `commenter${index + 1}`,
+        content: `This is a sample comment ${index + 1}. It demonstrates how comments are displayed in the ReadNext page.`,
+        comments: Math.floor(Math.random() * 50),
+        reposts: Math.floor(Math.random() * 50),
+        likes: Math.floor(Math.random() * 500),
+      })));
+    }
+  }, [article]);
 
   const headerHeight = 60;
   const stickyHeaderY = 240; // Adjusted to a fixed value
@@ -62,7 +66,7 @@ const ReadNext = ({ route, navigation }) => {
     scrollViewRef.current?.scrollTo({ y: 0, animated: true });
   };
 
-  const navigateToThread = (readNextItem) => {
+  const navigateToThread = useCallback((readNextItem) => {
     navigation.navigate('Threads', { 
       item: {
         ...readNextItem,
@@ -76,7 +80,43 @@ const ReadNext = ({ route, navigation }) => {
         reposts: readNextItem.reposts
       }
     });
-  };
+  }, [navigation]);
+
+  const getItemLayout = useCallback((data, index) => ({
+    length: 150, // Approximate height of each item
+    offset: 150 * index,
+    index,
+  }), []);
+
+  const renderItem = useCallback(({ item }) => {
+    if (item.type === 'readNext') {
+      return (
+        <ReadNextBox
+          item={item}
+          onPress={() => navigateToThread(item)}
+        />
+      );
+    } else if (item.type === 'comment') {
+      return <Comment comment={item} />;
+    }
+  }, [navigateToThread]);
+
+  const keyExtractor = useCallback((item) => {
+    return item.id.toString();
+  }, []);
+
+  if (!article || !article.title) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Article not found</Text>
+      </View>
+    );
+  }
+
+  const listData = [
+    { type: 'stickyHeader', id: 'stickyHeader' },
+    ...comments.map(item => ({ ...item, type: 'comment', id: `comment-${item.id}` })),
+  ];
 
   return (
     <View style={styles.container}>
@@ -91,58 +131,35 @@ const ReadNext = ({ route, navigation }) => {
           <Text style={styles.readNextHeader}>Read Next...</Text>
         </TouchableOpacity>
       </View>
-      <ScrollView
-        ref={scrollViewRef}
-        stickyHeaderIndices={[1]}
+      <FlatList
+        data={listData}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        getItemLayout={getItemLayout}
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={21}
+        removeClippedSubviews={true}
+        ListHeaderComponent={() => (
+          <View style={styles.readNextSection}>
+            <View style={styles.readNextBoxesContainer}>
+              {readNextItems.map((readNextItem) => (
+                <ReadNextBox
+                  key={`header-${readNextItem.id}`}
+                  item={readNextItem}
+                  onPress={() => navigateToThread(readNextItem)}
+                />
+              ))}
+            </View>
+          </View>
+        )}
+        stickyHeaderIndices={[readNextItems.length + 1]}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: false }
         )}
         scrollEventThrottle={16}
-      >
-        <View style={styles.readNextSection}>
-          <View style={styles.readNextBoxesContainer}>
-            {readNextItems.map((readNextItem) => (
-              <ReadNextBox
-                key={readNextItem.id}
-                item={readNextItem}
-                onPress={() => navigation.navigate('Threads', { 
-                  item: {
-                    ...readNextItem,
-                    threads: readNextItem.content.map((content, index) => ({ 
-                      content, 
-                      pageNumber: index + 1,
-                      image: readNextItem.image // if available
-                    })),
-                    likes: readNextItem.likes,
-                    comments: readNextItem.comments,
-                    reposts: readNextItem.reposts
-                  }
-                })}
-              />
-            ))}
-          </View>
-        </View>
-        <Animated.View style={[
-          styles.stickyHeader,
-          {
-            transform: [{
-              translateY: scrollY.interpolate({
-                inputRange: [0, stickyHeaderY, stickyHeaderY + 1],
-                outputRange: [0, 0, 1],
-              })
-            }]
-          }
-        ]}>
-          <Text style={styles.stickyTitle}>{item.title}</Text>
-          <Text style={styles.stickyUsername}>{item.username} <Text style={styles.stickyHandle}>@{item.handle}</Text></Text>
-        </Animated.View>
-        <View style={styles.commentsSection}>
-          {comments.map((comment) => (
-            <Comment key={comment.id} comment={comment} />
-          ))}
-        </View>
-      </ScrollView>
+      />
     </View>
   );
 };
@@ -266,6 +283,11 @@ const styles = StyleSheet.create({
   commentContent: {
     flex: 1,
     marginLeft: 0, // This creates the indentation
+  },
+  errorText: {
+    fontSize: 18,
+    color: '#fff',
+    textAlign: 'center',
   },
 });
 
