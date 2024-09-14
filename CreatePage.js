@@ -24,8 +24,14 @@ const CreatePage = () => {
     setShowDropdown(false);
   };
 
-  const renderDropdownItem = ({ item }) => (
-    <TouchableOpacity style={styles.dropdownItem} onPress={() => selectPostType(item)}>
+  const renderDropdownItem = ({ item, index, separators }) => (
+    <TouchableOpacity 
+      style={[
+        styles.dropdownItem, 
+        index === 1 && styles.lastDropdownItem // Apply different style to last item
+      ]} 
+      onPress={() => selectPostType(item)}
+    >
       <Text style={styles.dropdownItemText}>{item}</Text>
       {item === postType && <Ionicons name="checkmark" size={20} color="#000" />}
     </TouchableOpacity>
@@ -254,6 +260,9 @@ const styles = StyleSheet.create({
     padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#444',
+  },
+  lastDropdownItem: {
+    borderBottomWidth: 0, // Remove bottom border for last item
   },
   dropdownItemText: {
     color: '#fff',

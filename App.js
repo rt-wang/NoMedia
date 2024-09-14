@@ -18,6 +18,7 @@ import ReadNext from './ReadNext';
 import QuoteScreen from './QuoteScreen';
 import RepostScreen from './RepostScreen';
 import Drafts from './Drafts'; // Import the Drafts component
+import SettingsPage from './SettingsPage';
 
 import * as Font from 'expo-font';
 import { RepostProvider } from './RepostContext';
@@ -34,6 +35,7 @@ const HomeStack = ({ showCommentModal }) => (
     <Stack.Screen name="ReadNext" component={ReadNext} />
     <Stack.Screen name="Quote" component={QuoteScreen} />
     <Stack.Screen name="Repost" component={RepostScreen} />
+    <Stack.Screen name="Settings" component={SettingsPage} />
   </Stack.Navigator>
 );
 

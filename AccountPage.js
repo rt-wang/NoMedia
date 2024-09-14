@@ -74,7 +74,7 @@ const ReplyContainer = ({ item, reply }) => {
   );
 };
 
-const AccountPage = () => {
+const AccountPage = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('Posts');
   const [content, setContent] = useState([]);
   const [posts, setPosts] = useState([]);
@@ -88,7 +88,6 @@ const AccountPage = () => {
     followers: 1000,
     location: '',
   });
-  const navigation = useNavigation();
 
   useEffect(() => {
     fetchPosts();
@@ -160,14 +159,22 @@ const AccountPage = () => {
   return (
     <View style={styles.container}>
       <ScrollView stickyHeaderIndices={[1]}>
-        <PersonalInfo
-          username={profile.name}
-          handle={profile.handle}
-          bio={profile.bio}
-          following={profile.following}
-          followers={profile.followers}
-          location={profile.location}
-        />
+        <View style={styles.headerContainer}>
+          <PersonalInfo
+            username={profile.name}
+            handle={profile.handle}
+            bio={profile.bio}
+            following={profile.following}
+            followers={profile.followers}
+            location={profile.location}
+          />
+          <TouchableOpacity 
+            onPress={() => navigation.navigate('Settings')} 
+            style={styles.settingsButton}
+          >
+            <Ionicons name="settings-outline" size={22} color="#687684" />
+          </TouchableOpacity>
+        </View>
         <View style={styles.stickyHeader}>
           <ActionButtons onEditProfile={handleEditProfile} onDraftsPress={handleDraftsPress} />
           <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -194,7 +201,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  headerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    paddingRight: 16,
+  },
+  settingsButton: {
+    padding: 10,
+    marginTop: 14, // Adjusted to align with the username
+  },
   personalInfo: {
+    flex: 1,
     padding: 16,
   },
   username: {
