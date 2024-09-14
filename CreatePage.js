@@ -1,25 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Modal, TouchableWithoutFeedback } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Modal, TouchableWithoutFeedback, Animated } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useIsFocused } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const CreatePage = () => {
   const [postType, setPostType] = useState('Nom');
   const [showDropdown, setShowDropdown] = useState(false);
-  const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [showPromptSearch, setShowPromptSearch] = useState(false);
   const [promptSearch, setPromptSearch] = useState('');
-  const navigation = useNavigation();
-  const isFocused = useIsFocused();
+  const [showMenu, setShowMenu] = useState(false);
+  const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    if (!isFocused) {
-      if (title === '' && body === '') {
-        setPostType('Nom');
-      }
-    }
-  }, [isFocused, title, body]);
+  const navigation = useNavigation();
 
   const toggleDropdown = () => setShowDropdown(!showDropdown);
 
@@ -35,92 +31,145 @@ const CreatePage = () => {
     </TouchableOpacity>
   );
 
+  const toggleMenu = () => setShowMenu(!showMenu);
+
+  const saveAsDraft = async () => {
+    if (body.trim().length === 0) {
+      setShowMenu(false);
+      return;
+    }
+
+    try {
+      const draft = { postType, body, timestamp: Date.now() };
+      const existingDrafts = await AsyncStorage.getItem('drafts');
+      let drafts = existingDrafts ? JSON.parse(existingDrafts) : [];
+      drafts.push(draft);
+      await AsyncStorage.setItem('drafts', JSON.stringify(drafts));
+      setBody('');
+      showSavedAnimation();
+      setShowMenu(false);
+    } catch (error) {
+      console.error('Error saving draft:', error);
+    }
+  };
+
+  const addTopic = () => {
+    setShowPromptSearch(true);
+    setShowMenu(false);
+  };
+
+  const showSavedAnimation = () => {
+    setShowSavedIndicator(true);
+    Animated.sequence([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+      Animated.delay(1000),
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => setShowSavedIndicator(false));
+  };
+
+  const handlePost = async () => {
+    // Implement post functionality here
+    navigation.goBack();
+  };
+
   return (
-    <TouchableWithoutFeedback onPress={() => setShowPromptSearch(false)}>
-      <View style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity style={styles.postTypeButton} onPress={toggleDropdown}>
-            <Text style={styles.postTypeText}>{postType}</Text>
-            <Ionicons name="chevron-down" size={24} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.postButton}>
-            <Text style={styles.postButtonText}>Post</Text>
-          </TouchableOpacity>
-        </View>
-        {showDropdown && (
-          <FlatList
-            style={styles.dropdown}
-            data={['Nom', 'Prompt']}
-            renderItem={renderDropdownItem}
-            keyExtractor={(item) => item}
-          />
-        )}
-        {postType === 'Prompt' ? (
-          <View style={styles.promptInputContainer}>
-            <Text style={styles.promptPrefix}>/</Text>
-            <TextInput
-              style={styles.promptInput}
-              placeholder="your question?"
-              placeholderTextColor="#999"
-              value={title}
-              onChangeText={setTitle}
-            />
+    <SafeAreaView style={styles.container}>
+      <TouchableWithoutFeedback onPress={() => { setShowPromptSearch(false); setShowMenu(false); }}>
+        <View style={styles.content}>
+          {showSavedIndicator && (
+            <Animated.View style={[styles.savedIndicator, { opacity: fadeAnim }]}>
+              <Ionicons name="checkmark-circle" size={24} color="#fff" />
+              <Text style={styles.savedIndicatorText}>Saved</Text>
+            </Animated.View>
+          )}
+          <View style={styles.postTypeContainer}>
+            <TouchableOpacity style={styles.postTypeButton} onPress={toggleDropdown}>
+              <Text style={styles.postTypeText}>{postType}</Text>
+              <Ionicons name="chevron-down" size={24} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={toggleMenu}>
+              <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
+            </TouchableOpacity>
           </View>
-        ) : (
-          <>
-            <TextInput
-              style={styles.titleInput}
-              placeholder="Title"
-              placeholderTextColor="#999"
-              value={title}
-              onChangeText={setTitle}
+          {showMenu && (
+            <View style={styles.menu}>
+              <TouchableOpacity style={styles.menuItem} onPress={saveAsDraft}>
+                <Text style={styles.menuItemText}>Save as draft</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.menuItem} onPress={addTopic}>
+                <Text style={styles.menuItemText}>Add topic?</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          {showDropdown && (
+            <FlatList
+              style={styles.dropdown}
+              data={['Nom', 'Prompt']}
+              renderItem={renderDropdownItem}
+              keyExtractor={(item) => item}
             />
+          )}
+          {postType === 'Prompt' ? (
+            <View style={styles.promptInputContainer}>
+              <Text style={styles.promptPrefix}>/</Text>
+              <TextInput
+                style={styles.promptInput}
+                placeholder="your question?"
+                placeholderTextColor="#999"
+                value={body}
+                onChangeText={setBody}
+              />
+            </View>
+          ) : (
             <View style={styles.bodyContainer}>
               <TextInput
                 style={styles.bodyInput}
-                placeholder="body text"
+                placeholder="What's on your mind?"
                 placeholderTextColor="#999"
                 multiline
                 value={body}
                 onChangeText={setBody}
               />
             </View>
-          </>
-        )}
-        {postType === 'Nom' && (
-          <TouchableOpacity 
-            style={styles.addPromptButton} 
-            onPress={() => setShowPromptSearch(true)}
+          )}
+          <Modal
+            visible={showPromptSearch}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowPromptSearch(false)}
           >
-            <Text style={styles.addPromptButtonText}>add prompt?</Text>
-          </TouchableOpacity>
-        )}
-        <Modal
-          visible={showPromptSearch}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowPromptSearch(false)}
-        >
-          <TouchableWithoutFeedback onPress={() => setShowPromptSearch(false)}>
-            <View style={styles.modalOverlay}>
-              <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-                <View style={styles.promptSearchContainer}>
-                  <Text style={styles.promptSearchPrefix}>/</Text>
-                  <TextInput
-                    style={styles.promptSearchInput}
-                    placeholder="Search for a prompt"
-                    placeholderTextColor="#999"
-                    value={promptSearch}
-                    onChangeText={setPromptSearch}
-                    autoFocus
-                  />
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
-      </View>
-    </TouchableWithoutFeedback>
+            <TouchableWithoutFeedback onPress={() => setShowPromptSearch(false)}>
+              <View style={styles.modalOverlay}>
+                <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
+                  <View style={styles.promptSearchContainer}>
+                    <Text style={styles.promptSearchPrefix}>/</Text>
+                    <TextInput
+                      style={styles.promptSearchInput}
+                      placeholder="Search for a prompt"
+                      placeholderTextColor="#999"
+                      value={promptSearch}
+                      onChangeText={setPromptSearch}
+                      autoFocus
+                    />
+                  </View>
+                </TouchableWithoutFeedback>
+              </View>
+            </TouchableWithoutFeedback>
+          </Modal>
+        </View>
+      </TouchableWithoutFeedback>
+      <TouchableOpacity style={styles.postButton} onPress={handlePost}>
+        <Text style={styles.postButtonText}>Post</Text>
+      </TouchableOpacity>
+    </SafeAreaView>
   );
 };
 
@@ -128,13 +177,37 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
+  },
+  content: {
+    flex: 1,
     padding: 16,
   },
-  header: {
+  postTypeContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
+  },
+  savedIndicator: {
+    position: 'absolute',
+    top: -24,
+    left: 123,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    alignSelf: 'center',
+    maxWidth: 120,
+    zIndex: 1,
+  },
+  savedIndicatorText: {
+    color: '#fff',
+    marginLeft: 5,
+    fontSize: 16,
   },
   postTypeButton: {
     flexDirection: 'row',
@@ -147,14 +220,22 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   postButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
     backgroundColor: '#333',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 30,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   postButtonText: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
   },
   dropdown: {
@@ -178,36 +259,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
   },
-  titleInput: {
-    color: '#fff',
-    fontSize: 22,
-    fontWeight: 'bold',
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
-    paddingVertical: 12,
-    marginBottom: 16,
-  },
   bodyContainer: {
     flex: 1,
+    marginTop: 16,
   },
   bodyInput: {
     color: '#fff',
     fontSize: 18,
-    paddingTop: 12,
+    paddingTop: -30,
     flex: 1,
-  },
-  addPromptButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#333',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  addPromptButtonText: {
-    color: '#fff',
-    fontSize: 14,
   },
   modalOverlay: {
     flex: 1,
@@ -251,6 +311,23 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 22,
     fontWeight: 'bold',
+  },
+  menu: {
+    position: 'absolute',
+    top: 50,
+    right: 10,
+    backgroundColor: '#333',
+    borderRadius: 8,
+    zIndex: 1,
+  },
+  menuItem: {
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#444',
+  },
+  menuItemText: {
+    color: '#fff',
+    fontSize: 16,
   },
 });
 

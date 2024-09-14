@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { View, StyleSheet, StatusBar } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -16,6 +17,7 @@ import Threads from './Threads';
 import ReadNext from './ReadNext';
 import QuoteScreen from './QuoteScreen';
 import RepostScreen from './RepostScreen';
+import Drafts from './Drafts'; // Import the Drafts component
 
 import * as Font from 'expo-font';
 import { RepostProvider } from './RepostContext';
@@ -32,6 +34,13 @@ const HomeStack = ({ showCommentModal }) => (
     <Stack.Screen name="ReadNext" component={ReadNext} />
     <Stack.Screen name="Quote" component={QuoteScreen} />
     <Stack.Screen name="Repost" component={RepostScreen} />
+  </Stack.Navigator>
+);
+
+const AccountStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="AccountMain" component={AccountPage} />
+    <Stack.Screen name="Drafts" component={Drafts} />
   </Stack.Navigator>
 );
 
@@ -79,40 +88,42 @@ const App = () => {
   }
 
   return (
-    <RepostProvider>
-      <SafeAreaProvider>
-        <StatusBar barStyle="light-content" />
-        <SafeAreaView style={styles.container}>
-          <NavigationContainer>
-            <View style={styles.content}>
-              <Header />
-              <Tab.Navigator
-                screenOptions={screenOptions}
-                tabBar={props => <NavigationBar {...props} />}
-              >
-                <Tab.Screen name="Home">
-                  {(props) => (
-                    <HomeStack {...props} showCommentModal={showCommentModal} />
-                  )}
-                </Tab.Screen>
-                <Tab.Screen name="Account" component={AccountPage} />
-                <Tab.Screen name="Notifications" component={NotificationsPage} />
-                <Tab.Screen name="Create" component={CreatePage} />
-              </Tab.Navigator>
-            </View>
-          </NavigationContainer>
-          <CommentModal
-            isVisible={commentModalVisible}
-            onClose={hideCommentModal}
-            originalPost={selectedPost}
-            onPostComment={(comment) => {
-              console.log('Posted comment:', comment);
-              hideCommentModal();
-            }}
-          />
-        </SafeAreaView>
-      </SafeAreaProvider>
-    </RepostProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <RepostProvider>
+        <SafeAreaProvider>
+          <StatusBar barStyle="light-content" />
+          <SafeAreaView style={styles.container}>
+            <NavigationContainer>
+              <View style={styles.content}>
+                <Header />
+                <Tab.Navigator
+                  screenOptions={screenOptions}
+                  tabBar={props => <NavigationBar {...props} />}
+                >
+                  <Tab.Screen name="Home">
+                    {(props) => (
+                      <HomeStack {...props} showCommentModal={showCommentModal} />
+                    )}
+                  </Tab.Screen>
+                  <Tab.Screen name="Account" component={AccountStack} />
+                  <Tab.Screen name="Notifications" component={NotificationsPage} />
+                  <Tab.Screen name="Create" component={CreatePage} />
+                </Tab.Navigator>
+              </View>
+            </NavigationContainer>
+            <CommentModal
+              isVisible={commentModalVisible}
+              onClose={hideCommentModal}
+              originalPost={selectedPost}
+              onPostComment={(comment) => {
+                console.log('Posted comment:', comment);
+                hideCommentModal();
+              }}
+            />
+          </SafeAreaView>
+        </SafeAreaProvider>
+      </RepostProvider>
+    </GestureHandlerRootView>
   );
 };
 

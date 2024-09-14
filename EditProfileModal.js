@@ -33,10 +33,11 @@ const EditProfileModal = ({ isVisible, onClose, onSave, initialProfile }) => {
       >
         <View style={styles.modalContent}>
           <View style={styles.modalHeader}>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Ionicons name="close" size={24} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.modalTitle}>Edit profile</Text>
+            <View style={styles.closeButtonContainer}>
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <Ionicons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
             <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
               <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
@@ -89,34 +90,39 @@ const styles = StyleSheet.create({
   modalContent: {
     flex: 1,
     backgroundColor: '#000',
-    marginTop: 50,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    marginTop: 51,
   },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
+    padding: 13,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
   },
+  closeButtonContainer: {
+    width: 60,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+  },
   closeButton: {
     padding: 5,
-  },
-  modalTitle: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    marginTop: 8, // Adjust this value to move the close button down
   },
   saveButton: {
-    backgroundColor: '#fff',
+    backgroundColor: '#333',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    elevation: 5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
   saveButtonText: {
-    color: '#000',
+    color: '#fff',
+    fontSize: 16,
     fontWeight: 'bold',
   },
   scrollView: {
@@ -141,7 +147,7 @@ const styles = StyleSheet.create({
     borderColor: '#333',
   },
   bioInput: {
-    height: 200, // Increased height to accommodate more text
+    height: 200,
     textAlignVertical: 'top',
   },
 });

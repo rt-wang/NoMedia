@@ -5,6 +5,7 @@ import Post from './Post';
 import ArticlePreview from './ArticlePreview';
 import { useReposts } from './RepostContext';
 import EditProfileModal from './EditProfileModal';
+import { useNavigation } from '@react-navigation/native';
 
 const CONTENT_INDENT = '  '; // Two spaces for indentation
 
@@ -32,12 +33,12 @@ const PersonalInfo = ({ username, handle, bio, following, followers, location })
   </View>
 );
 
-const ActionButtons = ({ onEditProfile }) => (
+const ActionButtons = ({ onEditProfile, onDraftsPress }) => (
   <View style={styles.actionButtons}>
     <TouchableOpacity style={styles.button} onPress={onEditProfile}>
       <Text style={styles.buttonText}>Edit Profile</Text>
     </TouchableOpacity>
-    <TouchableOpacity style={styles.button}>
+    <TouchableOpacity style={styles.button} onPress={onDraftsPress}>
       <Text style={styles.buttonText}>Drafts</Text>
     </TouchableOpacity>
   </View>
@@ -87,6 +88,7 @@ const AccountPage = () => {
     followers: 1000,
     location: '',
   });
+  const navigation = useNavigation();
 
   useEffect(() => {
     fetchPosts();
@@ -151,6 +153,10 @@ const AccountPage = () => {
     setProfile({ ...profile, ...updatedProfile });
   };
 
+  const handleDraftsPress = () => {
+    navigation.navigate('Drafts');
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView stickyHeaderIndices={[1]}>
@@ -163,7 +169,7 @@ const AccountPage = () => {
           location={profile.location}
         />
         <View style={styles.stickyHeader}>
-          <ActionButtons onEditProfile={handleEditProfile} />
+          <ActionButtons onEditProfile={handleEditProfile} onDraftsPress={handleDraftsPress} />
           <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         </View>
         <FlatList
