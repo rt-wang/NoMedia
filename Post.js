@@ -4,9 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import Popover from 'react-native-popover-view';
 import { useNavigation } from '@react-navigation/native';
 import { useReposts } from './RepostContext';
+import CommentSection from './CommentSection'; // New import
 
 const LIGHT_GREY = '#CCCCCC';
-const REPOST_BLUE = '#1A91DA'; // Darker blue that fits NoMedia's theme
+const REPOST_BLUE = '#1A91DA';
 
 const MoreOptions = ({ onDislike, onReport }) => (
   <View style={styles.moreOptionsContainer}>
@@ -38,6 +39,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   const navigation = useNavigation();
   const { reposts, addRepost } = useReposts();
   const [isReposted, setIsReposted] = useState(false);
+  const [showComments, setShowComments] = useState(false); // New state
 
   useEffect(() => {
     setIsReposted(reposts.some(repost => repost.originalPost.id === item.id));
@@ -79,6 +81,10 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   const [showRepostMenu, setShowRepostMenu] = useState(false);
   const repostButtonRef = useRef();
 
+  const handlePostPress = () => {
+    navigation.navigate('CommentSection', { postId: item.id });
+  };
+
   return (
     <View style={styles.container}>
       {item.isRepost && (
@@ -86,26 +92,28 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
           <Ionicons name="repeat" size={14} color={REPOST_BLUE} /> You Reposted
         </Text>
       )}
-      <View style={styles.postHeader}>
-        <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
-        <Popover
-          isVisible={showOptions}
-          onRequestClose={() => setShowOptions(false)}
-          from={(
-            <TouchableOpacity onPress={() => setShowOptions(true)} style={styles.moreIconContainer}>
-              <Ionicons name="ellipsis-horizontal" size={16} color={LIGHT_GREY} />
-            </TouchableOpacity>
-          )}
-          popoverStyle={styles.popover}
-        >
-          <MoreOptions onDislike={handleDislike} onReport={handleReport} />
-        </Popover>
-      </View>
-      <Text style={styles.content}>
-        {item.content}
-      </Text>
+      <TouchableOpacity onPress={handlePostPress}>
+        <View style={styles.postHeader}>
+          <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
+          <Popover
+            isVisible={showOptions}
+            onRequestClose={() => setShowOptions(false)}
+            from={(
+              <TouchableOpacity onPress={() => setShowOptions(true)} style={styles.moreIconContainer}>
+                <Ionicons name="ellipsis-horizontal" size={16} color={LIGHT_GREY} />
+              </TouchableOpacity>
+            )}
+            popoverStyle={styles.popover}
+          >
+            <MoreOptions onDislike={handleDislike} onReport={handleReport} />
+          </Popover>
+        </View>
+        <Text style={styles.content}>
+          {item.content}
+        </Text>
+      </TouchableOpacity>
       <View style={styles.toolBar}>
-        <TouchableOpacity style={styles.toolItem} onPress={() => onCommentPress(item)}>
+        <TouchableOpacity style={styles.toolItem} onPress={handlePostPress}>
           <Ionicons name="chatbubble-outline" size={18} color="gray" />
           <Text style={styles.toolCount}>{item.comments}</Text>
         </TouchableOpacity>

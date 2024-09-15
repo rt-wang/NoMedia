@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import ArticlePreview from './ArticlePreview';
 import Post from './Post';
 import { useReposts } from './RepostContext';
+import { usePosts } from './PostContext'; // Add this import
 
 const LIGHT_GREY = '#CCCCCC';
 
@@ -15,12 +16,14 @@ const SearchBar = () => (
 );
 
 const ForYouPage = ({ navigation, showCommentModal }) => {
-  const [posts, setPosts] = useState([]);
+  const { posts, addPost } = usePosts(); // Use the PostContext
   const [loading, setLoading] = useState(false);
   const { reposts } = useReposts();
 
   useEffect(() => {
-    fetchPosts();
+    if (posts.length === 0) {
+      fetchPosts();
+    }
   }, []);
 
   const fetchPosts = () => {
@@ -46,7 +49,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
           likes: Math.floor(Math.random() * 1000),
         };
       });
-      setPosts(prevPosts => [...prevPosts, ...newPosts]);
+      newPosts.forEach(post => addPost(post)); // Add posts to the context
       setLoading(false);
     }, 1000);
   };
