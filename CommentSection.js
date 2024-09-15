@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { usePosts } from './PostContext';
 
 const Comment = ({ comment, depth = 0 }) => {
@@ -26,7 +26,6 @@ const Comment = ({ comment, depth = 0 }) => {
 const CommentSection = ({ route }) => {
   const { postId } = route.params;
   const postContext = usePosts();
-  const [newComment, setNewComment] = useState('');
   const [comments, setComments] = useState([]);
 
   useEffect(() => {
@@ -35,7 +34,7 @@ const CommentSection = ({ route }) => {
       if (post && post.comments.length > 0) {
         setComments(post.comments);
       } else {
-        // Generate auto comments if no comments exist
+        // Generate auto comments
         const generatedComments = Array(20).fill().map((_, index) => ({
           id: `comment_${index}`,
           username: `User${Math.floor(Math.random() * 1000)}`,
@@ -48,29 +47,12 @@ const CommentSection = ({ route }) => {
     }
   }, [postId, postContext]);
 
-  const handleAddComment = () => {
-    if (newComment.trim() && postContext && postContext.addComment) {
-      postContext.addComment(postId, newComment);
-      setNewComment('');
-    }
-  };
-
   if (!postContext) {
     return <Text style={styles.errorText}>Unable to load comments</Text>;
   }
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        value={newComment}
-        onChangeText={setNewComment}
-        placeholder="Add a comment..."
-        placeholderTextColor="#999"
-      />
-      <TouchableOpacity style={styles.submitButton} onPress={handleAddComment}>
-        <Text style={styles.submitButtonText}>Submit</Text>
-      </TouchableOpacity>
       <FlatList
         data={comments}
         renderItem={({ item }) => <Comment comment={item} />}
@@ -86,24 +68,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
     padding: 10,
-  },
-  input: {
-    backgroundColor: '#333',
-    color: '#fff',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  submitButton: {
-    backgroundColor: '#1DA1F2',
-    padding: 10,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  submitButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
   comment: {
     marginVertical: 5,
