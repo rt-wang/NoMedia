@@ -40,12 +40,27 @@ export const PostProvider = ({ children }) => {
     }));
   };
 
+  const addCommentsToPost = (postId, newComments) => {
+    setPosts(prevPosts => prevPosts.map(post => 
+      post.id === postId 
+        ? { ...post, comments: [...post.comments, ...newComments] }
+        : post
+    ));
+  };
+
   const updateCurrentUser = (user) => {
     setCurrentUser(user);
   };
 
   return (
-    <PostContext.Provider value={{ posts, addPost, addComment, currentUser, updateCurrentUser }}>
+    <PostContext.Provider value={{ 
+      posts, 
+      addPost, 
+      addComment, 
+      addCommentsToPost, // Add this new method
+      currentUser, 
+      updateCurrentUser 
+    }}>
       {children}
     </PostContext.Provider>
   );

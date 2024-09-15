@@ -1,63 +1,68 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import { usePosts } from './PostContext';
+import Post from './Post';
 
-const Comment = ({ comment, depth = 0 }) => {
-  const [showReplies, setShowReplies] = useState(false);
-
-  return (
-    <View style={[styles.comment, { marginLeft: depth * 20 }]}>
-      <Text style={styles.commentUsername}>{comment.username}</Text>
-      <Text style={styles.commentContent}>{comment.content}</Text>
-      {comment.replies && comment.replies.length > 0 && (
-        <TouchableOpacity onPress={() => setShowReplies(!showReplies)}>
-          <Text style={styles.seeReplies}>
-            {showReplies ? 'Hide replies' : `See ${comment.replies.length} replies`}
-          </Text>
-        </TouchableOpacity>
-      )}
-      {showReplies && comment.replies.map(reply => (
-        <Comment key={reply.id} comment={reply} depth={depth + 1} />
-      ))}
-    </View>
-  );
-};
-
-const CommentSection = ({ route }) => {
+const CommentSection = ({ route, navigation }) => {
   const { postId } = route.params;
-  const postContext = usePosts();
+  const { posts, addCommentsToPost } = usePosts();
   const [comments, setComments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const generateComments = useCallback(() => {
+    return Array(20).fill().map((_, index) => ({
+      id: `comment_${Date.now()}_${index}`,
+      type: 'post',
+      username: `User${Math.floor(Math.random() * 1000)}`,
+      handle: `user${Math.floor(Math.random() * 1000)}`,
+      content: `This is an auto-generated comment ${index + 1}. Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
+      timestamp: Date.now() - Math.random() * 1000000,
+      comments: [],
+      reposts: Math.floor(Math.random() * 50),
+      likes: Math.floor(Math.random() * 100),
+    }));
+  }, []);
 
   useEffect(() => {
-    if (postContext && postContext.posts) {
-      const post = postContext.posts.find(p => p.id === postId);
+    const loadComments = async () => {
+      setIsLoading(true);
+      const post = posts.find(p => p.id === postId);
       if (post && post.comments.length > 0) {
         setComments(post.comments);
       } else {
-        // Generate auto comments
-        const generatedComments = Array(20).fill().map((_, index) => ({
-          id: `comment_${index}`,
-          username: `User${Math.floor(Math.random() * 1000)}`,
-          content: `This is an auto-generated comment ${index + 1}. Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
-          timestamp: Date.now() - Math.random() * 1000000,
-          replies: [],
-        }));
+        const generatedComments = generateComments();
         setComments(generatedComments);
+        addCommentsToPost(postId, generatedComments);
       }
-    }
-  }, [postId, postContext]);
+      setIsLoading(false);
+    };
 
-  if (!postContext) {
-    return <Text style={styles.errorText}>Unable to load comments</Text>;
+    loadComments();
+  }, [postId, posts, generateComments, addCommentsToPost]);
+
+  const handleCommentPress = (comment) => {
+    navigation.push('CommentSection', { postId: comment.id });
+  };
+
+  const renderItem = ({ item }) => (
+    <Post
+      item={item}
+      onCommentPress={() => handleCommentPress(item)}
+      commentCount={item.comments ? item.comments.length : 0}
+    />
+  );
+
+  if (isLoading) {
+    return <View style={styles.container}><Text style={styles.loadingText}>Loading comments...</Text></View>;
   }
 
   return (
     <View style={styles.container}>
       <FlatList
         data={comments}
-        renderItem={({ item }) => <Comment comment={item} />}
+        renderItem={renderItem}
         keyExtractor={item => item.id}
-        ListEmptyComponent={<Text style={styles.emptyText}>No comments yet</Text>}
+        contentContainerStyle={styles.scrollContent}
       />
     </View>
   );
@@ -67,32 +72,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    padding: 10,
   },
-  comment: {
-    marginVertical: 5,
-    padding: 5,
-    borderLeftWidth: 1,
-    borderLeftColor: '#333',
+  scrollContent: {
+    paddingBottom: 20,
+    paddingHorizontal: 16,
   },
-  commentUsername: {
+  loadingText: {
     color: '#fff',
-    fontWeight: 'bold',
-  },
-  commentContent: {
-    color: '#ccc',
-  },
-  seeReplies: {
-    color: '#1DA1F2',
-    marginTop: 5,
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
-    padding: 10,
-  },
-  emptyText: {
-    color: '#999',
     textAlign: 'center',
     padding: 20,
   },
