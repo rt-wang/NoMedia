@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Popover from 'react-native-popover-view';
 import { useNavigation } from '@react-navigation/native';
 import { useReposts } from './RepostContext';
-import CommentSection from './CommentSection'; // New import
+import { usePosts } from './PostContext';
 
 const LIGHT_GREY = '#CCCCCC';
 const REPOST_BLUE = '#1A91DA';
@@ -38,8 +38,15 @@ const RepostMenu = ({ onRepost, onQuote, onClose }) => (
 const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   const navigation = useNavigation();
   const { reposts, addRepost } = useReposts();
+  const { posts } = usePosts();
   const [isReposted, setIsReposted] = useState(false);
-  const [showComments, setShowComments] = useState(false); // New state
+  const [isLiked, setIsLiked] = useState(false);
+  const [showOptions, setShowOptions] = useState(false);
+  const [showRepostMenu, setShowRepostMenu] = useState(false);
+  const repostButtonRef = useRef();
+
+  const post = posts.find(p => p.id === item.id) || item;
+  const commentCount = post.comments ? post.comments.length : 0;
 
   useEffect(() => {
     setIsReposted(reposts.some(repost => repost.originalPost.id === item.id));
@@ -76,10 +83,11 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
     setIsReposted(true);
   };
 
-  const [isLiked, setIsLiked] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
-  const [showRepostMenu, setShowRepostMenu] = useState(false);
-  const repostButtonRef = useRef();
+  const handleCommentPress = () => {
+    if (onCommentPress) {
+      onCommentPress(item);
+    }
+  };
 
   const handlePostPress = () => {
     navigation.navigate('CommentSection', { postId: item.id });
@@ -113,9 +121,9 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
         </Text>
       </TouchableOpacity>
       <View style={styles.toolBar}>
-        <TouchableOpacity style={styles.toolItem} onPress={handlePostPress}>
+        <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
           <Ionicons name="chatbubble-outline" size={18} color="gray" />
-          <Text style={styles.toolCount}>{item.comments}</Text>
+          <Text style={styles.toolCount}>{commentCount}</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           style={styles.toolItem} 
@@ -135,7 +143,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
           <Ionicons 
             name={isLiked ? "heart" : "heart-outline"} 
             size={18} 
-            color={isLiked ? "white" : "gray"} 
+            color={isLiked ? "red" : "gray"} 
           />
           <Text style={styles.toolCount}>{item.likes}</Text>
         </TouchableOpacity>

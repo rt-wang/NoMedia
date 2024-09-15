@@ -81,7 +81,13 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         />
       );
     } else {
-      return <Post item={item} onCommentPress={() => handleCommentPress(item)} />;
+      return (
+        <Post 
+          item={item} 
+          onCommentPress={() => handleCommentPress(item)}
+          commentCount={item.comments} // Pass the comment count to Post component
+        />
+      );
     }
   };
 
