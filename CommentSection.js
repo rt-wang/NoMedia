@@ -1,44 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import React from 'react';
+import { View, FlatList, StyleSheet, Text } from 'react-native';
 import { usePosts } from './PostContext';
 import Post from './Post';
 
 const CommentSection = ({ route, navigation }) => {
   const { postId } = route.params;
-  const { posts, addCommentsToPost } = usePosts();
-  const [comments, setComments] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { posts } = usePosts();
 
-  const generateComments = useCallback(() => {
-    return Array(20).fill().map((_, index) => ({
-      id: `comment_${Date.now()}_${index}`,
-      type: 'post',
-      username: `User${Math.floor(Math.random() * 1000)}`,
-      handle: `user${Math.floor(Math.random() * 1000)}`,
-      content: `This is an auto-generated comment ${index + 1}. Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
-      timestamp: Date.now() - Math.random() * 1000000,
-      comments: [],
-      reposts: Math.floor(Math.random() * 50),
-      likes: Math.floor(Math.random() * 100),
-    }));
-  }, []);
-
-  useEffect(() => {
-    const loadComments = async () => {
-      setIsLoading(true);
-      const post = posts.find(p => p.id === postId);
-      if (post && post.comments.length > 0) {
-        setComments(post.comments);
-      } else {
-        const generatedComments = generateComments();
-        setComments(generatedComments);
-        addCommentsToPost(postId, generatedComments);
-      }
-      setIsLoading(false);
-    };
-
-    loadComments();
-  }, [postId, posts, generateComments, addCommentsToPost]);
+  const post = posts.find(p => p.id === postId);
+  const comments = post ? post.comments : [];
 
   const handleCommentPress = (comment) => {
     navigation.push('CommentSection', { postId: comment.id });
@@ -52,8 +22,12 @@ const CommentSection = ({ route, navigation }) => {
     />
   );
 
-  if (isLoading) {
-    return <View style={styles.container}><Text style={styles.loadingText}>Loading comments...</Text></View>;
+  if (!post) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Post not found</Text>
+      </View>
+    );
   }
 
   return (
@@ -63,6 +37,9 @@ const CommentSection = ({ route, navigation }) => {
         renderItem={renderItem}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.scrollContent}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>No comments yet</Text>
+        }
       />
     </View>
   );
@@ -77,8 +54,13 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     paddingHorizontal: 16,
   },
-  loadingText: {
+  errorText: {
     color: '#fff',
+    textAlign: 'center',
+    padding: 20,
+  },
+  emptyText: {
+    color: '#888',
     textAlign: 'center',
     padding: 20,
   },

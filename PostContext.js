@@ -26,10 +26,14 @@ export const PostProvider = ({ children }) => {
       if (post.id === postId) {
         const newComment = {
           id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          type: 'post',
           username: currentUser.username,
+          handle: currentUser.handle,
           content: commentContent,
           timestamp: Date.now(),
-          replies: [],
+          comments: [],
+          reposts: 0,
+          likes: 0,
         };
         return {
           ...post,
@@ -40,14 +44,6 @@ export const PostProvider = ({ children }) => {
     }));
   };
 
-  const addCommentsToPost = (postId, newComments) => {
-    setPosts(prevPosts => prevPosts.map(post => 
-      post.id === postId 
-        ? { ...post, comments: [...post.comments, ...newComments] }
-        : post
-    ));
-  };
-
   const updateCurrentUser = (user) => {
     setCurrentUser(user);
   };
@@ -56,8 +52,7 @@ export const PostProvider = ({ children }) => {
     <PostContext.Provider value={{ 
       posts, 
       addPost, 
-      addComment, 
-      addCommentsToPost, // Add this new method
+      addComment,
       currentUser, 
       updateCurrentUser 
     }}>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { usePosts } from './PostContext';
 
-const CommentModal = ({ isVisible, onClose, originalPost, onPostComment }) => {
+const CommentModal = ({ isVisible, onClose, originalPost }) => {
   const [comment, setComment] = useState('');
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 300;
+  const { addComment } = usePosts();
 
   useEffect(() => {
     setCharCount(comment.length);
@@ -13,8 +15,9 @@ const CommentModal = ({ isVisible, onClose, originalPost, onPostComment }) => {
 
   const handlePostComment = () => {
     if (comment.trim().length > 0 && comment.length <= MAX_CHARS) {
-      onPostComment(comment);
+      addComment(originalPost.id, comment);
       setComment('');
+      onClose();
     }
   };
 
