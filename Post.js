@@ -7,7 +7,7 @@ import { useReposts } from './RepostContext';
 import { usePosts } from './PostContext';
 
 const LIGHT_GREY = '#CCCCCC';
-const REPOST_BLUE = '#1A91DA';
+const REPOST_PINK = '#FFB6C1';
 
 const MoreOptions = ({ onDislike, onReport }) => (
   <View style={styles.moreOptionsContainer}>
@@ -97,7 +97,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
     <View style={styles.container}>
       {item.isRepost && (
         <Text style={styles.repostIndicator}>
-          <Ionicons name="repeat" size={14} color={REPOST_BLUE} /> You Reposted
+          <Ionicons name="repeat" size={14} color={REPOST_PINK} /> You Reposted
         </Text>
       )}
       <TouchableOpacity onPress={handlePostPress}>
@@ -133,7 +133,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
           <Ionicons 
             name="repeat" 
             size={18} 
-            color={isReposted ? REPOST_BLUE : "gray"} 
+            color={isReposted ? REPOST_PINK : "gray"} 
           />
           <Text style={[styles.toolCount, isReposted && styles.repostedText]}>
             {item.reposts}
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
   toolBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 0,
     marginLeft: 4,
   },
   toolItem: {
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
     fontSize: 14, // Reduced font size
   },
   repostedText: {
-    color: REPOST_BLUE,
+    color: REPOST_PINK,
   },
   cancelButton: {
     padding: 16,
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   repostIndicator: {
-    color: REPOST_BLUE,
+    color: REPOST_PINK,
     fontSize: 14,
     marginBottom: 8,
   },
