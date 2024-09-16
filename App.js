@@ -12,7 +12,6 @@ import NavigationBar from './NavigationBar';
 import Header from './Header';
 import NotificationsPage from './NotificationsPage';
 import CreatePage from './CreatePage';
-import CommentModal from './CommentModal';
 import Threads from './Threads';
 import ReadNext from './ReadNext';
 import QuoteScreen from './QuoteScreen';
@@ -28,11 +27,9 @@ import { RepostProvider } from './RepostContext';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 
-const HomeStack = ({ showCommentModal }) => (
+const HomeStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="ForYou">
-      {(props) => <ForYouPage {...props} showCommentModal={showCommentModal} />}
-    </Stack.Screen>
+    <Stack.Screen name="ForYou" component={ForYouPage} />
     <Stack.Screen name="Threads" component={Threads} />
     <Stack.Screen name="ReadNext" component={ReadNext} />
     <Stack.Screen name="Quote" component={QuoteScreen} />
@@ -49,10 +46,6 @@ const AccountStack = () => (
   </Stack.Navigator>
 );
 
-const CustomTransition = ({ current, next, inverted, layouts: { screen } }) => {
-  // ... (keep existing CustomTransition logic)
-};
-
 const screenOptions = ({ route }) => ({
   headerShown: false,
   tabBarStyle: { display: 'none' },
@@ -61,8 +54,6 @@ const screenOptions = ({ route }) => ({
 
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
-  const [commentModalVisible, setCommentModalVisible] = useState(false);
-  const [selectedPost, setSelectedPost] = useState(null);
 
   useEffect(() => {
     async function loadFonts() {
@@ -78,58 +69,35 @@ const App = () => {
     loadFonts();
   }, []);
 
-  const showCommentModal = (post) => {
-    setSelectedPost(post);
-    setCommentModalVisible(true);
-  };
-
-  const hideCommentModal = () => {
-    setCommentModalVisible(false);
-    setSelectedPost(null);
-  };
-
   if (!fontsLoaded) {
     return null; // or return a loading screen
   }
 
   return (
     <PostProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
         <RepostProvider>
-            <SafeAreaProvider>
+          <SafeAreaProvider>
             <StatusBar barStyle="light-content" />
             <SafeAreaView style={styles.container}>
-                <NavigationContainer>
+              <NavigationContainer>
                 <View style={styles.content}>
-                    <Header />
-                    <Tab.Navigator
+                  <Header />
+                  <Tab.Navigator
                     screenOptions={screenOptions}
                     tabBar={props => <NavigationBar {...props} />}
-                    >
-                    <Tab.Screen name="Home">
-                        {(props) => (
-                        <HomeStack {...props} showCommentModal={showCommentModal} />
-                        )}
-                    </Tab.Screen>
+                  >
+                    <Tab.Screen name="Home" component={HomeStack} />
                     <Tab.Screen name="Account" component={AccountStack} />
                     <Tab.Screen name="Notifications" component={NotificationsPage} />
                     <Tab.Screen name="Create" component={CreatePage} />
-                    </Tab.Navigator>
+                  </Tab.Navigator>
                 </View>
-                </NavigationContainer>
-                <CommentModal
-                isVisible={commentModalVisible}
-                onClose={hideCommentModal}
-                originalPost={selectedPost}
-                onPostComment={(comment) => {
-                    console.log('Posted comment:', comment);
-                    hideCommentModal();
-                }}
-                />
+              </NavigationContainer>
             </SafeAreaView>
-            </SafeAreaProvider>
+          </SafeAreaProvider>
         </RepostProvider>
-        </GestureHandlerRootView>
+      </GestureHandlerRootView>
     </PostProvider>
   );
 };

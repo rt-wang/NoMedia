@@ -116,39 +116,37 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
             <MoreOptions onDislike={handleDislike} onReport={handleReport} />
           </Popover>
         </View>
-        <Text style={styles.content}>
-          {item.content}
-        </Text>
+        <Text style={styles.content}>{item.content}</Text>
+        <View style={styles.toolBar}>
+          <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
+            <Ionicons name="chatbubble-outline" size={18} color="gray" />
+            <Text style={styles.toolCount}>{commentCount}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.toolItem} 
+            onPress={handleRepostPress}
+            ref={repostButtonRef}
+          >
+            <Ionicons 
+              name="repeat" 
+              size={18} 
+              color={isReposted ? REPOST_PINK : "gray"} 
+            />
+            <Text style={[styles.toolCount, isReposted && styles.repostedText]}>
+              {item.reposts}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
+            <Ionicons 
+              name={isLiked ? "heart" : "heart-outline"} 
+              size={18} 
+              color={isLiked ? "red" : "gray"} 
+            />
+            <Text style={styles.toolCount}>{item.likes}</Text>
+          </TouchableOpacity>
+          <Ionicons name="share-outline" size={18} color="gray" />
+        </View>
       </TouchableOpacity>
-      <View style={styles.toolBar}>
-        <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
-          <Ionicons name="chatbubble-outline" size={18} color="gray" />
-          <Text style={styles.toolCount}>{commentCount}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          style={styles.toolItem} 
-          onPress={handleRepostPress}
-          ref={repostButtonRef}
-        >
-          <Ionicons 
-            name="repeat" 
-            size={18} 
-            color={isReposted ? REPOST_PINK : "gray"} 
-          />
-          <Text style={[styles.toolCount, isReposted && styles.repostedText]}>
-            {item.reposts}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
-          <Ionicons 
-            name={isLiked ? "heart" : "heart-outline"} 
-            size={18} 
-            color={isLiked ? "red" : "gray"} 
-          />
-          <Text style={styles.toolCount}>{item.likes}</Text>
-        </TouchableOpacity>
-        <Ionicons name="share-outline" size={18} color="gray" />
-      </View>
       <Popover
         isVisible={showRepostMenu}
         onRequestClose={() => setShowRepostMenu(false)}

@@ -55,9 +55,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   };
 
   const handleCommentPress = (post) => {
-    if (showCommentModal) {
-      showCommentModal(post);
-    }
+    navigation.navigate('CommentSection', { postId: post.id });
   };
 
   const handleArticlePress = (item) => {

@@ -1,33 +1,45 @@
-import React, { useState, useRef } from 'react';
-import { View, StyleSheet, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { usePosts } from './PostContext';
 import Post from './Post';
 import { Ionicons } from '@expo/vector-icons';
 
-const PINK_COLOR = '#FFB6C1'; // A darker pink that fits NoMedia's theme
+const PINK_COLOR = '#FFB6C1';
+const MAX_CHARS = 300;
 
 const CommentSection = ({ route, navigation }) => {
   const { postId } = route.params;
-  const { posts } = usePosts();
+  const { posts, addComment } = usePosts();
   const [comment, setComment] = useState('');
+  const [charCount, setCharCount] = useState(0);
   const inputRef = useRef(null);
 
   const post = posts.find(p => p.id === postId);
   const comments = post ? post.comments : [];
+
+  useEffect(() => {
+    setCharCount(comment.length);
+  }, [comment]);
 
   const handleCommentPress = (comment) => {
     navigation.push('CommentSection', { postId: comment.id });
   };
 
   const handleSendComment = () => {
-    // Implement send comment logic here
-    console.log('Sending comment:', comment);
-    setComment(''); // Clear the input after sending
+    if (comment.trim().length > 0 && comment.length <= MAX_CHARS) {
+      addComment(postId, comment.trim());
+      setComment('');
+      inputRef.current?.blur();
+    } else if (comment.length > MAX_CHARS) {
+      Alert.alert('Error', 'Comment exceeds maximum character limit');
+    } else {
+      Alert.alert('Error', 'Comment cannot be empty');
+    }
   };
 
   const renderComments = () => {
-    return comments.map((item, index) => (
+    return comments.map((item) => (
       <View key={item.id} style={styles.commentContainer}>
         <View style={styles.commentLine} />
         <Post
@@ -82,11 +94,13 @@ const CommentSection = ({ route, navigation }) => {
             value={comment}
             onChangeText={setComment}
             multiline
+            maxLength={MAX_CHARS}
           />
           <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
             <Ionicons name="send" size={24} color={PINK_COLOR} />
           </TouchableOpacity>
         </View>
+        <Text style={styles.charCount}>{charCount}/{MAX_CHARS}</Text>
       </View>
     </KeyboardAvoidingView>
   );
@@ -151,7 +165,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
-    paddingRight: 40, // Make room for the send button
+    paddingRight: 40,
     color: '#fff',
     fontSize: 16,
     maxHeight: 100,
@@ -160,8 +174,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     top: '38%',
-    transform: [{ translateY: -12 }], // Half the icon size to center it
+    transform: [{ translateY: -12 }],
     padding: 4,
+  },
+  charCount: {
+    color: '#888',
+    fontSize: 12,
+    textAlign: 'right',
+    marginTop: 4,
   },
 });
 
