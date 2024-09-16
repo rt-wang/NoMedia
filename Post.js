@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
+    left: 4,
     marginBottom: 2,
   },
   moreIconContainer: {

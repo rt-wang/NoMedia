@@ -96,8 +96,10 @@ const CommentSection = ({ route, navigation }) => {
             multiline
             maxLength={MAX_CHARS}
           />
-          <TouchableOpacity onPress={handleSendComment} style={styles.sendButton}>
-            <Ionicons name="send" size={24} color={PINK_COLOR} />
+          <TouchableOpacity onPress={handleSendComment} style={styles.sendButton} disabled={comment.trim().length === 0}>
+            <View style={[styles.sendButtonInner, comment.trim().length === 0 && styles.sendButtonDisabled]}>
+              <Ionicons name="arrow-up" size={20} color="#fff" />
+            </View>
           </TouchableOpacity>
         </View>
         <Text style={styles.charCount}>{charCount}/{MAX_CHARS}</Text>
@@ -158,24 +160,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   inputWrapper: {
-    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
   },
   commentInput: {
+    flex: 1,
     backgroundColor: '#222',
     borderRadius: 20,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingTop: 8,
+    paddingBottom: 8,
     paddingRight: 40,
     color: '#fff',
     fontSize: 16,
     maxHeight: 100,
+    marginRight: 8,
   },
   sendButton: {
-    position: 'absolute',
-    right: 10,
-    top: '38%',
-    transform: [{ translateY: -12 }],
-    padding: 4,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-end',
+    marginBottom: 4,
+  },
+  sendButtonInner: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+    backgroundColor: PINK_COLOR,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  sendButtonDisabled: {
+    backgroundColor: '#555',
   },
   charCount: {
     color: '#888',
