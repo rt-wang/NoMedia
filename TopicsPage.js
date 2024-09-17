@@ -7,20 +7,19 @@ const TOPICS = [
   "Art", "Literature", "History", "Mathematics", "Psychology"
 ];
 
-const PROMPT_BOXES = [
+const TOPIC_BOXES = [
   { id: '1', title: '<Bitcoin discussion>' },
   { id: '2', title: '<Opinions on NVIDIA stock>' },
   { id: '3', title: '<New discovery in quantum physics?>' },
   { id: '4', title: '<Best way to learn Python?>' },
   { id: '5', title: '<What do you guys think of "Dune"?>' },
   { id: '6', title: '<Future of renewable energy?>' },
-  // Add more prompts as needed
+  // Add more topics as needed
 ];
 
-const PromptBox = ({ item }) => (
-  <View style={styles.promptBox}>
-    <Text style={styles.promptTitle}>{item.title}</Text>
-    <Text style={styles.promptBody}>Discuss this topic with the community...</Text>
+const TopicBox = ({ item }) => (
+  <View style={styles.topicBox}>
+    <Text style={styles.topicTitle}>{item.title}</Text>
   </View>
 );
 
@@ -30,26 +29,26 @@ const TopicButton = ({ topic }) => (
   </TouchableOpacity>
 );
 
-const PromptSection = ({ title, data }) => (
+const TopicSection = ({ title, data }) => (
   <View style={styles.section}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       {data.map((item) => (
-        <PromptBox key={item.id} item={item} />
+        <TopicBox key={item.id} item={item} />
       ))}
     </ScrollView>
   </View>
 );
 
-const Prompts = () => {
+const Topics = () => {
   const [sections, setSections] = useState([]);
 
   useEffect(() => {
     // Simulating fetching data
     const fetchedSections = [
-      { id: '1', title: 'Recommended for you', data: PROMPT_BOXES },
-      { id: '2', title: 'More like Technology', data: PROMPT_BOXES },
-      { id: '3', title: 'Trending Prompts', data: PROMPT_BOXES },
+      { id: '1', title: 'Recommended for you', data: TOPIC_BOXES },
+      { id: '2', title: 'More like Technology', data: TOPIC_BOXES },
+      { id: '3', title: 'Trending Topics', data: TOPIC_BOXES },
       // Add more sections as needed
     ];
     setSections(fetchedSections);
@@ -57,7 +56,7 @@ const Prompts = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Explore prompts by topic</Text>
+      <Text style={styles.header}>Explore topics</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.topicsScroll}>
         {TOPICS.map((topic, index) => (
           <TopicButton key={index} topic={topic} />
@@ -65,7 +64,7 @@ const Prompts = () => {
       </ScrollView>
       <FlatList
         data={sections}
-        renderItem={({ item }) => <PromptSection title={item.title} data={item.data} />}
+        renderItem={({ item }) => <TopicSection title={item.title} data={item.data} />}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
       />
@@ -108,7 +107,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginBottom: 12,
   },
-  promptBox: {
+  topicBox: {
     width: 250,
     height: 120,
     backgroundColor: '#222',
@@ -116,16 +115,12 @@ const styles = StyleSheet.create({
     padding: 16,
     marginRight: 12,
   },
-  promptTitle: {
+  topicTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 8,
   },
-  promptBody: {
-    fontSize: 14,
-    color: '#ccc',
-  },
 });
 
-export default Prompts;
+export default Topics;

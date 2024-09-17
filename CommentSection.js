@@ -70,11 +70,13 @@ const CommentSection = ({ route, navigation }) => {
         keyboardShouldPersistTaps="handled"
         extraScrollHeight={20}
       >
-        <Post
-          item={post}
-          onCommentPress={() => {}}
-          commentCount={comments.length}
-        />
+        <View style={styles.originalPostContainer}>
+          <Post
+            item={post}
+            onCommentPress={() => {}}
+            commentCount={comments.length}
+          />
+        </View>
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
           <Text style={styles.dividerText}>Comments</Text>
@@ -202,6 +204,9 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textAlign: 'right',
     marginTop: 4,
+  },
+  originalPostContainer: {
+    paddingHorizontal: 8, // Add horizontal padding to match For You page
   },
 });
 

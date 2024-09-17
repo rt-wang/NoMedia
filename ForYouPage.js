@@ -8,7 +8,7 @@ import { usePosts } from './PostContext';
 import TopicsPage from './TopicsPage'; // Import the TopicsPage component
 
 const LIGHT_GREY = '#CCCCCC';
-const ACTIVE_TAB_COLOR = '#1DA1F2'; // Twitter blue color
+const ACTIVE_TAB_COLOR = '#FFB6C1';
 
 const SearchBar = () => (
   <View style={styles.searchBarContainer}>
