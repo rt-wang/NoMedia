@@ -146,6 +146,7 @@ const styles = StyleSheet.create({
   commentContainer: {
     flexDirection: 'row',
     paddingLeft: 16,
+    paddingRight: 16,
   },
   commentLine: {
     width: 2,

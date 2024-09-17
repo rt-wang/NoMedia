@@ -9,19 +9,6 @@ import { usePosts } from './PostContext';
 const LIGHT_GREY = '#CCCCCC';
 const REPOST_PINK = '#FFB6C1';
 
-const MoreOptions = ({ onDislike, onReport }) => (
-  <View style={styles.moreOptionsContainer}>
-    <TouchableOpacity style={styles.moreOptionItem} onPress={onDislike}>
-      <Ionicons name="thumbs-down-outline" size={20} color="white" />
-      <Text style={styles.moreOptionText}>Dislike</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.moreOptionItem} onPress={onReport}>
-      <Ionicons name="flag-outline" size={20} color="white" />
-      <Text style={styles.moreOptionText}>Report</Text>
-    </TouchableOpacity>
-  </View>
-);
-
 const RepostMenu = ({ onRepost, onQuote, onClose }) => (
   <View style={styles.repostMenuContainer}>
     <TouchableOpacity style={styles.repostMenuItem} onPress={onRepost}>
@@ -41,7 +28,6 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   const { posts } = usePosts();
   const [isReposted, setIsReposted] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const [showOptions, setShowOptions] = useState(false);
   const [showRepostMenu, setShowRepostMenu] = useState(false);
   const repostButtonRef = useRef();
 
@@ -51,16 +37,6 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   useEffect(() => {
     setIsReposted(reposts.some(repost => repost.originalPost.id === item.id));
   }, [reposts, item.id]);
-
-  const handleDislike = () => {
-    Alert.alert('Disliked', 'You have disliked this post');
-    setShowOptions(false);
-  };
-
-  const handleReport = () => {
-    Alert.alert('Reported', 'You have reported this post');
-    setShowOptions(false);
-  };
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -103,18 +79,6 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
       <TouchableOpacity onPress={handlePostPress}>
         <View style={styles.postHeader}>
           <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
-          <Popover
-            isVisible={showOptions}
-            onRequestClose={() => setShowOptions(false)}
-            from={(
-              <TouchableOpacity onPress={() => setShowOptions(true)} style={styles.moreIconContainer}>
-                <Ionicons name="ellipsis-horizontal" size={16} color={LIGHT_GREY} />
-              </TouchableOpacity>
-            )}
-            popoverStyle={styles.popover}
-          >
-            <MoreOptions onDislike={handleDislike} onReport={handleReport} />
-          </Popover>
         </View>
         <Text style={styles.content}>{item.content}</Text>
         <View style={styles.toolBar}>
@@ -176,11 +140,6 @@ const styles = StyleSheet.create({
     left: 4,
     marginBottom: 2,
   },
-  moreIconContainer: {
-    padding: 4,
-    marginTop: -4,
-    marginRight: -8,
-  },
   username: {
     fontFamily: 'SFProText-Regular',
     fontSize: 16,
@@ -216,53 +175,28 @@ const styles = StyleSheet.create({
     color: '#687684',
     lineHeight: 18,
   },
-  popover: {
-    backgroundColor: '#333',
-    borderRadius: 8,
-  },
-  moreOptionsContainer: {
-    backgroundColor: 'transparent',
-  },
-  moreOptionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-  },
-  moreOptionText: {
-    color: 'white',
-    marginLeft: 8,
-    fontSize: 16,
-  },
   repostMenuPopover: {
     backgroundColor: '#222',
     borderRadius: 8,
     padding: 0,
   },
   repostMenuContainer: {
-    width: 120, // Reduced width
+    width: 120,
   },
   repostMenuItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12, // Reduced padding
+    padding: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#333',
   },
   repostMenuText: {
     color: 'white',
     marginLeft: 12,
-    fontSize: 14, // Reduced font size
+    fontSize: 14,
   },
   repostedText: {
     color: REPOST_PINK,
-  },
-  cancelButton: {
-    padding: 16,
-    alignItems: 'center',
-  },
-  cancelButtonText: {
-    color: 'white',
-    fontSize: 16,
   },
   repostIndicator: {
     color: REPOST_PINK,

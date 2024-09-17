@@ -1,25 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Popover from 'react-native-popover-view';
 import { useNavigation } from '@react-navigation/native';
 import { useReposts } from './RepostContext';
 
 const LIGHT_GREY = '#CCCCCC';
-const REPOST_BLUE = '#1A91DA'; // Darker blue that fits NoMedia's theme
-
-const MoreOptions = ({ onDislike, onReport }) => (
-  <View style={styles.moreOptionsContainer}>
-    <TouchableOpacity style={styles.moreOptionItem} onPress={onDislike}>
-      <Ionicons name="thumbs-down-outline" size={20} color="white" />
-      <Text style={styles.moreOptionText}>Dislike</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.moreOptionItem} onPress={onReport}>
-      <Ionicons name="flag-outline" size={20} color="white" />
-      <Text style={styles.moreOptionText}>Report</Text>
-    </TouchableOpacity>
-  </View>
-);
+const REPOST_BLUE = '#1A91DA';
 
 const RepostMenu = ({ onRepost, onQuote, onClose }) => (
   <View style={styles.repostMenuContainer}>
@@ -37,20 +24,9 @@ const RepostMenu = ({ onRepost, onQuote, onClose }) => (
 const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted }) => {
   const navigation = useNavigation();
   const { addRepost } = useReposts();
-  const [showOptions, setShowOptions] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [showRepostMenu, setShowRepostMenu] = useState(false);
   const repostButtonRef = useRef();
-
-  const handleDislike = () => {
-    Alert.alert('Disliked', 'You have disliked this article');
-    setShowOptions(false);
-  };
-
-  const handleReport = () => {
-    Alert.alert('Reported', 'You have reported this article');
-    setShowOptions(false);
-  };
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -85,18 +61,6 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted }) =>
       <View style={styles.container}>
         <View style={styles.postHeader}>
           <Text style={styles.title}>{item.title}</Text>
-          <Popover
-            isVisible={showOptions}
-            onRequestClose={() => setShowOptions(false)}
-            from={(
-              <TouchableOpacity onPress={() => setShowOptions(true)} style={styles.moreIconContainer}>
-                <Ionicons name="ellipsis-horizontal" size={16} color={LIGHT_GREY} />
-              </TouchableOpacity>
-            )}
-            popoverStyle={styles.popover}
-          >
-            <MoreOptions onDislike={handleDislike} onReport={handleReport} />
-          </Popover>
         </View>
         <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
         <View style={styles.previewBoxContainer}>
@@ -168,11 +132,6 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 2,
   },
-  moreIconContainer: {
-    padding: 4,
-    marginTop: -4,
-    marginRight: -8,
-  },
   title: {
     fontFamily: 'Athelas',
     fontSize: 22,
@@ -233,7 +192,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   moreButton: {
-    color: '#000000', // Explicitly set to black
+    color: '#000000',
     fontWeight: 'bold',
     fontSize: 16,
   },
@@ -253,23 +212,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#687684',
     lineHeight: 18,
-  },
-  popover: {
-    backgroundColor: '#333',
-    borderRadius: 8,
-  },
-  moreOptionsContainer: {
-    backgroundColor: 'transparent',
-  },
-  moreOptionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 8,
-  },
-  moreOptionText: {
-    color: 'white',
-    marginLeft: 8,
-    fontSize: 16,
   },
   repostMenuPopover: {
     backgroundColor: '#222',

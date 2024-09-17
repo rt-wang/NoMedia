@@ -128,7 +128,7 @@ const CreatePage = () => {
               <Text style={styles.promptPrefix}>/</Text>
               <TextInput
                 style={styles.promptInput}
-                placeholder="your question?"
+                placeholder="your topic?"
                 placeholderTextColor="#999"
                 value={body}
                 onChangeText={setBody}
@@ -159,7 +159,7 @@ const CreatePage = () => {
                     <Text style={styles.promptSearchPrefix}>/</Text>
                     <TextInput
                       style={styles.promptSearchInput}
-                      placeholder="Search for a prompt"
+                      placeholder="Search for a topic"
                       placeholderTextColor="#999"
                       value={promptSearch}
                       onChangeText={setPromptSearch}
