@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ArticlePreview from './ArticlePreview';
 import Post from './Post';
 import { useReposts } from './RepostContext';
-import { usePosts } from './PostContext'; // Add this import
+import { usePosts } from './PostContext';
+import TopicsPage from './TopicsPage'; // Import the TopicsPage component
 
 const LIGHT_GREY = '#CCCCCC';
+const ACTIVE_TAB_COLOR = '#1DA1F2'; // Twitter blue color
 
 const SearchBar = () => (
   <View style={styles.searchBarContainer}>
@@ -15,10 +17,28 @@ const SearchBar = () => (
   </View>
 );
 
+const TabNavigator = ({ activeTab, setActiveTab }) => (
+  <View style={styles.tabNavigator}>
+    <TouchableOpacity
+      style={[styles.tab, activeTab === 'ForYou' && styles.activeTab]}
+      onPress={() => setActiveTab('ForYou')}
+    >
+      <Text style={[styles.tabText, activeTab === 'ForYou' && styles.activeTabText]}>For You Page</Text>
+    </TouchableOpacity>
+    <TouchableOpacity
+      style={[styles.tab, activeTab === 'Topics' && styles.activeTab]}
+      onPress={() => setActiveTab('Topics')}
+    >
+      <Text style={[styles.tabText, activeTab === 'Topics' && styles.activeTabText]}>Topics</Text>
+    </TouchableOpacity>
+  </View>
+);
+
 const ForYouPage = ({ navigation, showCommentModal }) => {
   const { posts, addPost } = usePosts(); // Use the PostContext
   const [loading, setLoading] = useState(false);
   const { reposts } = useReposts();
+  const [activeTab, setActiveTab] = useState('ForYou');
 
   useEffect(() => {
     if (posts.length === 0) {
@@ -92,15 +112,20 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   return (
     <View style={styles.container}>
       <SearchBar />
-      <FlatList
-        data={posts}
-        renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
-        onEndReached={fetchPosts}
-        onEndReachedThreshold={0.1}
-        ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
-        contentContainerStyle={styles.scrollContent}
-      />
+      <TabNavigator activeTab={activeTab} setActiveTab={setActiveTab} />
+      {activeTab === 'ForYou' ? (
+        <FlatList
+          data={posts}
+          renderItem={renderItem}
+          keyExtractor={item => item.id.toString()}
+          onEndReached={fetchPosts}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
+          contentContainerStyle={styles.scrollContent}
+        />
+      ) : (
+        <TopicsPage navigation={navigation} /> // Use the TopicsPage component
+      )}
     </View>
   );
 };
@@ -135,6 +160,28 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     padding: 10,
+  },
+  tabNavigator: {
+    flexDirection: 'row',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  activeTab: {
+    borderBottomWidth: 2,
+    borderBottomColor: ACTIVE_TAB_COLOR,
+  },
+  tabText: {
+    color: '#888',
+    fontSize: 16,
+  },
+  activeTabText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 
