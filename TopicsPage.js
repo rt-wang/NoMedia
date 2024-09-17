@@ -1,26 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const TOPICS = [
-  "Technology", "Science", "Politics", "Economics", "Philosophy",
-  "Art", "Literature", "History", "Mathematics", "Psychology"
+  "Anime & Cosplay", "Art", "Business & Finance", "Collectibles",
+  "Home & Garden", "Humanities & Law", "Internet Culture",
+  "Pop Culture", "Q&As & Stories", "Reading & Writing", "Science",
+  "Technology", "Travel", "Video Games",
+  // Additional 15 topics
+  "Fashion & Beauty", "Food & Drinks", "Sports", "Music",
+  "Photography", "DIY & Crafts", "Fitness", "Movies & TV",
+  "Pets & Animals", "Education", "History", "Nature",
+  "Automotive", "Parenting", "Cryptocurrency"
 ];
 
 const TOPIC_BOXES = [
-  { id: '1', title: '<Bitcoin discussion>' },
-  { id: '2', title: '<Opinions on NVIDIA stock>' },
-  { id: '3', title: '<New discovery in quantum physics?>' },
-  { id: '4', title: '<Best way to learn Python?>' },
-  { id: '5', title: '<What do you guys think of "Dune"?>' },
-  { id: '6', title: '<Future of renewable energy?>' },
-  // Add more topics as needed
+  { id: '1', title: '/ P Diddy Arrested' },
+  { id: '2', title: '/ NVIDIA going to $150?' },
+  { id: '3', title: '/ New discovery in quantum physics' },
+  { id: '4', title: '/ Best way to learn Python' },
+  { id: '5', title: '/ Thoughts on "Dune"' },
+  { id: '6', title: '/ Future of renewable energy' },
+  { id: '7', title: '/ AI in healthcare' },
+  { id: '8', title: '/ Bitcoin discussion' },
 ];
 
 const TopicBox = ({ item }) => (
-  <View style={styles.topicBox}>
+  <TouchableOpacity style={styles.topicBox}>
     <Text style={styles.topicTitle}>{item.title}</Text>
-  </View>
+  </TouchableOpacity>
 );
 
 const TopicButton = ({ topic }) => (
@@ -33,23 +41,47 @@ const TopicSection = ({ title, data }) => (
   <View style={styles.section}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-      {data.map((item) => (
-        <TopicBox key={item.id} item={item} />
-      ))}
+      {data.reduce((pairs, item, index) => {
+        if (index % 2 === 0) {
+          pairs.push(
+            <View key={index} style={styles.topicBoxPair}>
+              <TopicBox item={item} />
+              {data[index + 1] && <TopicBox item={data[index + 1]} />}
+            </View>
+          );
+        }
+        return pairs;
+      }, [])}
     </ScrollView>
   </View>
 );
+
+const TopicButtonsSection = () => {
+  const rows = 2;
+  const buttonHeight = 36; // Adjust this value based on your button height
+  const containerHeight = rows * buttonHeight + (rows - 1) * 8; // 8 is the vertical margin between buttons
+
+  return (
+    <View style={[styles.topicsScrollContainer, { height: containerHeight }]}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={[styles.topicButtonsContainer, { height: containerHeight }]}>
+          {TOPICS.map((topic, index) => (
+            <TopicButton key={index} topic={topic} />
+          ))}
+        </View>
+      </ScrollView>
+    </View>
+  );
+};
 
 const Topics = () => {
   const [sections, setSections] = useState([]);
 
   useEffect(() => {
-    // Simulating fetching data
     const fetchedSections = [
       { id: '1', title: 'Recommended for you', data: TOPIC_BOXES },
-      { id: '2', title: 'More like Technology', data: TOPIC_BOXES },
-      { id: '3', title: 'Trending Topics', data: TOPIC_BOXES },
-      // Add more sections as needed
+      { id: '2', title: 'Trending Topics', data: TOPIC_BOXES },
+      { id: '3', title: 'Science', data: TOPIC_BOXES },
     ];
     setSections(fetchedSections);
   }, []);
@@ -57,11 +89,7 @@ const Topics = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Explore topics</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.topicsScroll}>
-        {TOPICS.map((topic, index) => (
-          <TopicButton key={index} topic={topic} />
-        ))}
-      </ScrollView>
+      <TopicButtonsSection />
       <FlatList
         data={sections}
         renderItem={({ item }) => <TopicSection title={item.title} data={item.data} />}
@@ -79,47 +107,66 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    fontSize: 22,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 16,
+    fontFamily: 'System',
   },
-  topicsScroll: {
-    marginBottom: 16,
+  topicsScrollContainer: {
+    marginBottom: 20,
+  },
+  topicButtonsContainer: {
+    flexDirection: 'column',
+    flexWrap: 'wrap',
+    height: 80, // Adjust this value to fit two rows of buttons
+    alignContent: 'flex-start',
   },
   topicButton: {
-    backgroundColor: '#333',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    backgroundColor: '#1A1A1A',
+    paddingHorizontal: 8,
+    paddingVertical: 5,
     borderRadius: 20,
-    marginRight: 8,
+    margin: 4,
+    borderWidth: 1,
+    borderColor: '#333',
   },
   topicButtonText: {
     color: '#fff',
     fontSize: 14,
+    fontWeight: '500',
+    fontFamily: 'System',
   },
   section: {
     marginBottom: 24,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 12,
-  },
-  topicBox: {
-    width: 250,
-    height: 120,
-    backgroundColor: '#222',
-    borderRadius: 12,
-    padding: 16,
-    marginRight: 12,
-  },
-  topicTitle: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 8,
+    marginBottom: 12,
+    fontFamily: 'System',
+  },
+  topicBoxPair: {
+    width: 280,
+    marginRight: 16,
+  },
+  topicBox: {
+    width: '100%',
+    height: 60,
+    backgroundColor: '#1A1A1A',
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 6,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  topicTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#fff',
+    fontFamily: 'System',
   },
 });
 
