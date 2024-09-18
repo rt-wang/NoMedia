@@ -143,7 +143,6 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 12,
-    paddingHorizontal: 16,
     marginBottom: 4,
   },
   postHeader: {
