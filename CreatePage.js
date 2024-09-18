@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   },
   menuItem: {
     padding: 12,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0,
     borderBottomColor: '#444',
   },
   menuItemText: {
