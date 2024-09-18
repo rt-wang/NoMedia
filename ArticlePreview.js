@@ -28,6 +28,9 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted }) =>
   const [showRepostMenu, setShowRepostMenu] = useState(false);
   const repostButtonRef = useRef();
 
+  // Initialize comments to 0 for article previews
+  const commentCount = item.type === 'article' ? 0 : item.comments;
+
   const handleLike = () => {
     setIsLiked(!isLiked);
     // Here you would typically update the like count on the server
@@ -77,7 +80,7 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted }) =>
         <View style={styles.toolBar}>
           <TouchableOpacity style={styles.toolItem} onPress={() => onCommentPress(item)}>
             <Ionicons name="chatbubble-outline" size={18} color="gray" />
-            <Text style={styles.toolCount}>{item.comments}</Text>
+            <Text style={styles.toolCount}>{commentCount}</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.toolItem} 
