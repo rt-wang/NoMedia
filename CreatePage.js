@@ -9,11 +9,12 @@ const CreatePage = () => {
   const [postType, setPostType] = useState('Nom');
   const [showDropdown, setShowDropdown] = useState(false);
   const [body, setBody] = useState('');
-  const [showPromptSearch, setShowPromptSearch] = useState(false);
-  const [promptSearch, setPromptSearch] = useState('');
+  const [showTopicSearch, setShowTopicSearch] = useState(false);
+  const [topicSearch, setTopicSearch] = useState('');
   const [showMenu, setShowMenu] = useState(false);
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [charCount, setCharCount] = useState(0);
 
   const navigation = useNavigation();
 
@@ -28,7 +29,7 @@ const CreatePage = () => {
     <TouchableOpacity 
       style={[
         styles.dropdownItem, 
-        index === 1 && styles.lastDropdownItem // Apply different style to last item
+        index === 1 && styles.lastDropdownItem
       ]} 
       onPress={() => selectPostType(item)}
     >
@@ -60,7 +61,7 @@ const CreatePage = () => {
   };
 
   const addTopic = () => {
-    setShowPromptSearch(true);
+    setShowTopicSearch(true);
     setShowMenu(false);
   };
 
@@ -86,9 +87,16 @@ const CreatePage = () => {
     navigation.goBack();
   };
 
+  const handleTopicChange = (text) => {
+    if (text.length <= 30) {
+      setBody(text);
+      setCharCount(text.length);
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableWithoutFeedback onPress={() => { setShowPromptSearch(false); setShowMenu(false); }}>
+      <TouchableWithoutFeedback onPress={() => { setShowTopicSearch(false); setShowMenu(false); }}>
         <View style={styles.content}>
           {showSavedIndicator && (
             <Animated.View style={[styles.savedIndicator, { opacity: fadeAnim }]}>
@@ -118,21 +126,25 @@ const CreatePage = () => {
           {showDropdown && (
             <FlatList
               style={styles.dropdown}
-              data={['Nom', 'Prompt']}
+              data={['Nom', 'Topic']}
               renderItem={renderDropdownItem}
               keyExtractor={(item) => item}
             />
           )}
-          {postType === 'Prompt' ? (
-            <View style={styles.promptInputContainer}>
-              <Text style={styles.promptPrefix}>/</Text>
-              <TextInput
-                style={styles.promptInput}
-                placeholder="your topic"
-                placeholderTextColor="#999"
-                value={body}
-                onChangeText={setBody}
-              />
+          {postType === 'Topic' ? (
+            <View>
+              <View style={styles.topicInputContainer}>
+                <Text style={styles.topicPrefix}>/</Text>
+                <TextInput
+                  style={styles.topicInput}
+                  placeholder="your topic"
+                  placeholderTextColor="#999"
+                  value={body}
+                  onChangeText={handleTopicChange}
+                  maxLength={30}
+                />
+              </View>
+              <Text style={styles.charCount}>{charCount}/30</Text>
             </View>
           ) : (
             <View style={styles.bodyContainer}>
@@ -147,22 +159,22 @@ const CreatePage = () => {
             </View>
           )}
           <Modal
-            visible={showPromptSearch}
+            visible={showTopicSearch}
             transparent={true}
             animationType="fade"
-            onRequestClose={() => setShowPromptSearch(false)}
+            onRequestClose={() => setShowTopicSearch(false)}
           >
-            <TouchableWithoutFeedback onPress={() => setShowPromptSearch(false)}>
+            <TouchableWithoutFeedback onPress={() => setShowTopicSearch(false)}>
               <View style={styles.modalOverlay}>
                 <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-                  <View style={styles.promptSearchContainer}>
-                    <Text style={styles.promptSearchPrefix}>/</Text>
+                  <View style={styles.topicSearchContainer}>
+                    <Text style={styles.topicSearchPrefix}>/</Text>
                     <TextInput
-                      style={styles.promptSearchInput}
+                      style={styles.topicSearchInput}
                       placeholder="Search for a topic"
                       placeholderTextColor="#999"
-                      value={promptSearch}
-                      onChangeText={setPromptSearch}
+                      value={topicSearch}
+                      onChangeText={setTopicSearch}
                       autoFocus
                     />
                   </View>
@@ -262,7 +274,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#444',
   },
   lastDropdownItem: {
-    borderBottomWidth: 0, // Remove bottom border for last item
+    borderBottomWidth: 0,
   },
   dropdownItemText: {
     color: '#fff',
@@ -284,7 +296,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  promptSearchContainer: {
+  topicSearchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#222',
@@ -292,34 +304,44 @@ const styles = StyleSheet.create({
     padding: 8,
     width: '80%',
   },
-  promptSearchPrefix: {
+  topicSearchPrefix: {
     color: '#666',
     fontSize: 18,
     marginRight: 8,
   },
-  promptSearchInput: {
+  topicSearchInput: {
     flex: 1,
     color: '#fff',
     fontSize: 18,
   },
-  promptInputContainer: {
+  topicInputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#333',
-    paddingVertical: 12,
+    paddingVertical: 8,
     marginBottom: 16,
+    top: 10,
+    position: 'relative',
   },
-  promptPrefix: {
+  topicPrefix: {
     color: '#666',
-    fontSize: 22,
-    marginRight: 8,
+    fontSize: 30,
+    marginRight: 5,
   },
-  promptInput: {
+  topicInput: {
     flex: 1,
     color: '#fff',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: 'bold',
+    paddingVertical: 4,
+    top: 5.5,
+  },
+  charCount: {
+    alignSelf: 'flex-end',
+    color: '#666',
+    fontSize: 12,
+    marginTop: 0,
   },
   menu: {
     position: 'absolute',
