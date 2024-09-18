@@ -326,8 +326,9 @@ const styles = StyleSheet.create({
   },
   topicPrefix: {
     color: '#666',
-    fontSize: 30,
+    fontSize: 25,
     marginRight: 5,
+    top: 4,
   },
   topicInput: {
     flex: 1,
