@@ -4,6 +4,7 @@ const PostContext = createContext();
 
 export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
+  const [userPosts, setUserPosts] = useState([]);
   const [currentUser, setCurrentUser] = useState({
     username: 'John Doe',
     handle: 'johndoe',
@@ -18,7 +19,11 @@ export const PostProvider = ({ children }) => {
       timestamp: Date.now(),
       comments: [],
     };
-    setPosts(prevPosts => [postWithId, ...prevPosts]);
+    if (newPost.isUserPost) {
+      setUserPosts(prevPosts => [postWithId, ...prevPosts]);
+    } else {
+      setPosts(prevPosts => [postWithId, ...prevPosts]);
+    }
   };
 
   const addComment = (postId, commentContent) => {
@@ -51,6 +56,7 @@ export const PostProvider = ({ children }) => {
   return (
     <PostContext.Provider value={{ 
       posts, 
+      userPosts,
       addPost, 
       addComment,
       currentUser, 

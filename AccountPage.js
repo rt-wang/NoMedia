@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import Post from './Post';
 import ArticlePreview from './ArticlePreview';
 import { useReposts } from './RepostContext';
+import { usePosts } from './PostContext';
 import EditProfileModal from './EditProfileModal';
 import { useNavigation } from '@react-navigation/native';
 
@@ -77,8 +78,8 @@ const ReplyContainer = ({ item, reply }) => {
 const AccountPage = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('Posts');
   const [content, setContent] = useState([]);
-  const [posts, setPosts] = useState([]);
   const { reposts } = useReposts();
+  const { userPosts } = usePosts(); // Get userPosts from PostContext
   const [isEditProfileModalVisible, setIsEditProfileModalVisible] = useState(false);
   const [profile, setProfile] = useState({
     name: 'John Doe',
@@ -90,29 +91,13 @@ const AccountPage = ({ navigation }) => {
   });
 
   useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  useEffect(() => {
     fetchContent();
-  }, [activeTab, reposts, posts]);
-
-  const fetchPosts = () => {
-    // Simulating API call to fetch user's original posts
-    setTimeout(() => {
-      const originalPosts = [
-        { id: '1', username: 'John Doe', handle: 'johndoe', content: 'This is an original post', timestamp: Date.now() },
-        { id: '2', username: 'John Doe', handle: 'johndoe', content: 'Another original post', timestamp: Date.now() - 1000 },
-      ];
-      setPosts(originalPosts);
-    }, 1000);
-  };
+  }, [activeTab, reposts, userPosts]); // Add userPosts as a dependency
 
   const fetchContent = () => {
-    let newContent;
+    let newContent = [];
     if (activeTab === 'Posts') {
-      // Combine original posts and reposts (including quote-type reposts)
-      newContent = [...posts, ...reposts].sort((a, b) => b.timestamp - a.timestamp);
+      newContent = [...userPosts]; // Use userPosts for the Posts tab
     } else if (activeTab === 'Replies') {
       // Simulating replies data
       newContent = [
@@ -124,7 +109,7 @@ const AccountPage = ({ navigation }) => {
         { id: '4', username: 'Jane', handle: 'jane', content: 'A liked post', timestamp: Date.now() - 2000 },
       ];
     }
-    setContent(newContent.sort((a, b) => b.timestamp - a.timestamp));
+    setContent(newContent);
   };
 
   const renderItem = ({ item }) => {

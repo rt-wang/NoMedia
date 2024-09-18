@@ -4,7 +4,7 @@ import ArticlePreview from './ArticlePreview';
 import Post from './Post';
 import { useReposts } from './RepostContext';
 import { usePosts } from './PostContext';
-import TopicsPage from './TopicsPage'; // Import the TopicsPage component
+import TopicsPage from './TopicsPage';
 
 const LIGHT_GREY = '#CCCCCC';
 const ACTIVE_TAB_COLOR = '#FFB6C1';
@@ -27,7 +27,7 @@ const TabNavigator = ({ activeTab, setActiveTab }) => (
 );
 
 const ForYouPage = ({ navigation, showCommentModal }) => {
-  const { posts, addPost } = usePosts(); // Use the PostContext
+  const { posts, addPost } = usePosts();
   const [loading, setLoading] = useState(false);
   const { reposts } = useReposts();
   const [activeTab, setActiveTab] = useState('ForYou');
@@ -43,14 +43,14 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     // Simulating API call
     setTimeout(() => {
       const newPosts = Array(10).fill().map((_, index) => {
-        const isArticle = Math.random() > 0.6; // 40% chance of being an article
+        const isArticle = Math.random() > 0.6;
         const baseContent = 'This is a sample content for the post or article preview. It can be longer or shorter depending on the actual content.';
         const content = isArticle 
           ? baseContent.repeat(Math.ceil(200 / baseContent.length)) 
           : baseContent.slice(0, 150);
 
         return {
-          id: Date.now() + index,
+          id: `generated_${Date.now()}_${index}`,
           type: isArticle ? 'article' : 'post',
           title: isArticle ? 'Sample Article Title' : undefined,
           username: `User${Math.floor(Math.random() * 1000)}`,
@@ -59,9 +59,10 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
           comments: Math.floor(Math.random() * 100),
           reposts: Math.floor(Math.random() * 100),
           likes: Math.floor(Math.random() * 1000),
+          isUserPost: false, // Ensure this is false for generated posts
         };
       });
-      newPosts.forEach(post => addPost(post)); // Add posts to the context
+      newPosts.forEach(post => addPost(post));
       setLoading(false);
     }, 1000);
   };
@@ -106,7 +107,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
       <TabNavigator activeTab={activeTab} setActiveTab={setActiveTab} />
       {activeTab === 'ForYou' ? (
         <FlatList
-          data={posts}
+          data={posts.filter(post => !post.isUserPost)} // Only display non-user posts
           renderItem={renderItem}
           keyExtractor={item => item.id.toString()}
           onEndReached={fetchPosts}
@@ -115,7 +116,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
           contentContainerStyle={styles.scrollContent}
         />
       ) : (
-        <TopicsPage navigation={navigation} /> // Use the TopicsPage component
+        <TopicsPage navigation={navigation} />
       )}
     </View>
   );

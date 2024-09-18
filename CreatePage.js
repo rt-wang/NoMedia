@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { usePosts } from './PostContext'; // Import usePosts
 
 const CreatePage = () => {
   const [postType, setPostType] = useState('Nom');
@@ -17,6 +18,7 @@ const CreatePage = () => {
   const [charCount, setCharCount] = useState(0);
 
   const navigation = useNavigation();
+  const { addPost } = usePosts(); // Get addPost function from PostContext
 
   const toggleDropdown = () => setShowDropdown(!showDropdown);
 
@@ -83,7 +85,21 @@ const CreatePage = () => {
   };
 
   const handlePost = async () => {
-    // Implement post functionality here
+    if (body.trim().length === 0) {
+      // Don't post empty content
+      return;
+    }
+
+    const newPost = {
+      type: postType.toLowerCase(),
+      content: body,
+      reposts: 0,
+      likes: 0,
+      isUserPost: true, // Ensure this flag is set to true
+    };
+
+    addPost(newPost);
+    setBody('');
     navigation.goBack();
   };
 
