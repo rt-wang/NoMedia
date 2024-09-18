@@ -25,7 +25,7 @@ const RepostMenu = ({ onRepost, onQuote, onClose }) => (
 const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   const navigation = useNavigation();
   const { reposts, addRepost } = useReposts();
-  const { posts } = usePosts();
+  const { posts, currentUser } = usePosts();
   const [isReposted, setIsReposted] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [showRepostMenu, setShowRepostMenu] = useState(false);
@@ -35,8 +35,8 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   const commentCount = post.comments ? post.comments.length : 0;
 
   useEffect(() => {
-    setIsReposted(reposts.some(repost => repost.originalPost.id === item.id));
-  }, [reposts, item.id]);
+    setIsReposted(reposts.some(repost => repost.originalPost.id === item.id && repost.userId === currentUser.handle));
+  }, [reposts, item.id, currentUser.handle]);
 
   const handleLike = () => {
     setIsLiked(!isLiked);
@@ -48,7 +48,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   };
 
   const handleRepost = () => {
-    addRepost(item);
+    addRepost(item, currentUser.handle);
     setShowRepostMenu(false);
     setIsReposted(true);
   };
@@ -56,7 +56,6 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   const handleQuote = () => {
     navigation.navigate('Quote', { post: item });
     setShowRepostMenu(false);
-    setIsReposted(true);
   };
 
   const handleCommentPress = () => {
@@ -69,9 +68,23 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
     navigation.navigate('CommentSection', { postId: item.id });
   };
 
+  const renderContent = () => {
+    if (item.type === 'quote') {
+      return (
+        <View>
+          <Text style={styles.content}>{item.quoteText}</Text>
+          <View style={styles.quotedPostContainer}>
+            <Post item={item.originalPost} isQuoteRepost={true} />
+          </View>
+        </View>
+      );
+    }
+    return <Text style={styles.content}>{item.content}</Text>;
+  };
+
   return (
     <View style={styles.container}>
-      {item.isRepost && (
+      {item.type === 'repost' && (
         <Text style={styles.repostIndicator}>
           <Ionicons name="repeat" size={14} color={REPOST_PINK} /> You Reposted
         </Text>
@@ -80,7 +93,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
         <View style={styles.postHeader}>
           <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
         </View>
-        <Text style={styles.content}>{item.content}</Text>
+        {renderContent()}
         <View style={styles.toolBar}>
           <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
             <Ionicons name="chatbubble-outline" size={18} color="gray" />
@@ -130,7 +143,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 12,
-    paddingHorizontal: 4,
+    paddingHorizontal: 16,
     marginBottom: 4,
   },
   postHeader: {
@@ -202,6 +215,13 @@ const styles = StyleSheet.create({
     color: REPOST_PINK,
     fontSize: 14,
     marginBottom: 8,
+    marginLeft: 8,
+  },
+  quotedPostContainer: {
+    marginTop: 8,
+    borderLeftWidth: 2,
+    borderLeftColor: '#333',
+    paddingLeft: 8,
   },
 });
 

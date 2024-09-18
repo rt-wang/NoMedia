@@ -5,12 +5,12 @@ const RepostContext = createContext();
 export const RepostProvider = ({ children }) => {
   const [reposts, setReposts] = useState([]);
 
-  const addRepost = (post, quoteText = '') => {
+  const addRepost = (post, userId, quoteText = '') => {
     const repost = {
-      ...post,
       id: `repost-${post.id}-${Date.now()}`,
-      isRepost: true,
+      type: quoteText ? 'quote' : 'repost',
       originalPost: post,
+      userId: userId,
       timestamp: Date.now(),
       quoteText: quoteText,
     };

@@ -79,7 +79,7 @@ const AccountPage = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('Posts');
   const [content, setContent] = useState([]);
   const { reposts } = useReposts();
-  const { userPosts } = usePosts(); // Get userPosts from PostContext
+  const { userPosts, currentUser } = usePosts(); // Get currentUser from PostContext
   const [isEditProfileModalVisible, setIsEditProfileModalVisible] = useState(false);
   const [profile, setProfile] = useState({
     name: 'John Doe',
@@ -92,12 +92,14 @@ const AccountPage = ({ navigation }) => {
 
   useEffect(() => {
     fetchContent();
-  }, [activeTab, reposts, userPosts]); // Add userPosts as a dependency
+  }, [activeTab, reposts, userPosts, currentUser.handle]);
 
   const fetchContent = () => {
     let newContent = [];
     if (activeTab === 'Posts') {
-      newContent = [...userPosts]; // Use userPosts for the Posts tab
+      // Combine user posts and reposts
+      const userReposts = reposts.filter(repost => repost.userId === currentUser.handle);
+      newContent = [...userPosts, ...userReposts].sort((a, b) => b.timestamp - a.timestamp);
     } else if (activeTab === 'Replies') {
       // Simulating replies data
       newContent = [
@@ -116,7 +118,17 @@ const AccountPage = ({ navigation }) => {
     if (activeTab === 'Replies') {
       return <ReplyContainer item={item} reply={item.reply} />;
     }
-    if (item.isRepost && item.quoteText) {
+    if (item.type === 'repost') {
+      return (
+        <View style={styles.repostContainer}>
+          <Text style={styles.repostIndicator}>
+            <Ionicons name="repeat" size={14} color="#FFB6C1" /> You Reposted
+          </Text>
+          <Post item={item.originalPost} />
+        </View>
+      );
+    }
+    if (item.type === 'quote') {
       return (
         <View style={styles.quoteRepostContainer}>
           <Post item={{ ...item, content: item.quoteText }} />
@@ -311,6 +323,15 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2,
     borderLeftColor: '#333',
     paddingLeft: 8,
+  },
+  repostContainer: {
+    marginBottom: 0, // Reduced from 16 to 8
+  },
+  repostIndicator: {
+    color: '#FFB6C1',
+    fontSize: 14,
+    marginBottom: 4, // Reduced from 8 to 4
+    top: 12,
   },
 });
 
