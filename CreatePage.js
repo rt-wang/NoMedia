@@ -128,7 +128,7 @@ const CreatePage = () => {
               <Text style={styles.promptPrefix}>/</Text>
               <TextInput
                 style={styles.promptInput}
-                placeholder="your topic?"
+                placeholder="your topic"
                 placeholderTextColor="#999"
                 value={body}
                 onChangeText={setBody}

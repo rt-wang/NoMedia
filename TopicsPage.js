@@ -17,19 +17,30 @@ const TOPICS = [
 const TOPIC_BOXES = [
   { id: '1', title: '/ P Diddy Arrested' },
   { id: '2', title: '/ NVIDIA going to $150?' },
-  { id: '3', title: '/ New discovery in quantum physics' },
-  { id: '4', title: '/ Best way to learn Python' },
-  { id: '5', title: '/ Thoughts on "Dune"' },
-  { id: '6', title: '/ Future of renewable energy' },
-  { id: '7', title: '/ AI in healthcare' },
+  { id: '3', title: '/ Laver Cup: Fed Coaching' },
+  { id: '4', title: '/ Arcane S2 Trailer' },
+  { id: '5', title: '/ MLB' },
+  { id: '6', title: '/ I hate my life bro' },
+  { id: '7', title: '/ Dead Internet Theory' },
   { id: '8', title: '/ Bitcoin discussion' },
 ];
 
-const TopicBox = ({ item }) => (
-  <TouchableOpacity style={styles.topicBox}>
-    <Text style={styles.topicTitle}>{item.title}</Text>
-  </TouchableOpacity>
-);
+const TopicBox = ({ item }) => {
+  const randomPosts = (Math.random() * (10000 - 500) + 500).toFixed(2);
+  const formattedPosts = (randomPosts / 1000).toFixed(2) + 'k';
+
+  return (
+    <TouchableOpacity style={styles.topicBox}>
+      <View style={styles.topicSlashContainer}>
+        <Text style={styles.topicSlash}>/</Text>
+      </View>
+      <Text style={styles.topicTitle}>{item.title.substring(2)}</Text>
+      <View style={styles.postsContainer}>
+        <Text style={styles.postsCount}>{formattedPosts} posts</Text>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 const TopicButton = ({ topic }) => (
   <TouchableOpacity style={styles.topicButton}>
@@ -107,45 +118,45 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 16,
+    marginBottom: 20,
     fontFamily: 'System',
   },
   topicsScrollContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
   },
   topicButtonsContainer: {
     flexDirection: 'column',
     flexWrap: 'wrap',
-    height: 80, // Adjust this value to fit two rows of buttons
+    height: 80,
     alignContent: 'flex-start',
   },
   topicButton: {
-    backgroundColor: '#1A1A1A',
-    paddingHorizontal: 8,
-    paddingVertical: 5,
+    backgroundColor: 'rgba(255, 182, 193, 0.1)', // Light pink with opacity
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 20,
     margin: 4,
     borderWidth: 1,
-    borderColor: '#333',
+    borderColor: 'rgba(255, 182, 193, 0.3)',
   },
   topicButtonText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: '500',
-    fontFamily: 'System',
+    fontWeight: '400',
+    fontFamily: 'SFProText-Regular',
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 28,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 12,
-    fontFamily: 'System',
+    marginBottom: 14,
+    fontFamily: 'SFProText-Regular',
   },
   topicBoxPair: {
     width: 280,
@@ -153,20 +164,50 @@ const styles = StyleSheet.create({
   },
   topicBox: {
     width: '100%',
-    height: 60,
-    backgroundColor: '#1A1A1A',
+    height: 45,
+    backgroundColor: 'rgba(26, 26, 26, 0.8)',
     borderRadius: 12,
-    padding: 10,
-    marginBottom: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+    borderWidth: 0,
+    borderColor: 'rgba(255, 182, 193, 0.2)',
+    overflow: 'hidden',
+  },
+  topicSlashContainer: {
+    width: 30,
+    height: '100%',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#333',
+    alignItems: 'center',
+    borderRightWidth: 0,
+    borderRightColor: 'rgba(255, 255, 255, 0.1)',
+    marginRight: -12,
+  },
+  topicSlash: {
+    fontSize: 18,
+    fontWeight: '500',
+    color: '#666',
   },
   topicTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
+    flex: 1,
+    fontSize: 16,
+    fontWeight: '400',
     color: '#fff',
-    fontFamily: 'System',
+    fontFamily: 'SFProText-Regular',
+    paddingLeft: 10,
+  },
+  postsContainer: {
+    width: 60,
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderLeftWidth: 0,
+    borderLeftColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  postsCount: {
+    fontSize: 12,
+    fontWeight: '400',
+    color: 'rgba(255, 255, 255, 0.6)',
   },
 });
 

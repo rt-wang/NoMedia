@@ -10,8 +10,9 @@ const DARK_GREY = '#333333';
 const NavigationBar = ({ state, descriptors, navigation }) => {
   const navigateTo = (screen) => {
     if (screen === 'Home') {
-      // Always navigate to the ForYouPage when Home is tapped
       navigation.navigate('Home', { screen: 'ForYou' });
+    } else if (screen === 'AI') {
+      navigation.navigate('ExplorePageAI'); // Navigate to ExplorePageAI
     } else {
       navigation.navigate(screen);
     }
@@ -21,6 +22,9 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
     const currentRoute = state.routes[state.index];
     if (screenName === 'Home') {
       return currentRoute.name === 'Home' || currentRoute.name === 'Threads' || currentRoute.name === 'ReadNext' || currentRoute.name === 'ForYou';
+    }
+    if (screenName === 'AI') {
+      return currentRoute.name === 'ExplorePageAI'; // Check if ExplorePageAI is active
     }
     return currentRoute.name === screenName && screenName !== 'Create';
   };

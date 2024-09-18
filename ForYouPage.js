@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TextInput, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import ArticlePreview from './ArticlePreview';
 import Post from './Post';
 import { useReposts } from './RepostContext';
@@ -9,13 +8,6 @@ import TopicsPage from './TopicsPage'; // Import the TopicsPage component
 
 const LIGHT_GREY = '#CCCCCC';
 const ACTIVE_TAB_COLOR = '#FFB6C1';
-
-const SearchBar = () => (
-  <View style={styles.searchBarContainer}>
-    <TextInput style={styles.searchBar} placeholder="Search NoMedia" placeholderTextColor="#999" />
-    <Ionicons name="search" size={24} color="#999" style={styles.searchIcon} />
-  </View>
-);
 
 const TabNavigator = ({ activeTab, setActiveTab }) => (
   <View style={styles.tabNavigator}>
@@ -111,7 +103,6 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
 
   return (
     <View style={styles.container}>
-      <SearchBar />
       <TabNavigator activeTab={activeTab} setActiveTab={setActiveTab} />
       {activeTab === 'ForYou' ? (
         <FlatList
@@ -138,23 +129,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 20,
     paddingHorizontal: 16,
-  },
-  searchBarContainer: {
-    padding: 10,
-    paddingHorizontal: 16,
-    backgroundColor: '#000',
-  },
-  searchBar: {
-    backgroundColor: '#333',
-    borderRadius: 12,
-    padding: 10,
-    paddingLeft: 40,
-    color: '#fff',
-  },
-  searchIcon: {
-    position: 'absolute',
-    left: 26,
-    top: 18,
   },
   loadingText: {
     color: '#fff',
