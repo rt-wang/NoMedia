@@ -115,7 +115,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
               <Ionicons 
                 name={isLiked ? "heart" : "heart-outline"} 
                 size={18} 
-                color={isLiked ? "red" : "gray"} 
+                color={isLiked ? "white" : "gray"} 
               />
             </TouchableOpacity>
           </View>
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
   toolBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 4,
   },
   toolItem: {
     flexDirection: 'row',
@@ -253,6 +253,9 @@ const styles = StyleSheet.create({
   },
   likeButton: {
     padding: 4,
+    position: 'absolute',
+    left: 325,
+    bottom: 40,
   },
 });
 
