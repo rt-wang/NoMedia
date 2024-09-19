@@ -41,7 +41,6 @@ const CommentSection = ({ route, navigation }) => {
   const renderComments = () => {
     return comments.map((item) => (
       <View key={item.id} style={styles.commentContainer}>
-        <View style={styles.commentLine} />
         <Post
           item={item}
           onCommentPress={() => handleCommentPress(item)}
@@ -149,11 +148,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingLeft: 16,
     paddingRight: 16,
-  },
-  commentLine: {
-    width: 2,
-    backgroundColor: '#333',
-    marginRight: 8,
   },
   commentInputContainer: {
     backgroundColor: '#111',
