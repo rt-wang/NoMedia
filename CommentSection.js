@@ -100,7 +100,7 @@ const CommentSection = ({ route, navigation }) => {
           />
           <TouchableOpacity onPress={handleSendComment} style={styles.sendButton} disabled={comment.trim().length === 0}>
             <View style={[styles.sendButtonInner, comment.trim().length === 0 && styles.sendButtonDisabled]}>
-              <Ionicons name="arrow-up" size={20} color="#fff" />
+              <Ionicons name="arrow-up" size={16} color="#fff" />
             </View>
           </TouchableOpacity>
         </View>
@@ -165,6 +165,7 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'flex-end',
+    position: 'relative', // Ensure the send button can overlap
   },
   commentInput: {
     flex: 1,
@@ -173,25 +174,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 8,
     paddingBottom: 8,
-    paddingRight: 40,
+    paddingRight: 40, // Ensure space for the send button
     color: '#fff',
     fontSize: 16,
     maxHeight: 100,
-    marginRight: 8,
+    marginLeft: -2, // Equal distance from the sides of the phone
+    marginRight: -2, // Equal distance from the sides of the phone
   },
   sendButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    position: 'absolute',
+    right: 4, // Align with the right margin of the text input
+    bottom: 4, // Align with the bottom padding of the text input
+    width: 28, // Shrink the size of the button
+    height: 28, // Shrink the size of the button
+    borderRadius: 14, // Adjust the border radius to match the new size
     justifyContent: 'center',
     alignItems: 'center',
-    alignSelf: 'flex-end',
-    marginBottom: 4,
+    zIndex: 1, // Ensure the button is on top
+    marginLeft: 10,
   },
   sendButtonInner: {
     width: '100%',
     height: '100%',
-    borderRadius: 16,
+    borderRadius: 14, // Adjust the border radius to match the new size
     backgroundColor: PINK_COLOR,
     justifyContent: 'center',
     alignItems: 'center',
