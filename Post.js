@@ -68,6 +68,11 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
     navigation.navigate('CommentSection', { postId: item.id });
   };
 
+  const handleReply = () => {
+    // Handle reply functionality
+    console.log('Reply to comment:', item.id);
+  };
+
   const renderContent = () => {
     if (item.type === 'quote') {
       return (
@@ -91,43 +96,55 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
       )}
       <TouchableOpacity onPress={handlePostPress}>
         <View style={styles.postHeader}>
-          <Text style={styles.username}>
-            {item.username}
-            {item.type !== 'comment' && item.handle && (
-              <Text style={styles.handle}> @{item.handle}</Text>
-            )}
-          </Text>
+          <Text style={styles.username}>{item.username}</Text>
         </View>
         {renderContent()}
-        <View style={styles.toolBar}>
-          <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
-            <Ionicons name="chatbubble-outline" size={18} color="gray" />
-            <Text style={styles.toolCount}>{commentCount}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.toolItem} 
-            onPress={handleRepostPress}
-            ref={repostButtonRef}
-          >
-            <Ionicons 
-              name="repeat" 
-              size={18} 
-              color={isReposted ? REPOST_PINK : "gray"} 
-            />
-            <Text style={[styles.toolCount, isReposted && styles.repostedText]}>
-              {item.reposts}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
-            <Ionicons 
-              name={isLiked ? "heart" : "heart-outline"} 
-              size={18} 
-              color={isLiked ? "white" : "gray"} 
-            />
-            <Text style={styles.toolCount}>{item.likes}</Text>
-          </TouchableOpacity>
-          <Ionicons name="share-outline" size={18} color="gray" />
-        </View>
+        {item.type === 'comment' ? (
+          <View style={styles.commentToolbar}>
+            <TouchableOpacity onPress={handleReply}>
+              <Text style={styles.replyText}>
+                Reply ({commentCount})
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLike} style={styles.likeButton}>
+              <Ionicons 
+                name={isLiked ? "heart" : "heart-outline"} 
+                size={18} 
+                color={isLiked ? "red" : "gray"} 
+              />
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <View style={styles.toolBar}>
+            <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
+              <Ionicons name="chatbubble-outline" size={18} color="gray" />
+              <Text style={styles.toolCount}>{commentCount}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              style={styles.toolItem} 
+              onPress={handleRepostPress}
+              ref={repostButtonRef}
+            >
+              <Ionicons 
+                name="repeat" 
+                size={18} 
+                color={isReposted ? REPOST_PINK : "gray"} 
+              />
+              <Text style={[styles.toolCount, isReposted && styles.repostedText]}>
+                {item.reposts}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
+              <Ionicons 
+                name={isLiked ? "heart" : "heart-outline"} 
+                size={18} 
+                color={isLiked ? "white" : "gray"} 
+              />
+              <Text style={styles.toolCount}>{item.likes}</Text>
+            </TouchableOpacity>
+            <Ionicons name="share-outline" size={18} color="gray" />
+          </View>
+        )}
       </TouchableOpacity>
       <Popover
         isVisible={showRepostMenu}
@@ -152,34 +169,24 @@ const styles = StyleSheet.create({
   },
   postHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    left: 4,
-    marginBottom: 2,
+    alignItems: 'center',
+    marginBottom: 4,
   },
   username: {
-    fontFamily: 'SFProText-Regular',
     fontSize: 16,
     color: '#fff',
-  },
-  handle: {
-    fontFamily: 'SFProText-Regular',
-    fontSize: 16,
-    color: '#687684',
+    fontWeight: 'bold',
   },
   content: {
-    fontFamily: 'SFProText',
     fontSize: 16,
     lineHeight: 22,
     color: '#fff',
-    marginBottom: 12,
-    paddingLeft: 4,
+    marginBottom: 8,
   },
   toolBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 0,
-    marginLeft: 4,
+    marginTop: 8,
   },
   toolItem: {
     flexDirection: 'row',
@@ -190,7 +197,6 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 14,
     color: '#687684',
-    lineHeight: 18,
   },
   repostMenuPopover: {
     backgroundColor: '#222',
@@ -226,6 +232,19 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2,
     borderLeftColor: '#333',
     paddingLeft: 8,
+  },
+  commentToolbar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  replyText: {
+    fontSize: 14,
+    color: '#687684',
+  },
+  likeButton: {
+    padding: 4,
   },
 });
 
