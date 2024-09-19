@@ -181,6 +181,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
   },
+  handle: {
+    fontSize: 16,
+    color: '#687684',
+  },
   content: {
     fontSize: 16,
     lineHeight: 22,
@@ -249,10 +253,6 @@ const styles = StyleSheet.create({
   },
   likeButton: {
     padding: 4,
-  },
-  handle: {
-    fontSize: 14,
-    color: '#687684',
   },
 });
 
