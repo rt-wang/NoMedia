@@ -96,7 +96,12 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
       )}
       <TouchableOpacity onPress={handlePostPress}>
         <View style={styles.postHeader}>
-          <Text style={styles.username}>{item.username}</Text>
+          <Text style={styles.username}>
+            {item.username}
+            {item.type !== 'comment' && item.handle && (
+              <Text style={styles.handle}> @{item.handle}</Text>
+            )}
+          </Text>
         </View>
         {renderContent()}
         {item.type === 'comment' ? (
@@ -175,7 +180,6 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 16,
     color: '#fff',
-    fontWeight: 'bold',
   },
   content: {
     fontSize: 16,
@@ -245,6 +249,10 @@ const styles = StyleSheet.create({
   },
   likeButton: {
     padding: 4,
+  },
+  handle: {
+    fontSize: 14,
+    color: '#687684',
   },
 });
 
