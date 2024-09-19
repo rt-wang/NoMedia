@@ -18,6 +18,7 @@ export const PostProvider = ({ children }) => {
       handle: currentUser.handle,
       timestamp: Date.now(),
       comments: [],
+      type: newPost.type || 'post', // Ensure type is set, default to 'post'
     };
     if (newPost.isUserPost) {
       setUserPosts(prevPosts => [postWithId, ...prevPosts]);
@@ -31,9 +32,8 @@ export const PostProvider = ({ children }) => {
       if (post.id === postId) {
         const newComment = {
           id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          type: 'post',
+          type: 'comment', // Explicitly set type to 'comment'
           username: currentUser.username,
-          handle: currentUser.handle,
           content: commentContent,
           timestamp: Date.now(),
           comments: [],

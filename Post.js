@@ -91,7 +91,12 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
       )}
       <TouchableOpacity onPress={handlePostPress}>
         <View style={styles.postHeader}>
-          <Text style={styles.username}>{item.username} <Text style={styles.handle}>@{item.handle}</Text></Text>
+          <Text style={styles.username}>
+            {item.username}
+            {item.type !== 'comment' && item.handle && (
+              <Text style={styles.handle}> @{item.handle}</Text>
+            )}
+          </Text>
         </View>
         {renderContent()}
         <View style={styles.toolBar}>
