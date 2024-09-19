@@ -117,7 +117,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
             <Ionicons 
               name={isLiked ? "heart" : "heart-outline"} 
               size={18} 
-              color={isLiked ? "red" : "gray"} 
+              color={isLiked ? "white" : "white"} 
             />
             <Text style={styles.toolCount}>{item.likes}</Text>
           </TouchableOpacity>
