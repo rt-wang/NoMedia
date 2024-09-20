@@ -9,26 +9,45 @@ const PINK_COLOR = '#FFB6C1';
 const MAX_CHARS = 300;
 
 const CommentSection = ({ route, navigation }) => {
-  const { postId } = route.params;
+  const { postId, commentId } = route.params;
   const { posts, addComment } = usePosts();
   const [comment, setComment] = useState('');
   const [charCount, setCharCount] = useState(0);
   const inputRef = useRef(null);
 
-  const post = posts.find(p => p.id === postId);
-  const comments = post ? post.comments : [];
+  const findPostAndComment = (postId, commentId) => {
+    const post = posts.find(p => p.id === postId);
+    if (!post) return { post: null, comment: null };
+    
+    if (!commentId) return { post, comment: null };
+    
+    const findComment = (comments) => {
+      for (let c of comments) {
+        if (c.id === commentId) return c;
+        const nestedComment = findComment(c.comments || []);
+        if (nestedComment) return nestedComment;
+      }
+      return null;
+    };
+    
+    const comment = findComment(post.comments || []);
+    return { post, comment };
+  };
+
+  const { post, comment: originalComment } = findPostAndComment(postId, commentId);
+  const comments = originalComment ? originalComment.comments || [] : post ? post.comments || [] : [];
 
   useEffect(() => {
     setCharCount(comment.length);
   }, [comment]);
 
-  const handleCommentPress = (comment) => {
-    navigation.push('CommentSection', { postId: comment.id });
+  const handleCommentPress = (clickedComment) => {
+    navigation.push('CommentSection', { postId, commentId: clickedComment.id });
   };
 
   const handleSendComment = () => {
     if (comment.trim().length > 0 && comment.length <= MAX_CHARS) {
-      addComment(postId, comment.trim());
+      addComment(postId, comment.trim(), commentId);
       setComment('');
       inputRef.current?.blur();
     } else if (comment.length > MAX_CHARS) {
@@ -40,13 +59,15 @@ const CommentSection = ({ route, navigation }) => {
 
   const renderComments = () => {
     return comments.map((item) => (
-      <View key={item.id} style={styles.commentContainer}>
-        <Post
-          item={item}
-          onCommentPress={() => handleCommentPress(item)}
-          commentCount={item.comments ? item.comments.length : 0}
-        />
-      </View>
+      <TouchableOpacity key={item.id} onPress={() => handleCommentPress(item)}>
+        <View style={styles.commentContainer}>
+          <Post
+            item={item}
+            onCommentPress={() => {}} // We don't need this anymore as the whole comment is touchable
+            commentCount={item.comments ? item.comments.length : 0}
+          />
+        </View>
+      </TouchableOpacity>
     ));
   };
 
@@ -71,7 +92,7 @@ const CommentSection = ({ route, navigation }) => {
       >
         <View style={styles.originalPostContainer}>
           <Post
-            item={post}
+            item={originalComment || post}
             onCommentPress={() => {}}
             commentCount={comments.length}
           />
@@ -116,6 +137,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
+    paddingHorizontal: 3,
   },
   errorText: {
     color: '#fff',

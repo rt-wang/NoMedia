@@ -27,23 +27,48 @@ export const PostProvider = ({ children }) => {
     }
   };
 
-  const addComment = (postId, commentContent) => {
+  const addComment = (postId, commentContent, parentCommentId = null) => {
+    const newComment = {
+      id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      type: 'comment', // Explicitly set type to 'comment'
+      username: currentUser.username,
+      content: commentContent,
+      timestamp: Date.now(),
+      comments: [],
+      reposts: 0,
+      likes: 0,
+    };
+
+    const addNestedComment = (comments) => {
+      return comments.map(comment => {
+        if (comment.id === parentCommentId) {
+          return {
+            ...comment,
+            comments: [newComment, ...comment.comments],
+          };
+        } else if (comment.comments.length > 0) {
+          return {
+            ...comment,
+            comments: addNestedComment(comment.comments),
+          };
+        }
+        return comment;
+      });
+    };
+
     setPosts(prevPosts => prevPosts.map(post => {
       if (post.id === postId) {
-        const newComment = {
-          id: `comment_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          type: 'comment', // Explicitly set type to 'comment'
-          username: currentUser.username,
-          content: commentContent,
-          timestamp: Date.now(),
-          comments: [],
-          reposts: 0,
-          likes: 0,
-        };
-        return {
-          ...post,
-          comments: [newComment, ...post.comments],
-        };
+        if (parentCommentId === null) {
+          return {
+            ...post,
+            comments: [newComment, ...post.comments],
+          };
+        } else {
+          return {
+            ...post,
+            comments: addNestedComment(post.comments),
+          };
+        }
       }
       return post;
     }));
