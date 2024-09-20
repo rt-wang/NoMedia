@@ -79,6 +79,20 @@ const CommentSection = ({ route, navigation }) => {
     );
   }
 
+  const renderOriginalItem = () => {
+    const item = originalComment || post;
+    return (
+      <Post
+        item={{
+          ...item,
+          type: 'post', // Force the item to be treated as a post
+        }}
+        onCommentPress={() => {}}
+        commentCount={comments.length}
+      />
+    );
+  };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -91,11 +105,7 @@ const CommentSection = ({ route, navigation }) => {
         extraScrollHeight={20}
       >
         <View style={styles.originalPostContainer}>
-          <Post
-            item={originalComment || post}
-            onCommentPress={() => {}}
-            commentCount={comments.length}
-          />
+          {renderOriginalItem()}
         </View>
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
@@ -152,7 +162,7 @@ const styles = StyleSheet.create({
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: 16,
+    marginVertical: 8,
     paddingHorizontal: 16,
   },
   dividerLine: {
@@ -168,7 +178,7 @@ const styles = StyleSheet.create({
   },
   commentContainer: {
     flexDirection: 'row',
-    paddingLeft: 16,
+    paddingLeft: 20,
     paddingRight: 16,
   },
   commentInputContainer: {
