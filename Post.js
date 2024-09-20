@@ -250,12 +250,14 @@ const styles = StyleSheet.create({
   replyText: {
     fontSize: 14,
     color: '#687684',
+    marginTop: -4,
+    marginBottom: -8,
   },
   likeButton: {
     padding: 4,
     position: 'absolute',
     left: 325,
-    bottom: 40,
+    bottom: 25,
   },
 });
 
