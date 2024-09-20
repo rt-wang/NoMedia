@@ -21,9 +21,10 @@ import SettingsPage from './SettingsPage';
 import CommentSection from './CommentSection';
 import { PostProvider } from './PostContext';
 import ExplorePageAI from './ExplorePageAI';
-
+import RegistrationPage from './RegistrationPage';
 import * as Font from 'expo-font';
 import { RepostProvider } from './RepostContext';
+import LoginPage from './LoginPage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -35,7 +36,6 @@ const HomeStack = () => (
     <Stack.Screen name="ReadNext" component={ReadNext} />
     <Stack.Screen name="Quote" component={QuoteScreen} />
     <Stack.Screen name="Repost" component={RepostScreen} />
-    <Stack.Screen name="Settings" component={SettingsPage} />
     <Stack.Screen name="CommentSection" component={CommentSection} />
     <Stack.Screen name="ExplorePageAI" component={ExplorePageAI} />
   </Stack.Navigator>
@@ -45,14 +45,39 @@ const AccountStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="AccountMain" component={AccountPage} />
     <Stack.Screen name="Drafts" component={Drafts} />
+    <Stack.Screen name="Settings" component={SettingsPage} />
   </Stack.Navigator>
 );
 
-const screenOptions = ({ route }) => ({
-  headerShown: false,
-  tabBarStyle: { display: 'none' },
-  tabBar: (props) => <NavigationBar {...props} currentRoute={route.name} />
-});
+const AuthStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Login" component={LoginPage} />
+    <Stack.Screen name="Registration" component={RegistrationPage} />
+  </Stack.Navigator>
+);
+
+const MainApp = () => {
+  const screenOptions = ({ route }) => ({
+    headerShown: false,
+    tabBarStyle: { display: 'none' },
+    tabBar: (props) => <NavigationBar {...props} currentRoute={route.name} />
+  });
+
+  return (
+    <View style={styles.content}>
+      <Header />
+      <Tab.Navigator
+        screenOptions={screenOptions}
+        tabBar={props => <NavigationBar {...props} />}
+      >
+        <Tab.Screen name="Home" component={HomeStack} />
+        <Tab.Screen name="Account" component={AccountStack} />
+        <Tab.Screen name="Notifications" component={NotificationsPage} />
+        <Tab.Screen name="Create" component={CreatePage} />
+      </Tab.Navigator>
+    </View>
+  );
+};
 
 const App = () => {
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -83,18 +108,10 @@ const App = () => {
             <StatusBar barStyle="light-content" />
             <SafeAreaView style={styles.container}>
               <NavigationContainer>
-                <View style={styles.content}>
-                  <Header />
-                  <Tab.Navigator
-                    screenOptions={screenOptions}
-                    tabBar={props => <NavigationBar {...props} />}
-                  >
-                    <Tab.Screen name="Home" component={HomeStack} />
-                    <Tab.Screen name="Account" component={AccountStack} />
-                    <Tab.Screen name="Notifications" component={NotificationsPage} />
-                    <Tab.Screen name="Create" component={CreatePage} />
-                  </Tab.Navigator>
-                </View>
+                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="Auth" component={AuthStack} />
+                  <Stack.Screen name="MainApp" component={MainApp} />
+                </Stack.Navigator>
               </NavigationContainer>
             </SafeAreaView>
           </SafeAreaProvider>
