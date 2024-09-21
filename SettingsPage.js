@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { CommonActions } from '@react-navigation/native';
 
 const SettingsPage = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -41,6 +42,24 @@ const SettingsPage = ({ navigation }) => {
     return text;
   };
 
+  const handleLogout = async () => {
+    // Clear any stored user data (if necessary)
+    // For example:
+    // await AsyncStorage.removeItem('userToken');
+    
+    // Navigate to the Login page with a left swipe transition
+    navigation.dispatch(
+      CommonActions.reset({
+        index: 0,
+        routes: [{ name: 'Auth' }],
+      })
+    );
+    navigation.setOptions({
+      animationEnabled: true,
+      animation: 'slide_from_left',
+    });
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
@@ -70,6 +89,11 @@ const SettingsPage = ({ navigation }) => {
           value={notificationsEnabled}
         />
       </View>
+      <View style={styles.logoutButtonContainer}>
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <Text style={styles.logoutButtonText}>Log Out</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -78,7 +102,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    padding: 16,
+    padding: 20,
   },
   backButton: {
     marginBottom: 24,
@@ -100,7 +124,29 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     fontSize: 16,
     width: 150,
-    textAlign: 'center', // Changed from 'right' to 'center'
+    textAlign: 'center',
+  },
+  logoutButtonContainer: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  logoutButton: {
+    width: 120,
+    height: 40,
+    backgroundColor: 'rgba(26, 26, 26, 0.8)',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 0.5,
+    borderColor: 'rgba(255, 182, 193, 0.2)',
+  },
+  logoutButtonText: {
+    fontSize: 16,
+    fontWeight: '400',
+    color: '#fff',
+    fontFamily: 'SFProText-Regular',
   },
 });
 
