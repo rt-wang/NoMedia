@@ -84,7 +84,56 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
         </View>
       );
     }
-    return <Text style={styles.content}>{item.content}</Text>;
+    return (
+      <Text style={styles.content} numberOfLines={3} ellipsizeMode="tail">
+        {item.content}
+      </Text>
+    );
+  };
+
+  const renderToolbar = () => {
+    if (item.type === 'comment') {
+      return (
+        <View style={styles.commentContainer}>
+          <View style={styles.commentContent}>
+            {renderContent()}
+          </View>
+          <View style={styles.commentToolbar}>
+            <TouchableOpacity onPress={handleCommentPress} style={styles.toolItem}>
+              <Ionicons name="chatbubble-outline" size={18} color="gray" />
+              <Text style={styles.toolCount}>{commentCount}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleRepostPress} style={styles.toolItem} ref={repostButtonRef}>
+              <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
+              <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{item.reposts}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLike} style={styles.toolItem}>
+              <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
+              <Text style={styles.toolCount}>{item.likes}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      );
+    }
+    return (
+      <View style={styles.toolBar}>
+        <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
+          <Ionicons name="chatbubble-outline" size={18} color="gray" />
+          <Text style={styles.toolCount}>{commentCount}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolItem} onPress={handleRepostPress} ref={repostButtonRef}>
+          <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
+          <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{item.reposts}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
+          <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
+          <Text style={styles.toolCount}>{item.likes}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolItem}>
+          <Ionicons name="share-outline" size={18} color="gray" />
+        </TouchableOpacity>
+      </View>
+    );
   };
 
   return (
@@ -103,53 +152,8 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
             )}
           </Text>
         </View>
-        {renderContent()}
-        {item.type === 'comment' ? (
-          <View style={styles.commentToolbar}>
-            <TouchableOpacity onPress={handleReply}>
-              <Text style={styles.replyText}>
-                Reply ({commentCount})
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleLike} style={styles.likeButton}>
-              <Ionicons 
-                name={isLiked ? "heart" : "heart-outline"} 
-                size={18} 
-                color={isLiked ? "white" : "gray"} 
-              />
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <View style={styles.toolBar}>
-            <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
-              <Ionicons name="chatbubble-outline" size={18} color="gray" />
-              <Text style={styles.toolCount}>{commentCount}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={styles.toolItem} 
-              onPress={handleRepostPress}
-              ref={repostButtonRef}
-            >
-              <Ionicons 
-                name="repeat" 
-                size={18} 
-                color={isReposted ? REPOST_PINK : "gray"} 
-              />
-              <Text style={[styles.toolCount, isReposted && styles.repostedText]}>
-                {item.reposts}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
-              <Ionicons 
-                name={isLiked ? "heart" : "heart-outline"} 
-                size={18} 
-                color={isLiked ? "white" : "gray"} 
-              />
-              <Text style={styles.toolCount}>{item.likes}</Text>
-            </TouchableOpacity>
-            <Ionicons name="share-outline" size={18} color="gray" />
-          </View>
-        )}
+        {item.type === 'comment' ? renderToolbar() : renderContent()}
+        {item.type !== 'comment' && renderToolbar()}
       </TouchableOpacity>
       <Popover
         isVisible={showRepostMenu}
@@ -241,23 +245,22 @@ const styles = StyleSheet.create({
     borderLeftColor: '#333',
     paddingLeft: 8,
   },
+  commentContainer: {
+    flex: 1,
+  },
+  commentContent: {
+    marginBottom: 8,
+  },
   commentToolbar: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 4,
+    justifyContent: 'flex-start',
+    marginTop: -8,
   },
-  replyText: {
-    fontSize: 14,
-    color: '#687684',
-    marginTop: -4,
-    marginBottom: -8,
-  },
-  likeButton: {
-    padding: 4,
-    position: 'absolute',
-    left: 325,
-    bottom: 25,
+  commentLikeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingTop: 8,
   },
 });
 
