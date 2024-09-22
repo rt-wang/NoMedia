@@ -173,6 +173,8 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress }) => {
         onRequestClose={() => setShowOptionsMenu(false)}
         from={optionsButtonRef}
         popoverStyle={styles.optionsMenuPopover}
+        placement="bottom" // Add this line
+        arrowSize={{ width: 0, height: 0 }} // Optional: removes the arrow
       >
         <OptionsMenu 
           onNotInterested={handleNotInterested}

@@ -22,12 +22,14 @@ const RepostMenu = ({ onRepost, onQuote, onClose }) => (
   </View>
 );
 
-const OptionsMenu = ({ onClose, onNotInterested, onReport }) => (
+const OptionsMenu = ({ onClose, onNotInterested, onReport, isComment }) => (
   <View style={styles.optionsMenuContainer}>
-    <TouchableOpacity style={styles.optionItem} onPress={onNotInterested}>
-      <Ionicons name="eye-off-outline" size={16} color="white" />
-      <Text style={styles.optionText}>Not interested</Text>
-    </TouchableOpacity>
+    {!isComment && (
+      <TouchableOpacity style={styles.optionItem} onPress={onNotInterested}>
+        <Ionicons name="eye-off-outline" size={16} color="white" />
+        <Text style={styles.optionText}>Not interested</Text>
+      </TouchableOpacity>
+    )}
     <TouchableOpacity style={styles.optionItem} onPress={onReport}>
       <Ionicons name="flag-outline" size={16} color="white" />
       <Text style={styles.optionText}>Report</Text>
@@ -204,11 +206,14 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
         onRequestClose={() => setShowOptionsMenu(false)}
         from={optionsButtonRef}
         popoverStyle={styles.optionsMenuPopover}
+        placement="bottom" // Add this line
+        arrowSize={{ width: 0, height: 0 }} // Optional: removes the arrow
       >
         <OptionsMenu 
           onNotInterested={handleNotInterested}
           onReport={handleReport}
           onClose={() => setShowOptionsMenu(false)}
+          isComment={item.type === 'comment'}
         />
       </Popover>
     </View>
