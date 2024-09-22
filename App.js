@@ -25,6 +25,7 @@ import RegistrationPage from './RegistrationPage';
 import * as Font from 'expo-font';
 import { RepostProvider } from './RepostContext';
 import LoginPage from './LoginPage';
+import FeedbackForm from './FeedbackForm';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -38,6 +39,7 @@ const HomeStack = () => (
     <Stack.Screen name="Repost" component={RepostScreen} />
     <Stack.Screen name="CommentSection" component={CommentSection} />
     <Stack.Screen name="ExplorePageAI" component={ExplorePageAI} />
+    <Stack.Screen name="FeedbackForm" component={FeedbackForm} />
   </Stack.Navigator>
 );
 

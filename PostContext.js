@@ -78,6 +78,58 @@ export const PostProvider = ({ children }) => {
     setCurrentUser(user);
   };
 
+  const toggleLike = (postId) => {
+    const updateLikes = (postArray) => {
+      return postArray.map(post => {
+        if (post.id === postId) {
+          const isLiked = post.likedBy?.includes(currentUser.handle);
+          return {
+            ...post,
+            likes: isLiked ? post.likes - 1 : post.likes + 1,
+            likedBy: isLiked 
+              ? post.likedBy.filter(handle => handle !== currentUser.handle)
+              : [...(post.likedBy || []), currentUser.handle],
+          };
+        } else if (post.comments) {
+          return {
+            ...post,
+            comments: updateLikes(post.comments),
+          };
+        }
+        return post;
+      });
+    };
+
+    setPosts(updateLikes);
+    setUserPosts(updateLikes);
+  };
+
+  const toggleRepost = (postId) => {
+    const updateReposts = (postArray) => {
+      return postArray.map(post => {
+        if (post.id === postId) {
+          const isReposted = post.repostedBy?.includes(currentUser.handle);
+          return {
+            ...post,
+            reposts: isReposted ? post.reposts - 1 : post.reposts + 1,
+            repostedBy: isReposted 
+              ? post.repostedBy.filter(handle => handle !== currentUser.handle)
+              : [...(post.repostedBy || []), currentUser.handle],
+          };
+        } else if (post.comments) {
+          return {
+            ...post,
+            comments: updateReposts(post.comments),
+          };
+        }
+        return post;
+      });
+    };
+
+    setPosts(updateReposts);
+    setUserPosts(updateReposts);
+  };
+
   return (
     <PostContext.Provider value={{ 
       posts, 
@@ -85,7 +137,9 @@ export const PostProvider = ({ children }) => {
       addPost, 
       addComment,
       currentUser, 
-      updateCurrentUser 
+      updateCurrentUser,
+      toggleLike,
+      toggleRepost
     }}>
       {children}
     </PostContext.Provider>

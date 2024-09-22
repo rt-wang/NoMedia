@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // Make sure to import this
 import ArticlePreview from './ArticlePreview';
 import Post from './Post';
 import { useReposts } from './RepostContext';
@@ -106,15 +107,24 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     <View style={styles.container}>
       <TabNavigator activeTab={activeTab} setActiveTab={setActiveTab} />
       {activeTab === 'ForYou' ? (
-        <FlatList
-          data={posts.filter(post => !post.isUserPost)} // Only display non-user posts
-          renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
-          onEndReached={fetchPosts}
-          onEndReachedThreshold={0.1}
-          ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
-          contentContainerStyle={styles.scrollContent}
-        />
+        <>
+          <FlatList
+            data={posts.filter(post => !post.isUserPost)} // Only display non-user posts
+            renderItem={renderItem}
+            keyExtractor={item => item.id.toString()}
+            onEndReached={fetchPosts}
+            onEndReachedThreshold={0.1}
+            ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
+            contentContainerStyle={styles.scrollContent}
+          />
+          <TouchableOpacity
+            style={styles.feedbackButton}
+            onPress={() => navigation.navigate('FeedbackForm')}
+          >
+            <Text style={styles.feedbackText}>Give</Text>
+            <Text style={styles.feedbackText}>Feedback</Text>
+          </TouchableOpacity>
+        </>
       ) : (
         <TopicsPage navigation={navigation} />
       )}
@@ -157,6 +167,26 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  feedbackButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    backgroundColor: 'rgba(26, 26, 26, 0.8)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 182, 193, 0.3)',
+  },
+  feedbackText: {
+    color: '#fff',
+    fontSize: 14, // Reduced by approximately 70% from 14
+    fontWeight: '400',
+    fontFamily: 'SFProText-Regular',
+    textAlign: 'center',
   },
 });
 
