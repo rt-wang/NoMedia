@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "NoMedia",
+    "slug": "NoMedia",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "fonts": [
+      {
+        "asset": "assets/fonts/Athelas-Regular.ttf",
+        "family": "Athelas"
+      },
+      {
+        "asset": "assets/fonts/SFProText-Regular.otf",
+        "family": "SFProText-Regular"
+      },
+      {
+        "asset": "assets/fonts/SFProText-Bold.otf",
+        "family": "SFProText-Bold"
+      },
+      {
+        "asset": "assets/fonts/SFProText-Semibold.otf",
+        "family": "SFProText-Semibold"
+      },
+      {
+        "asset": "./assets/fonts/AbhayaLibre-Regular.ttf",
+        "family": "AbhayaLibre-Regular"
+      },
+      {
+        "asset": "./assets/fonts/AbhayaLibre-Medium.ttf",
+        "family": "AbhayaLibre-Medium"
+      },
+      {
+        "asset": "./assets/fonts/AbhayaLibre-SemiBold.ttf",
+        "family": "AbhayaLibre-SemiBold"
+      },
+      {
+        "asset": "./assets/fonts/AbhayaLibre-Bold.ttf",
+        "family": "AbhayaLibre-Bold"
+      },
+      {
+        "asset": "./assets/fonts/AbhayaLibre-ExtraBold.ttf",
+        "family": "AbhayaLibre-ExtraBold"
+      }
+    ],
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
