@@ -336,6 +336,7 @@ const styles = StyleSheet.create({
   },
   optionsButton: {
     padding: 5,
+    right: 10,
   },
   commentText: {
     flex: 1,

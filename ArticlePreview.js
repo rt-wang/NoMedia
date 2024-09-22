@@ -300,6 +300,7 @@ const styles = StyleSheet.create({
   },
   optionsButton: {
     padding: 5,
+    right: 5,
   },
   optionsMenuPopover: {
     backgroundColor: '#222',
