@@ -342,12 +342,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 0,
     overflow: 'hidden',
+    height: 120,
     padding: 16,
+    marginTop: 16,
     marginBottom: 16,
   },
   notInterestedContent: {
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 16,
   },
   notInterestedTitle: {
     fontSize: 18,
