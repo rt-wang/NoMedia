@@ -122,24 +122,19 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   const renderToolbar = () => {
     if (item.type === 'comment') {
       return (
-        <View style={styles.commentContainer}>
-          <View style={styles.commentContent}>
-            {renderContent()}
-          </View>
-          <View style={styles.commentToolbar}>
-            <TouchableOpacity onPress={handleCommentPress} style={styles.toolItem}>
-              <Ionicons name="chatbubble-outline" size={18} color="gray" />
-              <Text style={styles.toolCount}>{commentCount}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleRepostPress} style={styles.toolItem} ref={repostButtonRef}>
-              <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
-              <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{post.reposts}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={handleLike} style={styles.toolItem}>
-              <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
-              <Text style={styles.toolCount}>{post.likes}</Text>
-            </TouchableOpacity>
-          </View>
+        <View style={styles.commentToolbar}>
+          <TouchableOpacity onPress={handleCommentPress} style={styles.toolItem}>
+            <Ionicons name="chatbubble-outline" size={18} color="gray" />
+            <Text style={styles.toolCount}>{commentCount}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleRepostPress} style={styles.toolItem} ref={repostButtonRef}>
+            <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
+            <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{post.reposts}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleLike} style={styles.toolItem}>
+            <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
+            <Text style={styles.toolCount}>{post.likes}</Text>
+          </TouchableOpacity>
         </View>
       );
     }
@@ -223,6 +218,8 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
 const styles = StyleSheet.create({
   container: {
     paddingVertical: 12,
+    paddingHorizontal: 4,
+    marginBottom: 4,
   },
   postHeader: {
     flexDirection: 'row',
@@ -295,24 +292,17 @@ const styles = StyleSheet.create({
     borderLeftColor: '#333',
     paddingLeft: 8,
   },
-  commentContainer: {
-    flex: 1,
-    width: '100%',
-  },
-  commentContent: {
-    marginBottom: 8,
-    width: '100%',
-  },
   commentToolbar: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
     marginTop: -8,
   },
-  commentLikeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingTop: 8,
+  commentText: {
+    flex: 1,
+    flexWrap: 'wrap',
+    marginRight: -4,
+    marginBottom: 18,
   },
   optionsMenuPopover: {
     backgroundColor: '#222',
@@ -337,11 +327,6 @@ const styles = StyleSheet.create({
   optionsButton: {
     padding: 5,
     right: 10,
-  },
-  commentText: {
-    flex: 1,
-    flexWrap: 'wrap',
-    marginRight: 16,
   },
   notInterestedContainer: {
     backgroundColor: 'rgba(26, 26, 26, 0.8)',
