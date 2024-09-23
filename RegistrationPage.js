@@ -8,11 +8,15 @@ const RegistrationPage = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleRegister = () => {
-    // Implement registration logic here
-    console.log('Register:', { username, email, password });
-    // After successful registration, navigate to the main app
-    navigation.replace('MainApp');
+  const handleCreateAccount = () => {
+    // Here you would implement the logic to send a verification email
+    // For this example, we'll just navigate to the VerificationPage
+    if (email && username && password) {
+      navigation.navigate('Verification', { email });
+    } else {
+      // You might want to show an error message if fields are empty
+      alert('Please fill in all fields');
+    }
   };
 
   return (
@@ -45,8 +49,8 @@ const RegistrationPage = ({ navigation }) => {
         secureTextEntry
         placeholderTextColor="#666"
       />
-      <TouchableOpacity style={styles.button} onPress={handleRegister}>
-        <Text style={styles.buttonText}>Register</Text>
+      <TouchableOpacity style={styles.button} onPress={handleCreateAccount}>
+        <Text style={styles.buttonText}>Create account</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
         <Text style={styles.loginText}>Already have an account?{' '}

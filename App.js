@@ -26,6 +26,7 @@ import * as Font from 'expo-font';
 import { RepostProvider } from './RepostContext';
 import LoginPage from './LoginPage';
 import FeedbackForm from './FeedbackForm';
+import VerificationPage from './VerificationPage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -55,6 +56,7 @@ const AuthStack = () => (
   <Stack.Navigator screenOptions={{ headerShown: false }}>
     <Stack.Screen name="Login" component={LoginPage} />
     <Stack.Screen name="Registration" component={RegistrationPage} />
+    <Stack.Screen name="Verification" component={VerificationPage} />
   </Stack.Navigator>
 );
 

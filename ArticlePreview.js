@@ -325,8 +325,7 @@ const styles = StyleSheet.create({
   notInterestedContainer: {
     backgroundColor: 'rgba(26, 26, 26, 0.8)',
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 182, 193, 0.2)',
+    borderWidth: 0,
     overflow: 'hidden',
     height: 200, // Maintain the same height as the original ArticlePreview
     marginTop: 16,
