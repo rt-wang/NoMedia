@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Make sure to import this
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ArticlePreview from './ArticlePreview';
 import Post from './Post';
 import { useReposts } from './RepostContext';
 import { usePosts } from './PostContext';
 import TopicsPage from './TopicsPage';
+import ProfilePromptModal from './ProfilePromptModal';
 
 const LIGHT_GREY = '#CCCCCC';
 const ACTIVE_TAB_COLOR = '#FFB6C1';
@@ -32,11 +34,27 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   const [loading, setLoading] = useState(false);
   const { reposts } = useReposts();
   const [activeTab, setActiveTab] = useState('ForYou');
+  const [showProfilePrompt, setShowProfilePrompt] = useState(false);
 
   useEffect(() => {
     if (posts.length === 0) {
       fetchPosts();
     }
+
+    const checkAndShowProfilePrompt = async () => {
+      const currentUser = await AsyncStorage.getItem('currentUser');
+      const hasShownPrompt = await AsyncStorage.getItem(`hasShownPrompt_${currentUser}`);
+      if (currentUser && hasShownPrompt !== 'true') {
+        const timer = setTimeout(() => {
+          setShowProfilePrompt(true);
+          AsyncStorage.setItem(`hasShownPrompt_${currentUser}`, 'true');
+        }, 5000); // 30 seconds delay
+
+        return () => clearTimeout(timer);
+      }
+    };
+
+    checkAndShowProfilePrompt();
   }, []);
 
   const fetchPosts = () => {
@@ -79,6 +97,11 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         threads: [{ content: item.content, pageNumber: 1 }], // Assuming single page for now
       }
     });
+  };
+
+  const handleNavigateToProfile = () => {
+    setShowProfilePrompt(false);
+    navigation.navigate('AccountPage'); // Adjust this to your actual profile page route
   };
 
   const renderItem = ({ item }) => {
@@ -124,6 +147,11 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
             <Text style={styles.feedbackText}>Give</Text>
             <Text style={styles.feedbackText}>Feedback</Text>
           </TouchableOpacity>
+          <ProfilePromptModal
+            visible={showProfilePrompt}
+            onClose={() => setShowProfilePrompt(false)}
+            onNavigateToProfile={handleNavigateToProfile}
+          />
         </>
       ) : (
         <TopicsPage navigation={navigation} />
