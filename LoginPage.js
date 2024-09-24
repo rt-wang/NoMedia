@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const LIGHT_PINK = '#FFB6C1';
 
@@ -7,11 +8,20 @@ const LoginPage = ({ navigation }) => {
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // Implement login logic here
-    console.log('Login:', { emailOrUsername, password });
-    // After successful login, navigate to the main app
-    navigation.replace('MainApp');
+  const handleLogin = async () => {
+    // This is a mock login. In a real app, you'd validate against a backend.
+    if (emailOrUsername && password) {
+      try {
+        // Store the user info
+        await AsyncStorage.setItem('currentUser', emailOrUsername);
+        // Navigate to the main app
+        navigation.replace('MainApp');
+      } catch (error) {
+        Alert.alert('Error', 'Failed to log in. Please try again.');
+      }
+    } else {
+      Alert.alert('Error', 'Please enter both email/username and password.');
+    }
   };
 
   return (

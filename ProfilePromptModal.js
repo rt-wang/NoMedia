@@ -27,6 +27,7 @@ const ProfilePromptModal = ({ visible, onClose, onNavigateToProfile }) => {
   );
 };
 
+
 const styles = StyleSheet.create({
   centeredView: {
     flex: 1,
@@ -50,6 +51,8 @@ const styles = StyleSheet.create({
   closeButton: {
     alignSelf: 'flex-end',
     padding: 5,
+    top: -12,
+    left: 6
   },
   modalText: {
     marginBottom: 20,

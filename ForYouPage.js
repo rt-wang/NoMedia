@@ -101,7 +101,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
 
   const handleNavigateToProfile = () => {
     setShowProfilePrompt(false);
-    navigation.navigate('AccountPage'); // Adjust this to your actual profile page route
+    navigation.navigate('Account', { screen: 'AccountMain' }); // Updated this line
   };
 
   const renderItem = ({ item }) => {
