@@ -1,4 +1,4 @@
-package com.example.user_service.exception;
+package com.example.common.exception;
 
 public class AppException extends RuntimeException {
     

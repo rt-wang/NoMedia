@@ -1,14 +1,14 @@
 package com.example.user_service.security;
 
+import com.example.common.security.UserDetailsInterface;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class UserPrincipal implements UserDetails {
+public class UserPrincipal implements UserDetailsInterface {
     private Long id;
     private String username;
     private String email;
@@ -25,10 +25,12 @@ public class UserPrincipal implements UserDetails {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public Long getId() {
         return id;
     }
 
+    @Override
     public String getEmail() {
         return email;
     }

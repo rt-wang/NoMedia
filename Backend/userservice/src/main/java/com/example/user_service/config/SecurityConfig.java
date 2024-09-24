@@ -1,6 +1,6 @@
 package com.example.user_service.config;
 
-import com.example.user_service.security.JwtAuthenticationFilter;
+import com.example.common.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,7 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.user_service.security.JwtTokenProvider;
+import com.example.common.security.JwtTokenProvider;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;

@@ -1,4 +1,4 @@
-package com.example.user_service.security;
+package com.example.common.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -24,13 +24,13 @@ public class JwtTokenProvider {
     private int jwtExpirationInMs;
 
     public String generateToken(Authentication authentication) {
-        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        UserDetailsInterface userDetails = (UserDetailsInterface) authentication.getPrincipal();
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
         return Jwts.builder()
-                .setSubject(Long.toString(userPrincipal.getId()))
+                .setSubject(Long.toString(userDetails.getId()))
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
                 .signWith(Keys.hmacShaKeyFor(jwtSecret.getBytes()), SignatureAlgorithm.HS512)
