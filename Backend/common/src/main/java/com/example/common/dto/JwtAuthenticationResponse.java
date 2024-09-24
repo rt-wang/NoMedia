@@ -1,4 +1,4 @@
-package com.example.user_service.dto;
+package com.example.common.dto;
 
 public class JwtAuthenticationResponse {
     private String accessToken;
