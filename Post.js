@@ -101,6 +101,10 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
     Alert.alert('Report', 'Thank you for your report. We will review this post.');
   };
 
+  const handleNamePress = () => {
+    navigation.navigate('UserAccountPage', { username: item.username });
+  };
+
   const renderContent = () => {
     if (item.type === 'quote') {
       return (
@@ -174,13 +178,15 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={handlePostPress}>
-        <View style={styles.postHeader}>
+      <View style={styles.postHeader}>
+        <TouchableOpacity onPress={handleNamePress}>
           <Text style={styles.username}>{item.username}</Text>
-          <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
-            <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
-          </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
+          <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity onPress={handlePostPress}>
         {renderContent()}
       </TouchableOpacity>
       {renderToolbar()}
@@ -224,7 +230,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 3,
+    marginBottom: -1,
   },
   username: {
     fontSize: 16,
@@ -326,6 +332,7 @@ const styles = StyleSheet.create({
   optionsButton: {
     padding: 5,
     right: 10,
+    bottom: 3,
   },
   notInterestedContainer: {
     backgroundColor: 'rgba(26, 26, 26, 0.8)',

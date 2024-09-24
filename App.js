@@ -27,6 +27,7 @@ import { RepostProvider } from './RepostContext';
 import LoginPage from './LoginPage';
 import FeedbackForm from './FeedbackForm';
 import VerificationPage from './VerificationPage';
+import UserAccountPage from './UserAccountPage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -70,15 +71,22 @@ const MainApp = () => {
   return (
     <View style={styles.content}>
       <Header />
-      <Tab.Navigator
-        screenOptions={screenOptions}
-        tabBar={props => <NavigationBar {...props} />}
-      >
-        <Tab.Screen name="Home" component={HomeStack} />
-        <Tab.Screen name="Account" component={AccountStack} />
-        <Tab.Screen name="Notifications" component={NotificationsPage} />
-        <Tab.Screen name="Create" component={CreatePage} />
-      </Tab.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Tabs">
+          {() => (
+            <Tab.Navigator
+              screenOptions={screenOptions}
+              tabBar={props => <NavigationBar {...props} />}
+            >
+              <Tab.Screen name="Home" component={HomeStack} />
+              <Tab.Screen name="Account" component={AccountStack} />
+              <Tab.Screen name="Notifications" component={NotificationsPage} />
+              <Tab.Screen name="Create" component={CreatePage} />
+            </Tab.Navigator>
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="UserAccountPage" component={UserAccountPage} />
+      </Stack.Navigator>
     </View>
   );
 };

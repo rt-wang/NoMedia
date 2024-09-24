@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Post from './Post';
 import ArticlePreview from './ArticlePreview';
 import { useReposts } from './RepostContext';
 import { usePosts } from './PostContext';
-import EditProfileModal from './EditProfileModal';
 import { useNavigation } from '@react-navigation/native';
 
 const CONTENT_INDENT = '  '; // Two spaces for indentation
@@ -32,17 +30,6 @@ const PersonalInfo = ({ name, username, bio, following, followers, location }) =
         <Text style={styles.followCount}>{followers}</Text> Followers
       </Text>
     </View>
-  </View>
-);
-
-const ActionButtons = ({ onEditProfile, onDraftsPress }) => (
-  <View style={styles.actionButtons}>
-    <TouchableOpacity style={styles.button} onPress={onEditProfile}>
-      <Text style={styles.buttonText}>Edit Profile</Text>
-    </TouchableOpacity>
-    <TouchableOpacity style={styles.button} onPress={onDraftsPress}>
-      <Text style={styles.buttonText}>Drafts</Text>
-    </TouchableOpacity>
   </View>
 );
 
@@ -76,46 +63,36 @@ const ReplyContainer = ({ item, reply }) => {
   );
 };
 
-const AccountPage = ({ navigation }) => {
+const UserAccountPage = ({ route }) => {
+  const { username } = route.params;
   const [activeTab, setActiveTab] = useState('Posts');
   const [content, setContent] = useState([]);
   const { reposts } = useReposts();
-  const { userPosts, currentUser } = usePosts();
-  const [isEditProfileModalVisible, setIsEditProfileModalVisible] = useState(false);
+  const { posts } = usePosts();
+  const navigation = useNavigation();
+
   const [profile, setProfile] = useState({
-    name: 'John Doe', // Default name
-    username: '',
+    name: 'User Name',
+    username: username,
     bio: 'This is a brief self-introduction that is under 150 characters. It showcases the user\'s personality and interests.',
     following: 500,
     followers: 1000,
-    location: '',
+    location: 'City, Country',
   });
 
   useEffect(() => {
-    const fetchUsername = async () => {
-      const username = await AsyncStorage.getItem('currentUser');
-      if (username) {
-        setProfile(prevProfile => ({ ...prevProfile, username }));
-      }
-    };
-
-    fetchUsername();
-  }, []);
-
-  useEffect(() => {
     fetchContent();
-  }, [activeTab, reposts, userPosts, currentUser.handle]);
+  }, [activeTab, reposts, posts, username]);
 
   const fetchContent = () => {
     let newContent = [];
     if (activeTab === 'Posts') {
-      // Combine user posts and reposts
-      const userReposts = reposts.filter(repost => repost.userId === currentUser.handle);
-      newContent = [...userPosts, ...userReposts].sort((a, b) => b.timestamp - a.timestamp);
+      // Leave this empty to display nothing for the Posts tab
+      newContent = [];
     } else if (activeTab === 'Replies') {
       // Simulating replies data
       newContent = [
-        { id: '3', username: 'John Doe', handle: 'johndoe', content: 'A reply', timestamp: Date.now(), reply: { username: 'Jane', handle: 'jane', content: 'Original post' } },
+        { id: '3', username: username, handle: username, content: 'A reply', timestamp: Date.now(), reply: { username: 'Jane', handle: 'jane', content: 'Original post' } },
       ];
     } else if (activeTab === 'Likes') {
       // Simulating liked posts
@@ -134,7 +111,7 @@ const AccountPage = ({ navigation }) => {
       return (
         <View style={styles.repostContainer}>
           <Text style={styles.repostIndicator}>
-            <Ionicons name="repeat" size={14} color="#FFB6C1" /> You Reposted
+            <Ionicons name="repeat" size={14} color="#FFB6C1" /> Reposted
           </Text>
           <Post item={item.originalPost} />
         </View>
@@ -153,18 +130,6 @@ const AccountPage = ({ navigation }) => {
     return item.type === 'article' ? <ArticlePreview item={item} /> : <Post item={item} />;
   };
 
-  const handleEditProfile = () => {
-    setIsEditProfileModalVisible(true);
-  };
-
-  const handleSaveProfile = (updatedProfile) => {
-    setProfile({ ...profile, ...updatedProfile });
-  };
-
-  const handleDraftsPress = () => {
-    navigation.navigate('Drafts');
-  };
-
   return (
     <View style={styles.container}>
       <ScrollView stickyHeaderIndices={[1]}>
@@ -177,15 +142,8 @@ const AccountPage = ({ navigation }) => {
             followers={profile.followers}
             location={profile.location}
           />
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('Settings')} 
-            style={styles.settingsButton}
-          >
-            <Ionicons name="settings-outline" size={22} color="#687684" />
-          </TouchableOpacity>
         </View>
         <View style={styles.stickyHeader}>
-          <ActionButtons onEditProfile={handleEditProfile} onDraftsPress={handleDraftsPress} />
           <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         </View>
         <FlatList
@@ -195,12 +153,6 @@ const AccountPage = ({ navigation }) => {
           scrollEnabled={false}
         />
       </ScrollView>
-      <EditProfileModal
-        isVisible={isEditProfileModalVisible}
-        onClose={() => setIsEditProfileModalVisible(false)}
-        onSave={handleSaveProfile}
-        initialProfile={profile}
-      />
     </View>
   );
 };
@@ -215,10 +167,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     paddingRight: 16,
-  },
-  settingsButton: {
-    padding: 10,
-    marginTop: 14, // Adjusted to align with the username
   },
   personalInfo: {
     flex: 1,
@@ -267,31 +215,12 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   followCount: {
-    fontFamily: 'SFProText-Semibold', // Use the semibold font
-    color: '#fff', // This makes the number white
+    fontFamily: 'SFProText-Semibold',
+    color: '#fff',
   },
   stickyHeader: {
     backgroundColor: '#000',
     paddingTop: 8,
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
-    paddingHorizontal: 16, // Add horizontal padding
-  },
-  button: {
-    backgroundColor: '#333',
-    paddingVertical: 6, // Increased vertical padding
-    paddingHorizontal: 0, // Remove horizontal padding
-    borderRadius: 10,
-    width: '48%', // Set width to 48% of container width
-    alignItems: 'center', // Center content horizontally
-  },
-  buttonText: {
-    fontFamily: 'SFProText-Semibold',
-    color: '#fff',
-    fontSize: 14, // Slightly increased font size
   },
   contentTabs: {
     flexDirection: 'row',
@@ -348,4 +277,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AccountPage;
+export default UserAccountPage;

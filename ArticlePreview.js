@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert, Dimensions, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Popover from 'react-native-popover-view';
 import { useNavigation } from '@react-navigation/native';
@@ -90,6 +90,10 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress }) => {
     onArticlePress(post);
   };
 
+  const handleNamePress = () => {
+    navigation.navigate('UserAccountPage', { username: item.username });
+  };
+
   if (isNotInterested) {
     return (
       <View style={[styles.container, styles.notInterestedContainer]}>
@@ -109,7 +113,9 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress }) => {
         <View style={styles.postHeader}>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>{post.title}</Text>
-            <Text style={styles.username}>{post.username}</Text>
+            <TouchableOpacity onPress={handleNamePress}>
+              <Text style={styles.username}>{post.username}</Text>
+            </TouchableOpacity>
           </View>
           <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
             <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
@@ -195,7 +201,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   titleContainer: {
     flex: 1,
@@ -206,13 +212,13 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 2,
+    marginBottom: 6,
   },
   username: {
     fontFamily: 'SFProText-Regular',
     fontSize: 16,
     color: '#fff',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   previewBoxContainer: {
     marginTop: 8,
