@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
+const { width } = Dimensions.get('window');
 
 const ProfilePromptModal = ({ visible, onClose, onNavigateToProfile }) => {
   return (
@@ -13,7 +15,7 @@ const ProfilePromptModal = ({ visible, onClose, onNavigateToProfile }) => {
       <View style={styles.centeredView}>
         <View style={styles.modalView}>
           <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-            <Ionicons name="close" size={20} color="#888" />
+            <Ionicons name="close" size={24} color="#888" />
           </TouchableOpacity>
           <Text style={styles.modalText}>Add a bio to your profile</Text>
           <TouchableOpacity style={styles.button} onPress={onNavigateToProfile}>
@@ -30,42 +32,45 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   modalView: {
-    backgroundColor: '#1A1A1A',
-    borderRadius: 10,
-    padding: 20,
+    backgroundColor: 'rgba(28, 28, 30, 0.95)',
+    borderRadius: 20,
+    padding: 25,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
     elevation: 5,
-    width: '80%',
+    width: width * 0.85,
+    maxWidth: 400,
   },
   closeButton: {
     alignSelf: 'flex-end',
     padding: 5,
   },
   modalText: {
-    marginBottom: 15,
+    marginBottom: 20,
     textAlign: 'center',
-    fontSize: 16,
+    fontSize: 18,
     color: '#fff',
-    fontFamily: 'SFProText-Regular',
+    fontFamily: 'SFProText-Semibold',
+    letterSpacing: 0.5,
   },
   button: {
-    backgroundColor: '#333',
-    borderRadius: 5,
-    padding: 10,
+    backgroundColor: '#FAF9F6', // Changed to match login/registration button color
+    borderRadius: 25,
+    paddingVertical: 12,
+    paddingHorizontal: 30,
     marginTop: 10,
   },
   buttonText: {
-    color: '#fff',
+    color: "#000", // Changed to match login/registration button text color
     textAlign: 'center',
-    fontSize: 14,
-    fontFamily: 'SFProText-Regular',
+    fontSize: 18,
+    fontFamily: 'AbhayaLibre-Regular',
   },
 });
 

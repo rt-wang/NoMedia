@@ -219,7 +219,6 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 12,
     paddingHorizontal: 4,
-    marginBottom: 4,
   },
   postHeader: {
     flexDirection: 'row',
