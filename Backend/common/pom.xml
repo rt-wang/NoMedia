@@ -29,6 +29,10 @@
             <!-- No version needed -->
             <!-- Exclusions are generally not needed unless conflicting dependencies are present -->
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
 
         <!-- JSON Web Token (JWT) Dependencies -->
         <dependency>
@@ -87,17 +91,12 @@
         </dependency>
     </dependencies>
 
+    <properties>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+    </properties>
+
     <build>
-        <!-- Inherit build plugins from parent -->
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <classifier>exe</classifier>
-                </configuration>
-            </plugin>
-        </plugins>
+        <!-- Remove or comment out the spring-boot-maven-plugin -->
     </build>
 
 </project>
