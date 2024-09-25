@@ -54,30 +54,31 @@ public class UserController {
         }
     }
 
-    @GetMapping("/me")
-    public ResponseEntity<?> getUserProfile() {
-        logger.info("Received request to /api/users/me");
+    @GetMapping("/{username}")
+    public ResponseEntity<?> getUserProfile(@PathVariable String username) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        logger.info("Authentication object: {}", authentication);
+        logger.debug("Authentication object: {}", authentication);
         if (authentication == null || !authentication.isAuthenticated()) {
-            logger.warn("User not authenticated");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
-        String username = authentication.getName();
-        logger.info("Authenticated username: {}", username);
+        String authenticatedUsername = authentication.getName();
+        if (!authenticatedUsername.equals(username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        }
         User user = userService.getUserByUsername(username);
-        logger.info("Retrieved user: {}", user);
-
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/me")
-    public ResponseEntity<?> updateUserProfile(@RequestBody User user) {
+    @PutMapping("/{username}")
+    public ResponseEntity<?> updateUserProfile(@PathVariable String username, @RequestBody User user) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
-        String username = authentication.getName();
+        String authenticatedUsername = authentication.getName();
+        if (!authenticatedUsername.equals(username)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        }
         User updatedUser = userService.updateUser(username, user);
         return ResponseEntity.ok(updatedUser);
     }
