@@ -7,7 +7,6 @@ const MAX_BIO_LENGTH = 200;
 const EditProfileModal = ({ isVisible, onClose, onSave, initialProfile }) => {
   const [name, setName] = useState(initialProfile.name || '');
   const [bio, setBio] = useState(initialProfile.bio || '');
-  const [location, setLocation] = useState(initialProfile.location || '');
 
   const handleBioChange = (text) => {
     if (text.length <= MAX_BIO_LENGTH) {
@@ -16,7 +15,7 @@ const EditProfileModal = ({ isVisible, onClose, onSave, initialProfile }) => {
   };
 
   const handleSave = () => {
-    onSave({ name, bio, location });
+    onSave({ name, bio });
     onClose();
   };
 
@@ -63,16 +62,6 @@ const EditProfileModal = ({ isVisible, onClose, onSave, initialProfile }) => {
                 placeholderTextColor="#666"
                 multiline
                 maxLength={MAX_BIO_LENGTH}
-              />
-            </View>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Location</Text>
-              <TextInput
-                style={styles.input}
-                value={location}
-                onChangeText={setLocation}
-                placeholder="Add your location"
-                placeholderTextColor="#666"
               />
             </View>
           </ScrollView>

@@ -1,25 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { View, Text, StyleSheet } from 'react-native';
 
 const Header = () => {
-  const navigation = useNavigation();
-  const route = useRoute();
-
-  const showBackButton = ['UserAccountPage', 'CommentSection'].includes(route.name);
-
   return (
     <View style={styles.header}>
-      {showBackButton && (
-        <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="arrow-back" size={24} color="#fff" />
-        </TouchableOpacity>
-      )}
-      <Text style={[styles.headerText, !showBackButton && styles.headerTextCentered]}>NoMedia.</Text>
+      <Text style={styles.headerText}>NoMedia.</Text>
     </View>
   );
 };
@@ -29,6 +14,7 @@ const styles = StyleSheet.create({
     height: 44,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#000',
     paddingHorizontal: 16,
   },
@@ -37,13 +23,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
-    flex: 1,
-  },
-  headerTextCentered: {
-    textAlign: 'center',
-  },
-  backButton: {
-    marginRight: 16,
   },
 });
 

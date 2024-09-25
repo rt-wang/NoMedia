@@ -9,19 +9,11 @@ import { useNavigation } from '@react-navigation/native';
 
 const CONTENT_INDENT = '  '; // Two spaces for indentation
 
-const PersonalInfo = ({ name, username, bio, following, followers, location }) => (
+const PersonalInfo = ({ name, username, bio, following, followers }) => (
   <View style={styles.personalInfo}>
     <Text style={styles.name}>{name}</Text>
     <Text style={styles.username}>{username}</Text>
     <Text style={styles.bio}>{bio}</Text>
-    <View style={styles.locationContainer}>
-      {location && (
-        <View style={styles.locationItem}>
-          <Ionicons name="location-outline" size={16} color="#687684" />
-          <Text style={styles.locationText}>{location}</Text>
-        </View>
-      )}
-    </View>
     <View style={styles.followInfo}>
       <Text style={styles.followText}>
         <Text style={styles.followCount}>{following}</Text> Following
@@ -30,6 +22,17 @@ const PersonalInfo = ({ name, username, bio, following, followers, location }) =
         <Text style={styles.followCount}>{followers}</Text> Followers
       </Text>
     </View>
+  </View>
+);
+
+const ActionButtons = ({ onFollowPress, onMessagePress }) => (
+  <View style={styles.actionButtons}>
+    <TouchableOpacity style={styles.button} onPress={onFollowPress}>
+      <Text style={styles.buttonText}>Follow</Text>
+    </TouchableOpacity>
+    <TouchableOpacity style={styles.button} onPress={onMessagePress}>
+      <Text style={styles.buttonText}>Message</Text>
+    </TouchableOpacity>
   </View>
 );
 
@@ -77,7 +80,6 @@ const UserAccountPage = ({ route }) => {
     bio: 'This is a brief self-introduction that is under 150 characters. It showcases the user\'s personality and interests.',
     following: 500,
     followers: 1000,
-    location: 'City, Country',
   });
 
   useEffect(() => {
@@ -101,6 +103,16 @@ const UserAccountPage = ({ route }) => {
       ];
     }
     setContent(newContent);
+  };
+
+  const handleFollowPress = () => {
+    // Implement follow functionality
+    console.log('Follow button pressed');
+  };
+
+  const handleMessagePress = () => {
+    // Implement message functionality
+    console.log('Message button pressed');
   };
 
   const renderItem = ({ item }) => {
@@ -140,10 +152,10 @@ const UserAccountPage = ({ route }) => {
             bio={profile.bio}
             following={profile.following}
             followers={profile.followers}
-            location={profile.location}
           />
         </View>
         <View style={styles.stickyHeader}>
+          <ActionButtons onFollowPress={handleFollowPress} onMessagePress={handleMessagePress} />
           <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} />
         </View>
         <FlatList
@@ -188,21 +200,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     marginTop: 8,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    marginTop: 8,
-  },
-  locationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  locationText: {
-    fontFamily: 'SFProText-Regular',
-    fontSize: 14,
-    color: '#687684',
-    marginLeft: 4,
+    marginBottom: 8,
   },
   followInfo: {
     flexDirection: 'row',
@@ -220,7 +218,7 @@ const styles = StyleSheet.create({
   },
   stickyHeader: {
     backgroundColor: '#000',
-    paddingTop: 8,
+    paddingTop: 6,
   },
   contentTabs: {
     flexDirection: 'row',
@@ -274,6 +272,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 4, // Reduced from 8 to 4
     top: 12,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    paddingHorizontal: 16,
+  },
+  button: {
+    backgroundColor: '#333',
+    paddingVertical: 6,
+    paddingHorizontal: 0,
+    borderRadius: 10,
+    width: '48%',
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontFamily: 'SFProText-Semibold',
+    color: '#fff',
+    fontSize: 14,
   },
 });
 
