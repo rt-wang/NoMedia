@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; // Make sure to import this
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ArticlePreview from './ArticlePreview';
 import Post from './Post';
 import { useReposts } from './RepostContext';
 import { usePosts } from './PostContext';
 import TopicsPage from './TopicsPage';
+import ProfilePromptModal from './ProfilePromptModal';
 
 const LIGHT_GREY = '#CCCCCC';
 const ACTIVE_TAB_COLOR = '#FFB6C1';
@@ -31,11 +34,27 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   const [loading, setLoading] = useState(false);
   const { reposts } = useReposts();
   const [activeTab, setActiveTab] = useState('ForYou');
+  const [showProfilePrompt, setShowProfilePrompt] = useState(false);
 
   useEffect(() => {
     if (posts.length === 0) {
       fetchPosts();
     }
+
+    const checkAndShowProfilePrompt = async () => {
+      const currentUser = await AsyncStorage.getItem('currentUser');
+      const hasShownPrompt = await AsyncStorage.getItem(`hasShownPrompt_${currentUser}`);
+      if (currentUser && hasShownPrompt !== 'true') {
+        const timer = setTimeout(() => {
+          setShowProfilePrompt(true);
+          AsyncStorage.setItem(`hasShownPrompt_${currentUser}`, 'true');
+        }, 5000); // 30 seconds delay
+
+        return () => clearTimeout(timer);
+      }
+    };
+
+    checkAndShowProfilePrompt();
   }, []);
 
   const fetchPosts = () => {
@@ -80,6 +99,11 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     });
   };
 
+  const handleNavigateToProfile = () => {
+    setShowProfilePrompt(false);
+    navigation.navigate('Account', { screen: 'AccountMain' }); // Updated this line
+  };
+
   const renderItem = ({ item }) => {
     const isReposted = reposts.some(repost => repost.originalPost.id === item.id);
     if (item.type === 'article') {
@@ -106,15 +130,29 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     <View style={styles.container}>
       <TabNavigator activeTab={activeTab} setActiveTab={setActiveTab} />
       {activeTab === 'ForYou' ? (
-        <FlatList
-          data={posts.filter(post => !post.isUserPost)} // Only display non-user posts
-          renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
-          onEndReached={fetchPosts}
-          onEndReachedThreshold={0.1}
-          ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
-          contentContainerStyle={styles.scrollContent}
-        />
+        <>
+          <FlatList
+            data={posts.filter(post => !post.isUserPost)} // Only display non-user posts
+            renderItem={renderItem}
+            keyExtractor={item => item.id.toString()}
+            onEndReached={fetchPosts}
+            onEndReachedThreshold={0.1}
+            ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
+            contentContainerStyle={styles.scrollContent}
+          />
+          <TouchableOpacity
+            style={styles.feedbackButton}
+            onPress={() => navigation.navigate('FeedbackForm')}
+          >
+            <Text style={styles.feedbackText}>Give</Text>
+            <Text style={styles.feedbackText}>Feedback</Text>
+          </TouchableOpacity>
+          <ProfilePromptModal
+            visible={showProfilePrompt}
+            onClose={() => setShowProfilePrompt(false)}
+            onNavigateToProfile={handleNavigateToProfile}
+          />
+        </>
       ) : (
         <TopicsPage navigation={navigation} />
       )}
@@ -157,6 +195,26 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: '#fff',
     fontWeight: 'bold',
+  },
+  feedbackButton: {
+    position: 'absolute',
+    right: 20,
+    bottom: 20,
+    backgroundColor: 'rgba(26, 26, 26, 0.8)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 182, 193, 0.3)',
+  },
+  feedbackText: {
+    color: '#fff',
+    fontSize: 14, // Reduced by approximately 70% from 14
+    fontWeight: '400',
+    fontFamily: 'SFProText-Regular',
+    textAlign: 'center',
   },
 });
 

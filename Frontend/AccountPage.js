@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Post from './Post';
 import ArticlePreview from './ArticlePreview';
 import { useReposts } from './RepostContext';
@@ -10,10 +11,10 @@ import { useNavigation } from '@react-navigation/native';
 
 const CONTENT_INDENT = '  '; // Two spaces for indentation
 
-const PersonalInfo = ({ username, handle, bio, following, followers, location }) => (
+const PersonalInfo = ({ name, username, bio, following, followers, location }) => (
   <View style={styles.personalInfo}>
+    <Text style={styles.name}>{name}</Text>
     <Text style={styles.username}>{username}</Text>
-    <Text style={styles.handle}>@{handle}</Text>
     <Text style={styles.bio}>{bio}</Text>
     <View style={styles.locationContainer}>
       {location && (
@@ -79,16 +80,27 @@ const AccountPage = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('Posts');
   const [content, setContent] = useState([]);
   const { reposts } = useReposts();
-  const { userPosts, currentUser } = usePosts(); // Get currentUser from PostContext
+  const { userPosts, currentUser } = usePosts();
   const [isEditProfileModalVisible, setIsEditProfileModalVisible] = useState(false);
   const [profile, setProfile] = useState({
-    name: 'John Doe',
-    handle: 'johndoe',
+    name: 'John Doe', // Default name
+    username: '',
     bio: 'This is a brief self-introduction that is under 150 characters. It showcases the user\'s personality and interests.',
     following: 500,
     followers: 1000,
     location: '',
   });
+
+  useEffect(() => {
+    const fetchUsername = async () => {
+      const username = await AsyncStorage.getItem('currentUser');
+      if (username) {
+        setProfile(prevProfile => ({ ...prevProfile, username }));
+      }
+    };
+
+    fetchUsername();
+  }, []);
 
   useEffect(() => {
     fetchContent();
@@ -158,8 +170,8 @@ const AccountPage = ({ navigation }) => {
       <ScrollView stickyHeaderIndices={[1]}>
         <View style={styles.headerContainer}>
           <PersonalInfo
-            username={profile.name}
-            handle={profile.handle}
+            name={profile.name}
+            username={profile.username}
             bio={profile.bio}
             following={profile.following}
             followers={profile.followers}
@@ -212,12 +224,13 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  username: {
+  name: {
     fontFamily: 'SFProText-Bold',
     fontSize: 24,
     color: '#fff',
+    marginBottom: 5,
   },
-  handle: {
+  username: {
     fontFamily: 'SFProText-Regular',
     fontSize: 16,
     color: '#687684',
