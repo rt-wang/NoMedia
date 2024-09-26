@@ -36,7 +36,7 @@ const Thread = ({ content, pageNumber, totalPages, title, username, likes, comme
           <Ionicons name="heart-outline" size={30} color="#fff" />
           <Text style={styles.toolText}>{likes}</Text>
         </TouchableOpacity>
-        <View style={styles.toolItem}>
+        <View style={[styles.toolItem, styles.commentsButton]}>
           <Ionicons name="chatbubble-outline" size={30} color="#fff" />
           <Text style={styles.toolText}>{comments}</Text>
         </View>
@@ -64,15 +64,18 @@ const Threads = () => {
   const firstThread = item.threads && item.threads.length > 0 ? item.threads[0] : { 
     content: DEFAULT_CONTENT[0], 
     pageNumber: 1,
-    likes: 0,
-    comments: 0,
-    reposts: 0,
+    likes: item.likes || 0,
+    comments: item.comments?.length || 0,  // Use the length of comments array if available
+    reposts: item.reposts || 0,
   };
 
   const [threads, setThreads] = useState(
     Array(5).fill(firstThread).map((thread, index) => ({
       ...thread,
       pageNumber: index + 1,
+      likes: item.likes || 0,
+      comments: item.comments?.length || 0,  // Use the length of comments array if available
+      reposts: item.reposts || 0,
     }))
   );
 
@@ -226,6 +229,9 @@ const styles = StyleSheet.create({
   },
   moreButton: {
     marginRight: 2,
+  },
+  commentsButton: {
+    marginRight: -1.5,
   },
 });
 
