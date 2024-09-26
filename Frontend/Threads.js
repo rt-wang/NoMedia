@@ -56,7 +56,7 @@ const Thread = ({ content, pageNumber, totalPages, title, username, likes, comme
           <Text style={[styles.toolText, isReposted && styles.repostedText]}>{reposts}</Text>
         </TouchableOpacity>
         <View style={[styles.toolItem, styles.moreButton]}>
-          <Ionicons name="ellipsis-horizontal" size={20} color="gray" />
+          <Ionicons name="ellipsis-horizontal" size={24} color="gray" />
         </View>
       </View>
     </View>
@@ -239,9 +239,10 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 14,
     marginTop: 5,
+    textAlign: 'center',
   },
   moreButton: {
-    marginRight: 2,
+    marginRight: 1,
   },
   commentsButton: {
     marginRight: -1.5,
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   repostButton: {
-    marginRight: -2,
+    marginRight: -1,
   },
 });
 
