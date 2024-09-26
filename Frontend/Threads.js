@@ -14,7 +14,10 @@ const DEFAULT_CONTENT = [
   "And finally, the third page of our default content. Thanks for reading! Once again, we've stretched this to around 250 characters. This final page gives you a sense of how the end of a thread might look. It's also useful for testing any 'end of content' behavior you might have implemented, such as navigating to a 'Read Next' screen or showing a completion message.",
 ];
 
-const Thread = ({ content, pageNumber, totalPages, title, username, likes, comments, reposts, onLike, onRepost }) => {
+const Thread = ({ content, pageNumber, totalPages, title, username, likes, comments, reposts, onLike, onRepost, isLiked, isReposted }) => {
+  const LIGHT_GREY = '#CCCCCC';
+  const REPOST_PINK = '#FFB6C1';
+
   return (
     <View style={styles.threadContainer}>
       <View style={styles.headerContainer}>
@@ -33,19 +36,27 @@ const Thread = ({ content, pageNumber, totalPages, title, username, likes, comme
       </ScrollView>
       <View style={styles.toolbox}>
         <TouchableOpacity style={styles.toolItem} onPress={onLike}>
-          <Ionicons name="heart-outline" size={30} color="#fff" />
-          <Text style={styles.toolText}>{likes}</Text>
+          <Ionicons 
+            name={isLiked ? "heart" : "heart-outline"} 
+            size={30} 
+            color={isLiked ? "white" : "gray"} 
+          />
+          <Text style={[styles.toolText, isLiked && styles.likedText]}>{likes}</Text>
         </TouchableOpacity>
         <View style={[styles.toolItem, styles.commentsButton]}>
-          <Ionicons name="chatbubble-outline" size={30} color="#fff" />
+          <Ionicons name="chatbubble-outline" size={30} color="gray" />
           <Text style={styles.toolText}>{comments}</Text>
         </View>
-        <TouchableOpacity style={styles.toolItem} onPress={onRepost}>
-          <Ionicons name="repeat-outline" size={30} color="#fff" />
-          <Text style={styles.toolText}>{reposts}</Text>
+        <TouchableOpacity style={[styles.toolItem, styles.repostButton]} onPress={onRepost}>
+          <Ionicons 
+            name="repeat" 
+            size={30} 
+            color={isReposted ? REPOST_PINK : "gray"} 
+          />
+          <Text style={[styles.toolText, isReposted && styles.repostedText]}>{reposts}</Text>
         </TouchableOpacity>
         <View style={[styles.toolItem, styles.moreButton]}>
-          <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
+          <Ionicons name="ellipsis-horizontal" size={20} color="gray" />
         </View>
       </View>
     </View>
@@ -130,6 +141,8 @@ const Threads = () => {
             reposts={item.reposts}
             onLike={handleLike}
             onRepost={handleRepost}
+            isLiked={posts.find(p => p.id === item.id)?.isLiked}
+            isReposted={posts.find(p => p.id === item.id)?.isReposted}
           />
         )}
         pagingEnabled
@@ -232,6 +245,17 @@ const styles = StyleSheet.create({
   },
   commentsButton: {
     marginRight: -1.5,
+  },
+  likedText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  repostedText: {
+    color: '#FFB6C1',
+    fontWeight: 'bold',
+  },
+  repostButton: {
+    marginRight: -2,
   },
 });
 
