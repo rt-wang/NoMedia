@@ -111,8 +111,8 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   forgotPasswordText: {
-    color: '#888888',
-    fontSize: 13,
+    color: '#FFFFFF',
+    fontSize: 14,
     fontWeight: '400',
     fontFamily: 'AbhayaLibre-Regular',
     alignSelf: 'flex-start',
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     marginTop: -18,
     marginLeft: 0,
     width: '100%',
-    left: 120,
+    left: 117,
   },
 });
 

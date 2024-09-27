@@ -28,6 +28,7 @@ import LoginPage from './LoginPage';
 import FeedbackForm from './FeedbackForm';
 import VerificationPage from './VerificationPage';
 import UserAccountPage from './UserAccountPage';
+import ForgotPasswordPage from './ForgotPasswordPage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -58,6 +59,7 @@ const AuthStack = () => (
     <Stack.Screen name="Login" component={LoginPage} />
     <Stack.Screen name="Registration" component={RegistrationPage} />
     <Stack.Screen name="Verification" component={VerificationPage} />
+    <Stack.Screen name="ForgotPassword" component={ForgotPasswordPage} />
   </Stack.Navigator>
 );
 
