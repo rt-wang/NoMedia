@@ -89,24 +89,16 @@ const ForgotPasswordPage = ({ navigation }) => {
         autoCorrect={false}
         placeholderTextColor="#666"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Verification Code"
-        value={verificationCode}
-        onChangeText={setVerificationCode}
-        keyboardType="numeric"
-        placeholderTextColor="#666"
-      />
-      {step === 1 && (
-        <TouchableOpacity style={styles.button} onPress={handleSendCode}>
-          <Text style={styles.buttonText}>Send Code</Text>
-        </TouchableOpacity>
-      )}
-      {step === 2 && (
-        <>
-          <TouchableOpacity style={styles.button} onPress={handleVerifyCode}>
-            <Text style={styles.buttonText}>Verify Code</Text>
-          </TouchableOpacity>
+      {step >= 2 && (
+        <View style={styles.verificationContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Verification Code"
+            value={verificationCode}
+            onChangeText={setVerificationCode}
+            keyboardType="numeric"
+            placeholderTextColor="#666"
+          />
           {countdown > 0 ? (
             <Text style={styles.countdownText}>Resend code in {countdown}s</Text>
           ) : (
@@ -114,7 +106,17 @@ const ForgotPasswordPage = ({ navigation }) => {
               <Text style={styles.resendText}>Resend Code</Text>
             </TouchableOpacity>
           )}
-        </>
+        </View>
+      )}
+      {step === 1 && (
+        <TouchableOpacity style={styles.button} onPress={handleSendCode}>
+          <Text style={styles.buttonText}>Send Code</Text>
+        </TouchableOpacity>
+      )}
+      {step === 2 && (
+        <TouchableOpacity style={styles.button} onPress={handleVerifyCode}>
+          <Text style={styles.buttonText}>Verify Code</Text>
+        </TouchableOpacity>
       )}
       {step === 3 && (
         <>
@@ -172,6 +174,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#111111',
     fontSize: 16,
   },
+  verificationContainer: {
+    width: '100%',
+    marginBottom: 25,
+  },
   button: {
     backgroundColor: '#FAF9F6',
     padding: 15,
@@ -189,14 +195,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 14,
     fontFamily: 'AbhayaLibre-Regular',
-    marginBottom: 15,
+    alignSelf: 'flex-end',
+    marginTop: -20,
+    marginRight: 5,
   },
   resendText: {
     color: LIGHT_PINK,
     fontSize: 14,
     fontFamily: 'AbhayaLibre-Regular',
     textDecorationLine: 'underline',
-    marginBottom: 15,
+    alignSelf: 'flex-end',
+    marginTop: -20,
+    marginRight: 5,
   },
   backButton: {
     marginTop: 10,
