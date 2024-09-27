@@ -23,11 +23,13 @@ const EditProfileModal = ({ isVisible, onClose, onSave, initialProfile }) => {
       const authorities = await AsyncStorage.getItem('authorities');
 
       const response = await axios.put(
-        `http://localhost:8080/api/users/${userId}`, // Update this line
-        { name, bio, location },
-        { headers: {Authorization: `Bearer ${token}`,
+        `http://localhost:8080/api/users/${userId}`,
+        { name, bio },
+        { headers: {
+          Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
-          'X-Authorities': authorities} }
+          'X-Authorities': authorities
+        }}
       );
 
       if (response.status === 200) {

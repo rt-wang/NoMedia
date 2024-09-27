@@ -15,19 +15,11 @@ const API_BASE_URL = `http://localhost:8080`;
 
 
 
-const PersonalInfo = ({ name, username, bio, following, followers, location }) => (
+const PersonalInfo = ({ name, username, bio, following, followers }) => (
   <View style={styles.personalInfo}>
     <Text style={styles.name}>{name}</Text>
     <Text style={styles.username}>{username}</Text>
     <Text style={styles.bio}>{bio}</Text>
-    <View style={styles.locationContainer}>
-      {location && (
-        <View style={styles.locationItem}>
-          <Ionicons name="location-outline" size={16} color="#687684" />
-          <Text style={styles.locationText}>{location}</Text>
-        </View>
-      )}
-    </View>
     <View style={styles.followInfo}>
       <Text style={styles.followText}>
         <Text style={styles.followCount}>{following}</Text> Following
@@ -92,7 +84,6 @@ const AccountPage = ({ navigation }) => {
     bio: '',
     following: 0,
     followers: 0,
-    location: '',
   });
 
   useEffect(() => {
@@ -132,7 +123,6 @@ const AccountPage = ({ navigation }) => {
           bio: userData.bio || '',
           following: userData.following || 0,
           followers: userData.followers || 0,
-          location: userData.location || '',
           authorities: JSON.parse(authorities)
         });
       }
@@ -224,7 +214,6 @@ const AccountPage = ({ navigation }) => {
             bio={userInfo.bio}
             following={userInfo.following}
             followers={userInfo.followers}
-            location={userInfo.location}
           />
           <TouchableOpacity 
             onPress={() => navigation.navigate('Settings')} 
@@ -289,21 +278,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
     marginTop: 8,
-  },
-  locationContainer: {
-    flexDirection: 'row',
-    marginTop: 8,
-  },
-  locationItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  locationText: {
-    fontFamily: 'SFProText-Regular',
-    fontSize: 14,
-    color: '#687684',
-    marginLeft: 4,
   },
   followInfo: {
     flexDirection: 'row',
