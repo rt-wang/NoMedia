@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Dimensions, SafeAreaView, Platform, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState, useRef, useCallback } from 'react';
+import { View, Text, StyleSheet, FlatList, Dimensions, SafeAreaView, Platform, ScrollView, TouchableOpacity, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { usePosts } from './PostContext';
@@ -63,20 +63,22 @@ const Thread = ({ content, pageNumber, totalPages, title, username, likes, comme
   );
 };
 
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
+
 const Threads = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { item = {} } = route.params || {};
   const flatListRef = useRef(null);
+  const scrollY = useRef(new Animated.Value(0)).current;
   const [currentPage, setCurrentPage] = useState(0);
-  const { posts, toggleLike, toggleRepost } = usePosts();
+  const { posts, toggleLike, toggleRepost, currentUser } = usePosts();
 
-  // Create 5 identical pages based on the first thread or default content
   const firstThread = item.threads && item.threads.length > 0 ? item.threads[0] : { 
     content: DEFAULT_CONTENT[0], 
     pageNumber: 1,
     likes: item.likes || 0,
-    comments: item.comments?.length || 0,  // Use the length of comments array if available
+    comments: item.comments?.length || 0,
     reposts: item.reposts || 0,
   };
 
@@ -85,82 +87,117 @@ const Threads = () => {
       ...thread,
       pageNumber: index + 1,
       likes: item.likes || 0,
-      comments: item.comments?.length || 0,  // Use the length of comments array if available
+      comments: item.comments?.length || 0,
       reposts: item.reposts || 0,
     }))
   );
 
-  const handleViewableItemsChanged = ({ viewableItems }) => {
+  const handleViewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length > 0) {
       setCurrentPage(viewableItems[0].index);
     }
-  };
+  }, []);
 
-  const handleMomentumScrollEnd = (event) => {
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { useNativeDriver: true }
+  );
+
+  const handleMomentumScrollEnd = useCallback((event) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     const page = Math.round(offsetY / height);
+    if (page !== currentPage) {
+      flatListRef.current.scrollToOffset({ offset: page * height, animated: true });
+    }
     if (page >= threads.length) {
       navigation.navigate('ReadNext', { article: item });
     }
-  };
+  }, [currentPage, navigation, threads.length, item]);
 
-  const handleLike = () => {
+  const handleLike = useCallback(() => {
     toggleLike(item.id);
     setThreads((prevThreads) =>
       prevThreads.map((thread) => ({
         ...thread,
-        likes: posts.find(p => p.id === item.id).likes,
+        likes: posts.find(p => p.id === item.id)?.likes || thread.likes,
       }))
     );
-  };
+  }, [item.id, posts, toggleLike]);
 
-  const handleRepost = () => {
+  const handleRepost = useCallback(() => {
     toggleRepost(item.id);
     setThreads((prevThreads) =>
       prevThreads.map((thread) => ({
         ...thread,
-        reposts: posts.find(p => p.id === item.id).reposts,
+        reposts: posts.find(p => p.id === item.id)?.reposts || thread.reposts,
       }))
     );
-  };
+  }, [item.id, posts, toggleRepost]);
+
+  const renderItem = useCallback(({ item, index }) => {
+    const post = posts.find(p => p.id === item.id);
+    const isLiked = post?.likedBy?.includes(currentUser?.handle);
+    const isReposted = post?.repostedBy?.includes(currentUser?.handle);
+    
+    const inputRange = [(index - 1) * height, index * height, (index + 1) * height];
+    const scale = scrollY.interpolate({
+      inputRange,
+      outputRange: [0.9, 1, 0.9],
+      extrapolate: 'clamp',
+    });
+    const opacity = scrollY.interpolate({
+      inputRange,
+      outputRange: [0.5, 1, 0.5],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <Animated.View style={[{ transform: [{ scale }], opacity }]}>
+        <Thread
+          content={item.content || ''}
+          pageNumber={index + 1}
+          totalPages={threads.length}
+          title={item.title || 'Sample Thread'}
+          username={item.username || 'John Doe'}
+          likes={post?.likes || item.likes}
+          comments={post?.comments?.length || item.comments}
+          reposts={post?.reposts || item.reposts}
+          onLike={handleLike}
+          onRepost={handleRepost}
+          isLiked={isLiked}
+          isReposted={isReposted}
+        />
+      </Animated.View>
+    );
+  }, [posts, currentUser, threads.length, handleLike, handleRepost, scrollY]);
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
+      <AnimatedFlatList
         ref={flatListRef}
         data={threads}
-        renderItem={({ item, index }) => (
-          <Thread
-            content={item.content || ''}
-            pageNumber={index + 1}
-            totalPages={threads.length}
-            title={item.title || 'Sample Thread'}
-            username={item.username || 'John Doe'}
-            likes={item.likes}
-            comments={item.comments}
-            reposts={item.reposts}
-            onLike={handleLike}
-            onRepost={handleRepost}
-            isLiked={posts.find(p => p.id === item.id)?.isLiked}
-            isReposted={posts.find(p => p.id === item.id)?.isReposted}
-          />
-        )}
-        pagingEnabled
+        renderItem={renderItem}
+        pagingEnabled={true}
         showsVerticalScrollIndicator={false}
+        snapToInterval={height}
+        snapToAlignment="start"
+        decelerationRate={0.99}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        onMomentumScrollEnd={handleMomentumScrollEnd}
         onViewableItemsChanged={handleViewableItemsChanged}
         viewabilityConfig={{
           itemVisiblePercentThreshold: 50
         }}
-        onMomentumScrollEnd={handleMomentumScrollEnd}
-        keyExtractor={(item, index) => index.toString()}
+        scrollEventThrottle={16}
         getItemLayout={(data, index) => ({
           length: height,
           offset: height * index,
           index,
         })}
-        snapToInterval={height}
-        snapToAlignment="start"
-        decelerationRate="fast"
+        keyExtractor={(item, index) => index.toString()}
       />
     </SafeAreaView>
   );
@@ -175,7 +212,7 @@ const styles = StyleSheet.create({
     height: height,
     width: width,
     justifyContent: 'space-between',
-    paddingTop: 10, // Adjust this value if needed
+    paddingTop: 10,
   },
   headerContainer: {
     paddingHorizontal: 16,
@@ -194,7 +231,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   authorInfoShift: {
-    paddingTop: 8, // Adjust this value to match the title's padding
+    paddingTop: 8,
   },
   username: {
     fontFamily: Platform.OS === 'ios' ? 'SF Pro Text' : 'Roboto',
@@ -204,7 +241,7 @@ const styles = StyleSheet.create({
   },
   pageCounter: {
     position: 'absolute',
-    top: 17, // Adjust this value if needed
+    top: 17,
     right: 16,
     color: '#687684',
     fontSize: 14,
