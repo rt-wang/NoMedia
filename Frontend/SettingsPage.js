@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Switch, TouchableOpacity, TextInput } from 'react-native';
+import { Alert, View, Text, StyleSheet, Switch, TouchableOpacity, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
@@ -43,21 +43,24 @@ const SettingsPage = ({ navigation }) => {
   };
 
   const handleLogout = async () => {
-    // Clear any stored user data (if necessary)
-    // For example:
-    // await AsyncStorage.removeItem('userToken');
-    
-    // Navigate to the Login page with a left swipe transition
-    navigation.dispatch(
-      CommonActions.reset({
+    try {
+      // Clear all stored user data
+      await AsyncStorage.multiRemove([
+        'token',
+        'userId',
+        'authorities',
+        // Add any other keys you might be storing
+      ]);
+
+      // Navigate to the Auth stack, which will show the Login screen
+      navigation.reset({
         index: 0,
         routes: [{ name: 'Auth' }],
-      })
-    );
-    navigation.setOptions({
-      animationEnabled: true,
-      animation: 'slide_from_left',
-    });
+      });
+    } catch (error) {
+      console.error('Error during logout:', error);
+      Alert.alert('Error', 'Failed to logout. Please try again.');
+    }
   };
 
   return (

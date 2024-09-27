@@ -14,7 +14,7 @@ const LoginPage = ({ navigation }) => {
     if (emailOrUsername && password) {
       try {
         const response = await axios.post(`${API_BASE_URL}/api/users/login`, {
-          username: emailOrUsername,
+          usernameOrEmail: emailOrUsername,
           password: password
         });
 
@@ -22,25 +22,18 @@ const LoginPage = ({ navigation }) => {
           const token = response.data.accessToken;
           await AsyncStorage.setItem('token', token);
           
-          // Get the username from the response
           let userId = JSON.stringify(response.data.userId);
           let authorities = response.data.authorities;
 
           if (authorities) {
             await AsyncStorage.setItem('authorities', JSON.stringify(authorities));
           } else {
-            // If authorities are not provided, we'll set a default value
             await AsyncStorage.setItem('authorities', JSON.stringify(['ROLE_USER']));
           }
           
-          // If the server doesn't provide the username, we'll use the input
-          // This assumes that if the input contains '@', it's an email
-          
-          // Store the username
           await AsyncStorage.setItem('userId', userId);
           await AsyncStorage.setItem('authorities',JSON.stringify(authorities));
           
-          // Navigate to the main app
           navigation.replace('MainApp');
         } else {
           Alert.alert('Error', 'Failed to log in. Please try again.');
