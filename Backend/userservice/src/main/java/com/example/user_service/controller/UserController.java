@@ -16,8 +16,10 @@ import com.example.common.dto.JwtAuthenticationResponse;
 import org.springframework.security.core.AuthenticationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -41,45 +43,64 @@ public class UserController {
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         try {
             User user = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            }
+
             Authentication authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authentication);
+
             String jwt = tokenProvider.generateToken(authentication);
-            return ResponseEntity.ok(new JwtAuthenticationResponse(jwt));
-        } catch (RuntimeException e) {
+            
+            JwtAuthenticationResponse response = new JwtAuthenticationResponse(
+                jwt,
+                user.getUserId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList())
+            );
+
+            return ResponseEntity.ok(response);
+        } catch (AuthenticationException e) {
             logger.error("Authentication failed for user: " + loginRequest.getUsername(), e);
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         } catch (Exception e) {
             logger.error("Unexpected error during authentication", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An unexpected error occurred");
         }
     }
 
-    @GetMapping("/{username}")
-    public ResponseEntity<?> getUserProfile(@PathVariable String username) {
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getUserProfile(@PathVariable Long userId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         logger.debug("Authentication object: {}", authentication);
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
-        String authenticatedUsername = authentication.getName();
-        if (!authenticatedUsername.equals(username)) {
+        
+        // Assuming the principal is now the user ID
+        Long authenticatedUserId = Long.parseLong(authentication.getName());
+        if (!authenticatedUserId.equals(userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
         }
-        User user = userService.getUserByUsername(username);
+        
+        User user = userService.getUserById(userId);
         return ResponseEntity.ok(user);
     }
 
-    @PutMapping("/{username}")
-    public ResponseEntity<?> updateUserProfile(@PathVariable String username, @RequestBody User user) {
+    @PutMapping("/{userId}")
+    public ResponseEntity<?> updateUserProfile(@PathVariable Long userId, @RequestBody User user) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
-        String authenticatedUsername = authentication.getName();
-        if (!authenticatedUsername.equals(username)) {
+        Long authenticatedUserId = Long.parseLong(authentication.getName());
+        if (!authenticatedUserId.equals(userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
         }
-        User updatedUser = userService.updateUser(username, user);
+        User updatedUser = userService.updateUser(userId, user);
         return ResponseEntity.ok(updatedUser);
     }
 }

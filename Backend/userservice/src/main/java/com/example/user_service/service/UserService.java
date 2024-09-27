@@ -47,10 +47,14 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public User updateUser(String username, User updatedUser) {
-        User user = getUserByUsername(username);
-        // Update user fields...
-        return userRepository.save(user);
+    public User updateUser(Long userId, User updateduser) {
+        User existingUser = getUserById(userId);
+        if (existingUser != null){
+            existingUser.setBio(updateduser.getBio());
+            return userRepository.save(existingUser);
+        } else {
+            throw new RuntimeException("User not found");
+        }
     }
 
     public User loginUser(String username, String password) {
