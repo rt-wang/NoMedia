@@ -156,7 +156,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
           <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
           <Text style={styles.toolCount}>{post.likes}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.toolItem}>
+        <TouchableOpacity style={[styles.toolItem, styles.shareButton]}>
           <Ionicons name="share-outline" size={18} color="gray" />
         </TouchableOpacity>
       </View>
@@ -331,7 +331,7 @@ const styles = StyleSheet.create({
   },
   optionsButton: {
     padding: 5,
-    right: 10,
+    right: 5,
     bottom: 3,
   },
   notInterestedContainer: {
@@ -362,6 +362,9 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProText-Regular',
     fontSize: 14,
     lineHeight: 20,
+  },
+  shareButton: {
+    marginTop: -3, // This will move the share button up by 3 pixels
   },
 });
 
