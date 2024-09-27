@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MAX_BIO_LENGTH = 200;
 
@@ -14,9 +16,30 @@ const EditProfileModal = ({ isVisible, onClose, onSave, initialProfile }) => {
     }
   };
 
-  const handleSave = () => {
-    onSave({ name, bio });
-    onClose();
+  const handleSave = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId'); 
+      const authorities = await AsyncStorage.getItem('authorities');
+
+      const response = await axios.put(
+        `http://localhost:8080/api/users/${userId}`, // Update this line
+        { name, bio, location },
+        { headers: {Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'X-Authorities': authorities} }
+      );
+
+      if (response.status === 200) {
+        onSave({ name, bio });
+        onClose();
+      } else {
+        Alert.alert('Error', 'Failed to update profile. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      Alert.alert('Error', 'Failed to update profile. Please try again.');
+    }
   };
 
   return (

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Post from './Post';
@@ -8,8 +8,12 @@ import { useReposts } from './RepostContext';
 import { usePosts } from './PostContext';
 import EditProfileModal from './EditProfileModal';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 
 const CONTENT_INDENT = '  '; // Two spaces for indentation
+const API_BASE_URL = `http://localhost:8080`;
+
+
 
 const PersonalInfo = ({ name, username, bio, following, followers, location }) => (
   <View style={styles.personalInfo}>
@@ -82,25 +86,70 @@ const AccountPage = ({ navigation }) => {
   const { reposts } = useReposts();
   const { userPosts, currentUser } = usePosts();
   const [isEditProfileModalVisible, setIsEditProfileModalVisible] = useState(false);
-  const [profile, setProfile] = useState({
-    name: 'John Doe', // Default name
+  const [userInfo, setUserInfo] = useState({
+    name: '',
     username: '',
-    bio: 'This is a brief self-introduction that is under 150 characters. It showcases the user\'s personality and interests.',
-    following: 500,
-    followers: 1000,
+    bio: '',
+    following: 0,
+    followers: 0,
     location: '',
   });
 
   useEffect(() => {
-    const fetchUsername = async () => {
-      const username = await AsyncStorage.getItem('currentUser');
-      if (username) {
-        setProfile(prevProfile => ({ ...prevProfile, username }));
-      }
-    };
-
-    fetchUsername();
+    fetchUserInfo();
   }, []);
+
+  const fetchUserInfo = async () => {
+    console.log('Fetching user info');
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      const authorities = await AsyncStorage.getItem(`authorities`);
+      console.log('Retrieved token:', token);
+      
+      if (!token || !userId) { // Update this condition
+        console.error('No token or username found in AsyncStorage');
+        return;
+      }
+
+      console.log('Sending request with token:', token, userId);
+      const response = await axios.get(`${API_BASE_URL}/api/users/${userId}`, {
+        headers: { 
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'X-Authorities': authorities
+        }
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response data:', response.data);
+
+      if (response.status === 200) {
+        const userData = response.data;
+        setUserInfo({
+          name: userData.name,
+          username: userData.username,
+          bio: userData.bio || '',
+          following: userData.following || 0,
+          followers: userData.followers || 0,
+          location: userData.location || '',
+          authorities: JSON.parse(authorities)
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+      Alert.alert('Error', 'Failed to load user information');
+    }
+  };
 
   useEffect(() => {
     fetchContent();
@@ -158,7 +207,7 @@ const AccountPage = ({ navigation }) => {
   };
 
   const handleSaveProfile = (updatedProfile) => {
-    setProfile({ ...profile, ...updatedProfile });
+    setUserInfo({ ...userInfo, ...updatedProfile });
   };
 
   const handleDraftsPress = () => {
@@ -170,12 +219,12 @@ const AccountPage = ({ navigation }) => {
       <ScrollView stickyHeaderIndices={[1]}>
         <View style={styles.headerContainer}>
           <PersonalInfo
-            name={profile.name}
-            username={profile.username}
-            bio={profile.bio}
-            following={profile.following}
-            followers={profile.followers}
-            location={profile.location}
+            name={userInfo.name}
+            username={userInfo.username}
+            bio={userInfo.bio}
+            following={userInfo.following}
+            followers={userInfo.followers}
+            location={userInfo.location}
           />
           <TouchableOpacity 
             onPress={() => navigation.navigate('Settings')} 
@@ -199,7 +248,7 @@ const AccountPage = ({ navigation }) => {
         isVisible={isEditProfileModalVisible}
         onClose={() => setIsEditProfileModalVisible(false)}
         onSave={handleSaveProfile}
-        initialProfile={profile}
+        initialProfile={userInfo}
       />
     </View>
   );
