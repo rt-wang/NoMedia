@@ -8,7 +8,9 @@ const MAX_BIO_LENGTH = 200;
 
 const EditProfileModal = ({ isVisible, onClose, onSave, initialProfile }) => {
   const [name, setName] = useState(initialProfile.name || '');
+  const [username, setUsername] = useState(initialProfile.username || '');
   const [bio, setBio] = useState(initialProfile.bio || '');
+  const [usernameError, setUsernameError] = useState('');
 
   const handleBioChange = (text) => {
     if (text.length <= MAX_BIO_LENGTH) {
@@ -16,31 +18,79 @@ const EditProfileModal = ({ isVisible, onClose, onSave, initialProfile }) => {
     }
   };
 
+  const handleUsernameChange = (text) => {
+    if (text.includes('@')) {
+      setUsernameError('Username cannot contain @');
+    } else if (text.includes(' ')) {
+      setUsernameError('Username cannot contain spaces');
+    } else {
+      setUsernameError('');
+    }
+    setUsername(text.trim()); // Remove any leading or trailing spaces
+  };
+
   const handleSave = async () => {
+    if (!name.trim()) {
+      Alert.alert('Error', 'Name cannot be empty');
+      return;
+    }
+
+    if (!username.trim()) {
+      Alert.alert('Error', 'Username cannot be empty');
+      return;
+    }
+
+    if (username.includes('@') || username.includes(' ')) {
+      Alert.alert('Error', 'Username cannot contain @ or spaces');
+      return;
+    }
+
     try {
       const token = await AsyncStorage.getItem('token');
       const userId = await AsyncStorage.getItem('userId'); 
       const authorities = await AsyncStorage.getItem('authorities');
 
+      // Only include fields that have changed
+      const updatedProfile = {};
+      if (name.trim() !== initialProfile.name) updatedProfile.name = name.trim();
+      if (username.trim() !== initialProfile.username) updatedProfile.username = username.trim();
+      if (bio !== initialProfile.bio) updatedProfile.bio = bio;
+
+      // If nothing has changed, close the modal without making an API call
+      if (Object.keys(updatedProfile).length === 0) {
+        onClose();
+        return;
+      }
+
       const response = await axios.put(
         `http://localhost:8080/api/users/${userId}`,
-        { name, bio },
-        { headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-          'X-Authorities': authorities
-        }}
+        updatedProfile,
+        { 
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'X-Authorities': authorities
+          }
+        }
       );
 
       if (response.status === 200) {
-        onSave({ name, bio });
+        // Merge the updated fields with the initial profile
+        const savedProfile = { ...initialProfile, ...updatedProfile };
+        onSave(savedProfile);
         onClose();
       } else {
         Alert.alert('Error', 'Failed to update profile. Please try again.');
       }
     } catch (error) {
       console.error('Error updating profile:', error);
-      Alert.alert('Error', 'Failed to update profile. Please try again.');
+      if (error.response && error.response.status === 409) {
+        Alert.alert('Error', 'This username is already taken. Please choose a different one.');
+      } else if (error.response && error.response.data && error.response.data.message) {
+        Alert.alert('Error', error.response.data.message);
+      } else {
+        Alert.alert('Error', 'Failed to update profile. Please try again.');
+      }
     }
   };
 
@@ -76,6 +126,22 @@ const EditProfileModal = ({ isVisible, onClose, onSave, initialProfile }) => {
                 placeholder="Add your name"
                 placeholderTextColor="#666"
               />
+            </View>
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Username</Text>
+              <TextInput
+                style={styles.input}
+                value={username}
+                onChangeText={handleUsernameChange}
+                placeholder="Enter new username"
+                placeholderTextColor="#666"
+                autoCapitalize="none"
+                autoCorrect={false}
+                autoComplete="off"
+                spellCheck={false}
+                keyboardType="visible-password" // This disables auto-suggestion on iOS
+              />
+              {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
             </View>
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Bio</Text>
@@ -163,6 +229,11 @@ const styles = StyleSheet.create({
   bioInput: {
     height: 200,
     textAlignVertical: 'top',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 5,
   },
 });
 

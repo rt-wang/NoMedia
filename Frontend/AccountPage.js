@@ -18,7 +18,7 @@ const API_BASE_URL = `http://localhost:8080`;
 const PersonalInfo = ({ name, username, bio, following, followers }) => (
   <View style={styles.personalInfo}>
     <Text style={styles.name}>{name}</Text>
-    <Text style={styles.username}>{username}</Text>
+    <Text style={styles.username}>@{username}</Text>
     <Text style={styles.bio}>{bio}</Text>
     <View style={styles.followInfo}>
       <Text style={styles.followText}>
