@@ -113,9 +113,12 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress }) => {
         <View style={styles.postHeader}>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>{post.title}</Text>
-            <TouchableOpacity onPress={handleNamePress}>
-              <Text style={styles.username}>{post.username}</Text>
-            </TouchableOpacity>
+            <View style={styles.nameAndPageContainer}>
+              <TouchableOpacity onPress={handleNamePress}>
+                <Text style={styles.username}>{post.username}</Text>
+              </TouchableOpacity>
+              <Text style={styles.pageCounter}>{post.pageCount || 1} page{post.pageCount !== 1 ? 's' : ''}</Text>
+            </View>
           </View>
           <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
             <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
@@ -159,7 +162,9 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress }) => {
             />
             <Text style={styles.toolCount}>{post.likes}</Text>
           </TouchableOpacity>
-          <Ionicons name="share-outline" size={18} color="gray" />
+          <TouchableOpacity style={[styles.toolItem, styles.shareButton]}>
+            <Ionicons name="share-outline" size={18} color="gray" />
+          </TouchableOpacity>
         </View>
       </View>
       <Popover
@@ -356,6 +361,25 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProText-Regular',
     fontSize: 14,
     lineHeight: 20,
+  },
+  nameAndPageContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  username: {
+    fontFamily: 'SFProText-Regular',
+    fontSize: 16,
+    color: '#fff',
+  },
+  pageCounter: {
+    fontFamily: 'SFProText-Regular',
+    fontSize: 14,
+    color: '#687684',
+    left: 30,
+  },
+  shareButton: {
+    marginTop: -3.5, // This will move the share button up by 3 pixels
   },
 });
 
