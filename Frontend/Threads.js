@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, FlatList, Dimensions, SafeAreaView, Platform, S
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { usePosts } from './PostContext';
+import ThreadCommentModal from './ThreadCommentModal';
 
 const { width, height } = Dimensions.get('window');
 
@@ -14,7 +15,7 @@ const DEFAULT_CONTENT = [
   "And finally, the third page of our default content. Thanks for reading! Once again, we've stretched this to around 250 characters. This final page gives you a sense of how the end of a thread might look. It's also useful for testing any 'end of content' behavior you might have implemented, such as navigating to a 'Read Next' screen or showing a completion message.",
 ];
 
-const Thread = ({ content, pageNumber, totalPages, title, username, likes, comments, reposts, onLike, onRepost, isLiked, isReposted }) => {
+const Thread = ({ content, pageNumber, totalPages, title, username, likes, comments, reposts, onLike, onRepost, isLiked, isReposted, onCommentPress }) => {
   const LIGHT_GREY = '#CCCCCC';
   const REPOST_PINK = '#FFB6C1';
 
@@ -43,10 +44,10 @@ const Thread = ({ content, pageNumber, totalPages, title, username, likes, comme
           />
           <Text style={[styles.toolText, isLiked && styles.likedText]}>{likes}</Text>
         </TouchableOpacity>
-        <View style={[styles.toolItem, styles.commentsButton]}>
-          <Ionicons name="chatbubble-outline" size={30} color="gray" />
+        <TouchableOpacity style={styles.toolItem} onPress={onCommentPress}>
+          <Ionicons name="chatbubble-outline" size={29} color="gray" />
           <Text style={styles.toolText}>{comments}</Text>
-        </View>
+        </TouchableOpacity>
         <TouchableOpacity style={[styles.toolItem, styles.repostButton]} onPress={onRepost}>
           <Ionicons 
             name="repeat" 
@@ -73,6 +74,7 @@ const Threads = () => {
   const scrollY = useRef(new Animated.Value(0)).current;
   const [currentPage, setCurrentPage] = useState(0);
   const { posts, toggleLike, toggleRepost, currentUser } = usePosts();
+  const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
 
   const firstThread = item.threads && item.threads.length > 0 ? item.threads[0] : { 
     content: DEFAULT_CONTENT[0], 
@@ -134,6 +136,10 @@ const Threads = () => {
     );
   }, [item.id, posts, toggleRepost]);
 
+  const handleCommentPress = useCallback(() => {
+    setIsCommentModalVisible(true);
+  }, []);
+
   const renderItem = useCallback(({ item, index }) => {
     const post = posts.find(p => p.id === item.id);
     const isLiked = post?.likedBy?.includes(currentUser?.handle);
@@ -164,12 +170,13 @@ const Threads = () => {
           reposts={post?.reposts || item.reposts}
           onLike={handleLike}
           onRepost={handleRepost}
+          onCommentPress={handleCommentPress}
           isLiked={isLiked}
           isReposted={isReposted}
         />
       </Animated.View>
     );
-  }, [posts, currentUser, threads.length, handleLike, handleRepost, scrollY]);
+  }, [posts, currentUser, threads.length, handleLike, handleRepost, scrollY, handleCommentPress]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -198,6 +205,11 @@ const Threads = () => {
           index,
         })}
         keyExtractor={(item, index) => index.toString()}
+      />
+      <ThreadCommentModal
+        isVisible={isCommentModalVisible}
+        onClose={() => setIsCommentModalVisible(false)}
+        threadId={item.id} // Assuming 'item' is the current thread object
       />
     </SafeAreaView>
   );
