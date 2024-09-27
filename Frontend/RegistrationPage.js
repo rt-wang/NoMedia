@@ -9,8 +9,14 @@ const RegistrationPage = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   const handleRegister = async () => {
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
     try {
       const response = await axios.post(`${API_BASE_URL}/api/users/register`, {
         username,
@@ -56,6 +62,14 @@ const RegistrationPage = ({ navigation }) => {
         placeholder="Password"
         value={password}
         onChangeText={setPassword}
+        secureTextEntry
+        placeholderTextColor="#666"
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm Password"
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
         secureTextEntry
         placeholderTextColor="#666"
       />
