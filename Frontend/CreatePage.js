@@ -1,10 +1,17 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Modal } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Modal, FlatList, ScrollView, PanResponder } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usePosts } from './PostContext';
+
+// Import TOPICS from TopicsPage.js
+import { TOPICS } from './TopicsPage';
+
+const HighlightedTextInput = ({ value, onChangeText, placeholder, placeholderTextColor, style }) => {
+  // ... (HighlightedTextInput component remains the same)
+};
 
 const CreatePage = () => {
   const [body, setBody] = useState('');
@@ -12,10 +19,34 @@ const CreatePage = () => {
   const [showTitle, setShowTitle] = useState(false);
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showHashtagSuggestions, setShowHashtagSuggestions] = useState(false);
+  const [hashtagSuggestions, setHashtagSuggestions] = useState([]);
+  const [currentHashtag, setCurrentHashtag] = useState('');
   const fadeAnim = useRef(new Animated.Value(0)).current;
+  const [showTopicModal, setShowTopicModal] = useState(false);
+  const [selectedTopic, setSelectedTopic] = useState('Noms');
+  const [modalVisible, setModalVisible] = useState(false);
+  const slideAnim = useRef(new Animated.Value(0)).current;
 
   const navigation = useNavigation();
   const { addPost } = usePosts();
+
+  const SAMPLE_HASHTAGS = [
+    'trending', 'news', 'tech', 'politics', 'sports',
+    'entertainment', 'music', 'movies', 'gaming', 'food',
+    'travel', 'fashion', 'art', 'science', 'health'
+  ];
+
+  useEffect(() => {
+    if (currentHashtag) {
+      const filteredSuggestions = SAMPLE_HASHTAGS.filter(tag => 
+        tag.toLowerCase().startsWith(currentHashtag.toLowerCase())
+      );
+      setHashtagSuggestions(filteredSuggestions);
+    } else {
+      setHashtagSuggestions(SAMPLE_HASHTAGS);
+    }
+  }, [currentHashtag]);
 
   const saveAsDraft = async () => {
     if (body.trim().length === 0) return;
@@ -68,6 +99,16 @@ const CreatePage = () => {
     }
   };
 
+  const renderBodyContent = () => {
+    const parts = body.split(/(\/\S+)/);
+    return parts.map((part, index) => {
+      if (part.startsWith('/')) {
+        return <Text key={index} style={styles.highlightedText}>{part}</Text>;
+      }
+      return <Text key={index}>{part}</Text>;
+    });
+  };
+
   const handleBodyChange = (text) => {
     setBody(text);
     if (text.length >= 300 && !showTitle) {
@@ -76,7 +117,62 @@ const CreatePage = () => {
       setShowTitle(false);
       setTitle('');
     }
+
+    // Check for hashtag
+    const lastChar = text.slice(-1);
+    if (lastChar === '/') {
+      setShowHashtagSuggestions(true);
+      setCurrentHashtag('');
+    } else if (showHashtagSuggestions) {
+      const words = text.split(' ');
+      const lastWord = words[words.length - 1];
+      if (lastWord.startsWith('/')) {
+        setCurrentHashtag(lastWord.slice(1));
+      } else {
+        setShowHashtagSuggestions(false);
+      }
+    }
   };
+
+  const selectHashtag = (hashtag) => {
+    const words = body.split(' ');
+    words[words.length - 1] = `/${hashtag} `;
+    setBody(words.join(' '));
+    setShowHashtagSuggestions(false);
+  };
+
+  const handleTopicSelect = (topic) => {
+    setSelectedTopic(topic);
+    closeModal();
+  };
+
+  const openModal = () => {
+    setModalVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setModalVisible(false));
+  };
+
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gestureState) => {
+      return gestureState.dy > 5;
+    },
+    onPanResponderRelease: (_, gestureState) => {
+      if (gestureState.dy > 50) {
+        closeModal();
+      }
+    },
+  });
 
   return (
     <SafeAreaView style={styles.container}>
@@ -112,16 +208,38 @@ const CreatePage = () => {
           </Animated.View>
         )}
         <View style={styles.bodyContainer}>
-          <TextInput
+          <HighlightedTextInput
             style={styles.bodyInput}
             placeholder="What's happening?"
             placeholderTextColor="#666"
-            multiline
             value={body}
             onChangeText={handleBodyChange}
           />
         </View>
       </View>
+      <TouchableOpacity
+        style={styles.topicButton}
+        onPress={openModal}
+      >
+        <Text style={styles.topicButtonText}>{selectedTopic}</Text>
+        <Ionicons name="chevron-up" size={16} color="#FFFFFF" />
+      </TouchableOpacity>
+      {showHashtagSuggestions && (
+        <View style={styles.hashtagSuggestions}>
+          <FlatList
+            data={hashtagSuggestions}
+            keyExtractor={(item) => item}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.hashtagItem}
+                onPress={() => selectHashtag(item)}
+              >
+                <Text style={styles.hashtagText}>/{item}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        </View>
+      )}
       <Modal
         visible={showDropdown}
         transparent={true}
@@ -138,6 +256,54 @@ const CreatePage = () => {
               <Text style={styles.dropdownItemText}>Add as Draft</Text>
             </TouchableOpacity>
           </View>
+        </TouchableOpacity>
+      </Modal>
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="none"
+        onRequestClose={closeModal}
+      >
+        <TouchableOpacity
+          style={styles.topicModalOverlay}
+          activeOpacity={1}
+          onPress={closeModal}
+        >
+          <Animated.View
+            style={[
+              styles.topicModalContent,
+              {
+                transform: [
+                  {
+                    translateY: slideAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [300, 0],
+                    }),
+                  },
+                ],
+              },
+            ]}
+            {...panResponder.panHandlers}
+          >
+            <View style={styles.topicModalHeader}>
+              <Text style={styles.topicModalTitle}>Select a Topic</Text>
+              <TouchableOpacity onPress={closeModal}>
+                <Ionicons name="close" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={TOPICS}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.topicItem}
+                  onPress={() => handleTopicSelect(item)}
+                >
+                  <Text style={styles.topicItemText}>{item}</Text>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item, index) => index.toString()}
+            />
+          </Animated.View>
         </TouchableOpacity>
       </Modal>
     </SafeAreaView>
@@ -161,7 +327,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     marginBottom: -4,
-    marginLeft: 0,
+    marginLeft: -15,
   },
   titleInput: {
     color: '#FFFFFF',
@@ -228,7 +394,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
     flex: 1,
     fontFamily: 'SFProText-Regular',
-    marginTop: -10,
+  },
+  highlightedText: {
+    color: '#FFB6C1',
   },
   modalOverlay: {
     flex: 1,
@@ -246,6 +414,81 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   dropdownItemText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'SFProText-Regular',
+  },
+  hashtagSuggestions: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    maxHeight: 200,
+    backgroundColor: '#111111',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  hashtagItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333333',
+  },
+  hashtagText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'SFProText-Regular',
+  },
+  topicButton: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  topicButtonText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontFamily: 'SFProText-Regular',
+    marginRight: 4,
+  },
+  topicModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  topicModalContent: {
+    backgroundColor: '#111111',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    maxHeight: '80%',
+  },
+  topicModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  topicModalTitle: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: 'SFProText-Bold',
+  },
+  topicItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  topicItemText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'SFProText-Regular',
