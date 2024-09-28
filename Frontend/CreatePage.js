@@ -19,34 +19,13 @@ const CreatePage = () => {
   const [showTitle, setShowTitle] = useState(false);
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [showHashtagSuggestions, setShowHashtagSuggestions] = useState(false);
-  const [hashtagSuggestions, setHashtagSuggestions] = useState([]);
-  const [currentHashtag, setCurrentHashtag] = useState('');
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [showNomModal, setShowNomModal] = useState(false);
   const [selectedNom, setSelectedNom] = useState('Noms');
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   const navigation = useNavigation();
   const { addPost } = usePosts();
-
-  const SAMPLE_HASHTAGS = [
-    'trending', 'news', 'tech', 'politics', 'sports',
-    'entertainment', 'music', 'movies', 'gaming', 'food',
-    'travel', 'fashion', 'art', 'science', 'health'
-  ];
-
-  useEffect(() => {
-    if (currentHashtag) {
-      const filteredSuggestions = SAMPLE_HASHTAGS.filter(tag => 
-        tag.toLowerCase().startsWith(currentHashtag.toLowerCase())
-      );
-      setHashtagSuggestions(filteredSuggestions);
-    } else {
-      setHashtagSuggestions(SAMPLE_HASHTAGS);
-    }
-  }, [currentHashtag]);
 
   const saveAsDraft = async () => {
     if (body.trim().length === 0) return;
@@ -117,28 +96,6 @@ const CreatePage = () => {
       setShowTitle(false);
       setTitle('');
     }
-
-    // Check for hashtag
-    const lastChar = text.slice(-1);
-    if (lastChar === '/') {
-      setShowHashtagSuggestions(true);
-      setCurrentHashtag('');
-    } else if (showHashtagSuggestions) {
-      const words = text.split(' ');
-      const lastWord = words[words.length - 1];
-      if (lastWord.startsWith('/')) {
-        setCurrentHashtag(lastWord.slice(1));
-      } else {
-        setShowHashtagSuggestions(false);
-      }
-    }
-  };
-
-  const selectHashtag = (hashtag) => {
-    const words = body.split(' ');
-    words[words.length - 1] = `/${hashtag} `;
-    setBody(words.join(' '));
-    setShowHashtagSuggestions(false);
   };
 
   const handleNomSelect = (nom) => {
@@ -201,45 +158,22 @@ const CreatePage = () => {
         </View>
       </View>
       <View style={styles.content}>
-        {showSavedIndicator && (
-          <Animated.View style={[styles.savedIndicator, { opacity: fadeAnim }]}>
-            <Ionicons name="checkmark-circle" size={24} color="#fff" />
-            <Text style={styles.savedIndicatorText}>Saved</Text>
-          </Animated.View>
-        )}
-        <View style={styles.bodyContainer}>
-          <HighlightedTextInput
-            style={styles.bodyInput}
-            placeholder="What's happening?"
-            placeholderTextColor="#666"
-            value={body}
-            onChangeText={handleBodyChange}
-          />
-        </View>
+        <TextInput
+          style={styles.bodyInput}
+          placeholder="What's on your mind?"
+          placeholderTextColor="#666666"
+          value={body}
+          onChangeText={handleBodyChange}
+          multiline
+        />
       </View>
       <TouchableOpacity
         style={styles.nomButton}
         onPress={openModal}
       >
         <Text style={styles.nomButtonText}>{selectedNom}</Text>
-        <Ionicons name="chevron-up" size={16} color="#FFFFFF" />
+        <Ionicons name="chevron-up" size={16} color="#FFFFFF" style={styles.nomButtonIcon} />
       </TouchableOpacity>
-      {showHashtagSuggestions && (
-        <View style={styles.hashtagSuggestions}>
-          <FlatList
-            data={hashtagSuggestions}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.hashtagItem}
-                onPress={() => selectHashtag(item)}
-              >
-                <Text style={styles.hashtagText}>/{item}</Text>
-              </TouchableOpacity>
-            )}
-          />
-        </View>
-      )}
       <Modal
         visible={showDropdown}
         transparent={true}
@@ -327,7 +261,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     marginBottom: -4,
-    marginLeft: -15,
+    marginLeft: 0,
   },
   titleInput: {
     color: '#FFFFFF',
@@ -362,38 +296,16 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 16,
-  },
-  savedIndicator: {
-    position: 'absolute',
-    top: -24,
-    left: 123,
-    right: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 20,
-    alignSelf: 'center',
-    maxWidth: 120,
-    zIndex: 1,
-  },
-  savedIndicatorText: {
-    color: '#FFFFFF',
-    marginLeft: 5,
-    fontSize: 16,
-    fontFamily: 'SFProText-Regular',
-  },
-  bodyContainer: {
-    flex: 1,
+    paddingTop: 16,
   },
   bodyInput: {
+    flex: 1,
     color: '#FFFFFF',
     fontSize: 18,
-    flex: 1,
     fontFamily: 'SFProText-Regular',
+    textAlignVertical: 'top',
+    padding: 0,
   },
   highlightedText: {
     color: '#FFB6C1',
@@ -418,45 +330,29 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'SFProText-Regular',
   },
-  hashtagSuggestions: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    maxHeight: 200,
-    backgroundColor: '#111111',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  hashtagItem: {
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#333333',
-  },
-  hashtagText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'SFProText-Regular',
-  },
   nomButton: {
     position: 'absolute',
     bottom: 16,
     left: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Slightly more opaque white
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
+    paddingVertical: 10, // Increased vertical padding for a more square shape
+    borderRadius: 12, // Reduced border radius for a more square appearance
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderColor: 'rgba(255, 255, 255, 0.3)', // More visible border
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between', // Spread out the text and icon
+    minWidth: 100, // Ensure a minimum width for the button
   },
   nomButtonText: {
     color: '#FFFFFF',
-    fontSize: 12,
-    fontFamily: 'SFProText-Regular',
-    marginRight: 4,
+    fontSize: 14, // Slightly larger font size
+    fontWeight: '600', // Make the text a bit bolder
+    fontFamily: 'SFProText-Semibold', // Use a semibold font if available
+  },
+  nomButtonIcon: {
+    marginLeft: 4,
   },
   nomModalOverlay: {
     flex: 1,
