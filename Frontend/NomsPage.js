@@ -25,16 +25,16 @@ const TOPIC_BOXES = [
   { id: '8', title: '/ Bitcoin discussion' },
 ];
 
-const TopicBox = ({ item }) => {
+const NomBox = ({ item }) => {
   const randomPosts = (Math.random() * (10000 - 500) + 500).toFixed(2);
   const formattedPosts = (randomPosts / 1000).toFixed(2) + 'k';
 
   return (
-    <TouchableOpacity style={styles.topicBox}>
-      <View style={styles.topicSlashContainer}>
-        <Text style={styles.topicSlash}>/</Text>
+    <TouchableOpacity style={styles.nomBox}>
+      <View style={styles.nomSlashContainer}>
+        <Text style={styles.nomSlash}>/</Text>
       </View>
-      <Text style={styles.topicTitle}>{item.title.substring(2)}</Text>
+      <Text style={styles.nomTitle}>{item.title.substring(2)}</Text>
       <View style={styles.postsContainer}>
         <Text style={styles.postsCount}>{formattedPosts} posts</Text>
       </View>
@@ -42,22 +42,22 @@ const TopicBox = ({ item }) => {
   );
 };
 
-const TopicButton = ({ topic }) => (
-  <TouchableOpacity style={styles.topicButton}>
-    <Text style={styles.topicButtonText}>{topic}</Text>
+const NomButton = ({ topic }) => (
+  <TouchableOpacity style={styles.nomButton}>
+    <Text style={styles.nomButtonText}>{topic}</Text>
   </TouchableOpacity>
 );
 
-const TopicSection = ({ title, data }) => (
+const NomSection = ({ title, data }) => (
   <View style={styles.section}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
       {data.reduce((pairs, item, index) => {
         if (index % 2 === 0) {
           pairs.push(
-            <View key={index} style={styles.topicBoxPair}>
-              <TopicBox item={item} />
-              {data[index + 1] && <TopicBox item={data[index + 1]} />}
+            <View key={index} style={styles.nomBoxPair}>
+              <NomBox item={item} />
+              {data[index + 1] && <NomBox item={data[index + 1]} />}
             </View>
           );
         }
@@ -67,7 +67,7 @@ const TopicSection = ({ title, data }) => (
   </View>
 );
 
-const TopicButtonsSection = () => {
+const NomButtonsSection = () => {
   const rows = 2;
   const buttonHeight = 36; // Adjust this value based on your button height
   const containerHeight = rows * buttonHeight + (rows - 1) * 8; // 8 is the vertical margin between buttons
@@ -75,9 +75,9 @@ const TopicButtonsSection = () => {
   return (
     <View style={[styles.topicsScrollContainer, { height: containerHeight }]}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={[styles.topicButtonsContainer, { height: containerHeight }]}>
+        <View style={[styles.nomButtonsContainer, { height: containerHeight }]}>
           {TOPICS.map((topic, index) => (
-            <TopicButton key={index} topic={topic} />
+            <NomButton key={index} topic={topic} />
           ))}
         </View>
       </ScrollView>
@@ -85,7 +85,7 @@ const TopicButtonsSection = () => {
   );
 };
 
-const Topics = () => {
+const Noms = () => {
   const [sections, setSections] = useState([]);
 
   useEffect(() => {
@@ -100,10 +100,10 @@ const Topics = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Explore topics</Text>
-      <TopicButtonsSection />
+      <NomButtonsSection />
       <FlatList
         data={sections}
-        renderItem={({ item }) => <TopicSection title={item.title} data={item.data} />}
+        renderItem={({ item }) => <NomSection title={item.title} data={item.data} />}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
       />
@@ -127,13 +127,13 @@ const styles = StyleSheet.create({
   topicsScrollContainer: {
     marginBottom: 24,
   },
-  topicButtonsContainer: {
+  nomButtonsContainer: {
     flexDirection: 'column',
     flexWrap: 'wrap',
     height: 80,
     alignContent: 'flex-start',
   },
-  topicButton: {
+  nomButton: {
     backgroundColor: 'rgba(255, 182, 193, 0.1)', // Light pink with opacity
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 182, 193, 0.3)',
   },
-  topicButtonText: {
+  nomButtonText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: '400',
@@ -158,11 +158,11 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     fontFamily: 'SFProText-Regular',
   },
-  topicBoxPair: {
+  nomBoxPair: {
     width: 280,
     marginRight: 16,
   },
-  topicBox: {
+  nomBox: {
     width: '100%',
     height: 45,
     backgroundColor: 'rgba(26, 26, 26, 0.8)',
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 182, 193, 0.2)',
     overflow: 'hidden',
   },
-  topicSlashContainer: {
+  nomSlashContainer: {
     width: 30,
     height: '100%',
     justifyContent: 'center',
@@ -183,12 +183,12 @@ const styles = StyleSheet.create({
     borderRightColor: 'rgba(255, 255, 255, 0.1)',
     marginRight: -12,
   },
-  topicSlash: {
+  nomSlash: {
     fontSize: 18,
     fontWeight: '500',
     color: '#666',
   },
-  topicTitle: {
+  nomTitle: {
     flex: 1,
     fontSize: 16,
     fontWeight: '400',
@@ -211,4 +211,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Topics;
+export default Noms;

@@ -6,8 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usePosts } from './PostContext';
 
-// Import TOPICS from TopicsPage.js
-import { TOPICS } from './TopicsPage';
+// Import NOMS from NomsPage.js
+import { NOMS } from './NomsPage';
 
 const HighlightedTextInput = ({ value, onChangeText, placeholder, placeholderTextColor, style }) => {
   // ... (HighlightedTextInput component remains the same)
@@ -23,8 +23,8 @@ const CreatePage = () => {
   const [hashtagSuggestions, setHashtagSuggestions] = useState([]);
   const [currentHashtag, setCurrentHashtag] = useState('');
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [showTopicModal, setShowTopicModal] = useState(false);
-  const [selectedTopic, setSelectedTopic] = useState('Noms');
+  const [showNomModal, setShowNomModal] = useState(false);
+  const [selectedNom, setSelectedNom] = useState('Noms');
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
 
@@ -141,8 +141,8 @@ const CreatePage = () => {
     setShowHashtagSuggestions(false);
   };
 
-  const handleTopicSelect = (topic) => {
-    setSelectedTopic(topic);
+  const handleNomSelect = (nom) => {
+    setSelectedNom(nom);
     closeModal();
   };
 
@@ -218,10 +218,10 @@ const CreatePage = () => {
         </View>
       </View>
       <TouchableOpacity
-        style={styles.topicButton}
+        style={styles.nomButton}
         onPress={openModal}
       >
-        <Text style={styles.topicButtonText}>{selectedTopic}</Text>
+        <Text style={styles.nomButtonText}>{selectedNom}</Text>
         <Ionicons name="chevron-up" size={16} color="#FFFFFF" />
       </TouchableOpacity>
       {showHashtagSuggestions && (
@@ -265,13 +265,13 @@ const CreatePage = () => {
         onRequestClose={closeModal}
       >
         <TouchableOpacity
-          style={styles.topicModalOverlay}
+          style={styles.nomModalOverlay}
           activeOpacity={1}
           onPress={closeModal}
         >
           <Animated.View
             style={[
-              styles.topicModalContent,
+              styles.nomModalContent,
               {
                 transform: [
                   {
@@ -285,20 +285,20 @@ const CreatePage = () => {
             ]}
             {...panResponder.panHandlers}
           >
-            <View style={styles.topicModalHeader}>
-              <Text style={styles.topicModalTitle}>Select a Topic</Text>
+            <View style={styles.nomModalHeader}>
+              <Text style={styles.nomModalTitle}>Select a Nom</Text>
               <TouchableOpacity onPress={closeModal}>
                 <Ionicons name="close" size={24} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
             <FlatList
-              data={TOPICS}
+              data={NOMS}
               renderItem={({ item }) => (
                 <TouchableOpacity
-                  style={styles.topicItem}
-                  onPress={() => handleTopicSelect(item)}
+                  style={styles.nomItem}
+                  onPress={() => handleNomSelect(item)}
                 >
-                  <Text style={styles.topicItemText}>{item}</Text>
+                  <Text style={styles.nomItemText}>{item}</Text>
                 </TouchableOpacity>
               )}
               keyExtractor={(item, index) => index.toString()}
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'SFProText-Regular',
   },
-  topicButton: {
+  nomButton: {
     position: 'absolute',
     bottom: 16,
     left: 16,
@@ -452,18 +452,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  topicButtonText: {
+  nomButtonText: {
     color: '#FFFFFF',
     fontSize: 12,
     fontFamily: 'SFProText-Regular',
     marginRight: 4,
   },
-  topicModalOverlay: {
+  nomModalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
-  topicModalContent: {
+  nomModalContent: {
     backgroundColor: '#111111',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -471,24 +471,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     maxHeight: '80%',
   },
-  topicModalHeader: {
+  nomModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 16,
   },
-  topicModalTitle: {
+  nomModalTitle: {
     color: '#FFFFFF',
     fontSize: 18,
     fontWeight: 'bold',
     fontFamily: 'SFProText-Bold',
   },
-  topicItem: {
+  nomItem: {
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
-  topicItemText: {
+  nomItemText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'SFProText-Regular',
