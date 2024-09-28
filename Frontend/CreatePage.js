@@ -73,19 +73,9 @@ const CreatePage = () => {
   };
 
   const handleTitleChange = (text) => {
-    if (text.length <= 50) {
+    if (text.length <= 30) {
       setTitle(text);
     }
-  };
-
-  const renderBodyContent = () => {
-    const parts = body.split(/(\/\S+)/);
-    return parts.map((part, index) => {
-      if (part.startsWith('/')) {
-        return <Text key={index} style={styles.highlightedText}>{part}</Text>;
-      }
-      return <Text key={index}>{part}</Text>;
-    });
   };
 
   const handleBodyChange = (text) => {
@@ -265,11 +255,11 @@ const styles = StyleSheet.create({
   },
   titleInput: {
     color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'SFProText-Regular',
+    fontSize: 21,
+    fontFamily: 'Athelas',
     borderBottomWidth: 1,
     borderBottomColor: '#333333',
-    paddingBottom: 8,
+    paddingBottom: 4,
   },
   placeholderTitle: {
     height: 33, // Approximate height of the title input
@@ -306,9 +296,6 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProText-Regular',
     textAlignVertical: 'top',
     padding: 0,
-  },
-  highlightedText: {
-    color: '#FFB6C1',
   },
   modalOverlay: {
     flex: 1,
