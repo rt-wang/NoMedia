@@ -73,7 +73,7 @@ const CreatePage = () => {
   };
 
   const handleTitleChange = (text) => {
-    if (text.length <= 30) {
+    if (text.length <= 50) {
       setTitle(text);
     }
   };
