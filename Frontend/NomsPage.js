@@ -25,12 +25,12 @@ const TOPIC_BOXES = [
   { id: '8', title: '/ Bitcoin discussion' },
 ];
 
-const NomBox = ({ item }) => {
+const NomBox = ({ item, onPress }) => {
   const randomPosts = (Math.random() * (10000 - 500) + 500).toFixed(2);
   const formattedPosts = (randomPosts / 1000).toFixed(2) + 'k';
 
   return (
-    <TouchableOpacity style={styles.nomBox}>
+    <TouchableOpacity style={styles.nomBox} onPress={() => onPress(item.title)}>
       <View style={styles.nomSlashContainer}>
         <Text style={styles.nomSlash}>/</Text>
       </View>
@@ -48,7 +48,7 @@ const NomButton = ({ topic }) => (
   </TouchableOpacity>
 );
 
-const NomSection = ({ title, data }) => (
+const NomSection = ({ title, data, onNomPress }) => (
   <View style={styles.section}>
     <Text style={styles.sectionTitle}>{title}</Text>
     <ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -56,8 +56,8 @@ const NomSection = ({ title, data }) => (
         if (index % 2 === 0) {
           pairs.push(
             <View key={index} style={styles.nomBoxPair}>
-              <NomBox item={item} />
-              {data[index + 1] && <NomBox item={data[index + 1]} />}
+              <NomBox item={item} onPress={onNomPress} />
+              {data[index + 1] && <NomBox item={data[index + 1]} onPress={onNomPress} />}
             </View>
           );
         }
@@ -85,7 +85,7 @@ const NomButtonsSection = () => {
   );
 };
 
-const Noms = () => {
+const Noms = ({ navigation }) => {
   const [sections, setSections] = useState([]);
 
   useEffect(() => {
@@ -97,13 +97,19 @@ const Noms = () => {
     setSections(fetchedSections);
   }, []);
 
+  const handleNomPress = (nomTitle) => {
+    navigation.navigate('NomObject', { nomTitle });
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Explore topics</Text>
       <NomButtonsSection />
       <FlatList
         data={sections}
-        renderItem={({ item }) => <NomSection title={item.title} data={item.data} />}
+        renderItem={({ item }) => (
+          <NomSection title={item.title} data={item.data} onNomPress={handleNomPress} />
+        )}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
       />
