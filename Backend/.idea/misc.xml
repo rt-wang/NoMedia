@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/common1/pom.xml" />
         <option value="$PROJECT_DIR$/common1/common1/pom.xml" />
         <option value="$PROJECT_DIR$/demo/pom.xml" />
+        <option value="$PROJECT_DIR$/postservice/pom.xml" />
       </list>
     </option>
     <option name="ignoredFiles">

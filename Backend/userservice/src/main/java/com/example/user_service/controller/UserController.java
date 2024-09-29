@@ -42,7 +42,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         try {
-            User user = userService.loginUser(loginRequest.getUsername(), loginRequest.getPassword());
+            User user = userService.loginUser(loginRequest.getUsernameOrEmail(), loginRequest.getPassword());
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
             }
@@ -64,7 +64,7 @@ public class UserController {
 
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
-            logger.error("Authentication failed for user: " + loginRequest.getUsername(), e);
+            logger.error("Authentication failed for user: " + loginRequest.getUsernameOrEmail(), e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         } catch (Exception e) {
             logger.error("Unexpected error during authentication", e);
@@ -80,7 +80,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized");
         }
         
-        // Assuming the principal is now the user ID
         Long authenticatedUserId = Long.parseLong(authentication.getName());
         if (!authenticatedUserId.equals(userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");

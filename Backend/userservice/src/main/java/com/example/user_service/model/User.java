@@ -31,7 +31,19 @@ public class User implements UserDetailsInterface {
     @Column(nullable = false)
     private LocalDateTime updated_at;
 
+    @Column
     private String bio;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
 
     public Long getUserId() {
