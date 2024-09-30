@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import axios from 'axios';
 
@@ -7,15 +7,12 @@ const INACTIVE_BUTTON = '#666666';
 const API_BASE_URL = `http://localhost:8080`; // Replace with your actual API base URL
 
 const VerificationPage = ({ route, navigation }) => {
-  const { email } = route.params;
+  const { name, email, password } = route.params;
   const [verificationCode, setVerificationCode] = useState('');
   const [username, setUsername] = useState('');
   const [isCodeVerified, setIsCodeVerified] = useState(false);
   const [isUsernameValid, setIsUsernameValid] = useState(false);
-
-  useEffect(() => {
-    setIsUsernameValid(username.length >= 3);
-  }, [username]);
+  const [usernameError, setUsernameError] = useState('');
 
   const handleVerify = async () => {
     try {
@@ -28,20 +25,40 @@ const VerificationPage = ({ route, navigation }) => {
     }
   };
 
-  const handleSetUsername = async () => {
+  const handleUsernameChange = (text) => {
+    if (text.includes('@')) {
+      setUsernameError('Username cannot contain @');
+    } else if (text.includes(' ')) {
+      setUsernameError('Username cannot contain spaces');
+    } else {
+      setUsernameError('');
+    }
+    setUsername(text);
+    setIsUsernameValid(text.length >= 3 && !text.includes('@') && !text.includes(' '));
+  };
+
+  const handleCompleteRegistration = async () => {
     if (isUsernameValid) {
       try {
-        const response = await axios.post(`${API_BASE_URL}/api/users/set-username`, {
+        const response = await axios.post(`${API_BASE_URL}/api/users/register`, {
+          name,
+          username,
           email,
-          username
+          password
         });
 
         if (response.status === 200) {
           navigation.replace('MainApp');
         }
       } catch (error) {
-        console.error('Set username error:', error);
-        Alert.alert('Error', 'Failed to set username. Please try again.');
+        console.error('Registration error:', error);
+        if (error.response && error.response.status === 409) {
+          Alert.alert('Error', 'This username is already taken. Please choose a different one.');
+        } else if (error.response && error.response.data && error.response.data.message) {
+          Alert.alert('Error', error.response.data.message);
+        } else {
+          Alert.alert('Error', 'Registration failed. Please try again.');
+        }
       }
     }
   };
@@ -72,21 +89,24 @@ const VerificationPage = ({ route, navigation }) => {
       ) : (
         <>
           <Text style={styles.subtitle}>Choose your username</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter username"
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-            autoCorrect={false}
-            placeholderTextColor="#666"
-          />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter username"
+              value={username}
+              onChangeText={handleUsernameChange}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholderTextColor="#666"
+            />
+            {usernameError ? <Text style={styles.errorText}>{usernameError}</Text> : null}
+          </View>
           <TouchableOpacity 
             style={[styles.button, !isUsernameValid && styles.inactiveButton]} 
-            onPress={handleSetUsername}
+            onPress={handleCompleteRegistration}
             disabled={!isUsernameValid}
           >
-            <Text style={styles.buttonText}>Continue to platform</Text>
+            <Text style={styles.buttonText}>Complete Registration</Text>
           </TouchableOpacity>
         </>
       )}
@@ -142,6 +162,15 @@ const styles = StyleSheet.create({
     color: "#000",
     fontSize: 18,
     fontFamily: 'AbhayaLibre-Regular',
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 25,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 5,
   },
 });
 

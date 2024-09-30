@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 
@@ -11,52 +10,22 @@ const RegistrationPage = ({ navigation }) => {
   const [lastName, setLastName] = useState('');
   const name = `${firstName} ${lastName}`;
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [usernameError, setUsernameError] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleUsernameChange = (text) => {
-    if (text.includes('@')) {
-      setUsernameError('Username cannot contain @');
-    } else if (text.includes(' ')) {
-      setUsernameError('Username cannot contain spaces');
-    } else {
-      setUsernameError('');
-    }
-    setUsername(text);
-  };
-
-  const handleRegister = async () => {
+  const handleRegister = () => {
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return;
     }
 
-    if (username.includes('@') || username.includes(' ')) {
-      Alert.alert('Error', 'Username cannot contain @ or spaces');
-      return;
-    }
-
-    try {
-      const response = await axios.post(`${API_BASE_URL}/api/users/register`, {
-        name,
-        username,
-        email,
-        password
-      });
-
-      if (response.status === 200) {
-        navigation.navigate('Verification', { email });
-      }
-    } catch (error) {
-      console.error('Registration error:', error);
-      if (error.response && error.response.status === 409) {
-        Alert.alert('Error', 'This username is already taken. Please choose a different one.');
-      } else if (error.response && error.response.data && error.response.data.message) {
-        Alert.alert('Error', error.response.data.message);
-      } else {
-        Alert.alert('Error', 'Registration failed. Please try again.');
-      }
-    }
+    // Navigate to VerificationPage, passing the user's input
+    navigation.navigate('Verification', {
+      name: `${firstName} ${lastName}`,
+      email,
+      password
+    });
   };
 
   return (
@@ -113,7 +82,7 @@ const RegistrationPage = ({ navigation }) => {
           textContentType="oneTimeCode"
         />
         <TouchableOpacity style={styles.button} onPress={handleRegister}>
-          <Text style={styles.buttonText}>Register</Text>
+          <Text style={styles.buttonText}>Next</Text>
         </TouchableOpacity>
       </View>
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
