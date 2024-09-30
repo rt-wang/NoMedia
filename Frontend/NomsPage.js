@@ -1,6 +1,8 @@
+export {NOMS}
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
 
 const NOMS = [
   "Anime & Cosplay", "Art", "Business & Finance", "Collectibles",

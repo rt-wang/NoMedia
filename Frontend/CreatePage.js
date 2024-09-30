@@ -23,6 +23,8 @@ const CreatePage = () => {
   const [selectedNom, setSelectedNom] = useState('Noms');
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredNoms, setFilteredNoms] = useState(NOMS);
 
   const navigation = useNavigation();
   const { addPost } = usePosts();
@@ -91,6 +93,18 @@ const CreatePage = () => {
   const handleNomSelect = (nom) => {
     setSelectedNom(nom);
     closeModal();
+  };
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    const filtered = NOMS.filter(nom => nom.toLowerCase().includes(query.toLowerCase()));
+    setFilteredNoms(filtered);
+  };
+
+  const handleCreateNom = () => {
+    // Implement the logic to create a new nom
+    console.log('Create new nom');
+    // You can add a new screen for creating a nom or show a dialog here
   };
 
   const openModal = () => {
@@ -215,8 +229,20 @@ const CreatePage = () => {
                 <Ionicons name="close" size={24} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search Noms"
+                placeholderTextColor="#666"
+                value={searchQuery}
+                onChangeText={handleSearch}
+              />
+              <TouchableOpacity style={styles.createNomButton} onPress={handleCreateNom}>
+                <Ionicons name="add" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
             <FlatList
-              data={NOMS}
+              data={filteredNoms}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.nomItem}
@@ -375,6 +401,28 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontFamily: 'SFProText-Regular',
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#222',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    color: '#FFFFFF',
+    marginRight: 8,
+  },
+  createNomButton: {
+    backgroundColor: '#444',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
