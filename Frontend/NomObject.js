@@ -125,12 +125,10 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 20,
     fontWeight: 'bold',
-    marginLeft: 10,
   },
   sortButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 10,
   },
   sortButtonText: {
     color: '#FFFFFF',

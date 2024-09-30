@@ -2,19 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
-const TOPICS = [
+const NOMS = [
   "Anime & Cosplay", "Art", "Business & Finance", "Collectibles",
   "Home & Garden", "Humanities & Law", "Internet Culture",
   "Pop Culture", "Q&As & Stories", "Reading & Writing", "Science",
   "Technology", "Travel", "Video Games",
-  // Additional 15 topics
+  // Additional 15 noms
   "Fashion & Beauty", "Food & Drinks", "Sports", "Music",
   "Photography", "DIY & Crafts", "Fitness", "Movies & TV",
   "Pets & Animals", "Education", "History", "Nature",
   "Automotive", "Parenting", "Cryptocurrency"
 ];
 
-const TOPIC_BOXES = [
+const NOM_BOXES = [
   { id: '1', title: '/ P Diddy Arrested' },
   { id: '2', title: '/ NVIDIA going to $150?' },
   { id: '3', title: '/ Laver Cup: Fed Coaching' },
@@ -42,9 +42,9 @@ const NomBox = ({ item, onPress }) => {
   );
 };
 
-const NomButton = ({ topic }) => (
+const NomButton = ({ nom }) => (
   <TouchableOpacity style={styles.nomButton}>
-    <Text style={styles.nomButtonText}>{topic}</Text>
+    <Text style={styles.nomButtonText}>{nom}</Text>
   </TouchableOpacity>
 );
 
@@ -73,11 +73,11 @@ const NomButtonsSection = () => {
   const containerHeight = rows * buttonHeight + (rows - 1) * 8; // 8 is the vertical margin between buttons
 
   return (
-    <View style={[styles.topicsScrollContainer, { height: containerHeight }]}>
+    <View style={[styles.nomsScrollContainer, { height: containerHeight }]}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={[styles.nomButtonsContainer, { height: containerHeight }]}>
-          {TOPICS.map((topic, index) => (
-            <NomButton key={index} topic={topic} />
+          {NOMS.map((nom, index) => (
+            <NomButton key={index} nom={nom} />
           ))}
         </View>
       </ScrollView>
@@ -90,9 +90,9 @@ const Noms = ({ navigation }) => {
 
   useEffect(() => {
     const fetchedSections = [
-      { id: '1', title: 'Recommended for you', data: TOPIC_BOXES },
-      { id: '2', title: 'Trending Topics', data: TOPIC_BOXES },
-      { id: '3', title: 'Science', data: TOPIC_BOXES },
+      { id: '1', title: 'Recommended for you', data: NOM_BOXES },
+      { id: '2', title: 'Trending Noms', data: NOM_BOXES },
+      { id: '3', title: 'Science', data: NOM_BOXES },
     ];
     setSections(fetchedSections);
   }, []);
@@ -103,7 +103,7 @@ const Noms = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Explore topics</Text>
+      <Text style={styles.header}>Explore Noms</Text>
       <NomButtonsSection />
       <FlatList
         data={sections}
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontFamily: 'System',
   },
-  topicsScrollContainer: {
+  nomsScrollContainer: {
     marginBottom: 24,
   },
   nomButtonsContainer: {
