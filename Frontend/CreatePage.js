@@ -6,8 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usePosts } from './PostContext';
 
-// Import NOMS from NomsPage.js
-import { NOMS } from './NomsPage';
+// Import NOM_BOXES from NomsPage.js
+import { NOM_BOXES } from './NomsPage';
 
 const HighlightedTextInput = ({ value, onChangeText, placeholder, placeholderTextColor, style }) => {
   // ... (HighlightedTextInput component remains the same)
@@ -24,10 +24,36 @@ const CreatePage = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const slideAnim = useRef(new Animated.Value(0)).current;
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredNoms, setFilteredNoms] = useState(NOMS);
+  const [filteredNoms, setFilteredNoms] = useState(NOM_BOXES);
+  const [showCreateNomInput, setShowCreateNomInput] = useState(false);
+  const [newNomName, setNewNomName] = useState('');
+  const [allNoms, setAllNoms] = useState([...NOM_BOXES]);
 
   const navigation = useNavigation();
   const { addPost } = usePosts();
+
+  useEffect(() => {
+    loadNoms();
+  }, []);
+
+  const loadNoms = async () => {
+    try {
+      const storedNoms = await AsyncStorage.getItem('allNoms');
+      if (storedNoms) {
+        setAllNoms(JSON.parse(storedNoms));
+      }
+    } catch (error) {
+      console.error('Error loading noms:', error);
+    }
+  };
+
+  const saveNoms = async (noms) => {
+    try {
+      await AsyncStorage.setItem('allNoms', JSON.stringify(noms));
+    } catch (error) {
+      console.error('Error saving noms:', error);
+    }
+  };
 
   const saveAsDraft = async () => {
     if (body.trim().length === 0) return;
@@ -91,20 +117,54 @@ const CreatePage = () => {
   };
 
   const handleNomSelect = (nom) => {
-    setSelectedNom(nom);
+    setSelectedNom(nom.title.substring(2)); // Remove the leading "/ "
     closeModal();
   };
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-    const filtered = NOMS.filter(nom => nom.toLowerCase().includes(query.toLowerCase()));
+    const filtered = allNoms.filter(nom => 
+      nom.title.substring(2).toLowerCase().includes(query.toLowerCase())
+    );
     setFilteredNoms(filtered);
   };
 
+  const handleCheckPress = () => {
+    if (searchQuery.trim()) {
+      const existingNom = allNoms.find(nom => 
+        nom.title.substring(2).toLowerCase() === searchQuery.trim().toLowerCase()
+      );
+
+      if (existingNom) {
+        handleNomSelect(existingNom);
+      } else {
+        // Create new Nom
+        const newNom = { id: Date.now().toString(), title: `/ ${searchQuery.trim()}` };
+        const updatedNoms = [newNom, ...allNoms];
+        setAllNoms(updatedNoms);
+        setFilteredNoms(updatedNoms);
+        saveNoms(updatedNoms);
+        handleNomSelect(newNom);
+      }
+      setSearchQuery('');
+    }
+  };
+
   const handleCreateNom = () => {
-    // Implement the logic to create a new nom
-    console.log('Create new nom');
-    // You can add a new screen for creating a nom or show a dialog here
+    setShowCreateNomInput(true);
+  };
+
+  const handleNewNomSubmit = () => {
+    if (newNomName.trim()) {
+      // Here you would typically add the new Nom to your data source
+      // For now, we'll just add it to the filtered Noms
+      const newNom = { id: Date.now().toString(), title: `/ ${newNomName.trim()}` };
+      setFilteredNoms([newNom, ...filteredNoms]);
+      setNewNomName('');
+      setShowCreateNomInput(false);
+      // Optionally, you can select the newly created Nom
+      handleNomSelect(newNom);
+    }
   };
 
   const openModal = () => {
@@ -134,6 +194,18 @@ const CreatePage = () => {
       }
     },
   });
+
+  const renderNomItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.nomItem}
+      onPress={() => handleNomSelect(item)}
+    >
+      <Text style={styles.nomItemText}>{item.title.substring(2)}</Text>
+      {item.title.substring(2) === selectedNom && (
+        <Ionicons name="checkmark" size={24} color="#FFFFFF" style={styles.checkmarkIcon} />
+      )}
+    </TouchableOpacity>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -223,35 +295,24 @@ const CreatePage = () => {
             ]}
             {...panResponder.panHandlers}
           >
-            <View style={styles.nomModalHeader}>
-              <Text style={styles.nomModalTitle}>Select a Nom</Text>
-              <TouchableOpacity onPress={closeModal}>
-                <Ionicons name="close" size={24} color="#FFFFFF" />
-              </TouchableOpacity>
-            </View>
             <View style={styles.searchContainer}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search Noms"
+                placeholder="Search or create Nom"
                 placeholderTextColor="#666"
                 value={searchQuery}
                 onChangeText={handleSearch}
+                onSubmitEditing={handleCheckPress}
               />
-              <TouchableOpacity style={styles.createNomButton} onPress={handleCreateNom}>
-                <Ionicons name="add" size={24} color="#FFFFFF" />
+              <TouchableOpacity style={styles.checkButton} onPress={handleCheckPress}>
+                <Ionicons name="checkmark" size={24} color="#FFFFFF" />
               </TouchableOpacity>
             </View>
             <FlatList
               data={filteredNoms}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.nomItem}
-                  onPress={() => handleNomSelect(item)}
-                >
-                  <Text style={styles.nomItemText}>{item}</Text>
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item, index) => index.toString()}
+              renderItem={renderNomItem}
+              keyExtractor={(item) => item.id}
+              style={styles.nomList}
             />
           </Animated.View>
         </TouchableOpacity>
@@ -376,31 +437,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#111111',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    paddingVertical: 16,
+    paddingTop: 16,
     paddingHorizontal: 16,
-    maxHeight: '80%',
-  },
-  nomModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  nomModalTitle: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'SFProText-Bold',
-  },
-  nomItem: {
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  nomItemText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontFamily: 'SFProText-Regular',
+    height: 400, // Fixed height
   },
   searchContainer: {
     flexDirection: 'row',
@@ -415,14 +454,53 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     color: '#FFFFFF',
     marginRight: 8,
+    fontFamily: 'SFProText-Regular',
   },
-  createNomButton: {
-    backgroundColor: '#444',
+  checkButton: {
+    backgroundColor: 'rgba(255, 182, 193, 0.1)',
     width: 40,
     height: 40,
     borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 182, 193, 0.3)',
+  },
+  createNomInputContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  createNomInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#222',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    color: '#FFFFFF',
+    marginRight: 8,
+    fontFamily: 'SFProText-Regular',
+  },
+  nomList: {
+    flex: 1,
+  },
+  nomItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  nomItemText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'SFProText-Regular',
+    flex: 1,
+  },
+  checkmarkIcon: {
+    marginLeft: 8,
   },
 });
 
