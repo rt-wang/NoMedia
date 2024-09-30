@@ -48,7 +48,8 @@ const VerificationPage = ({ route, navigation }) => {
         });
 
         if (response.status === 200) {
-          navigation.replace('MainApp');
+          // Registration successful, navigate to the login page
+          navigation.replace('Login');
         }
       } catch (error) {
         console.error('Registration error:', error);
