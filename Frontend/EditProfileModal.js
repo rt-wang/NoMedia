@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
@@ -7,10 +7,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const MAX_BIO_LENGTH = 200;
 
 const EditProfileModal = ({ isVisible, onClose, onSave, initialProfile }) => {
+  console.log('EditProfileModal received initialProfile:', initialProfile);
   const [name, setName] = useState(initialProfile.name || '');
   const [username, setUsername] = useState(initialProfile.username || '');
   const [bio, setBio] = useState(initialProfile.bio || '');
   const [usernameError, setUsernameError] = useState('');
+
+  // Add this useEffect hook
+  useEffect(() => {
+    if (isVisible) {
+      setName(initialProfile.name || '');
+      setUsername(initialProfile.username || '');
+      setBio(initialProfile.bio || '');
+    }
+  }, [isVisible, initialProfile]);
 
   const handleBioChange = (text) => {
     if (text.length <= MAX_BIO_LENGTH) {

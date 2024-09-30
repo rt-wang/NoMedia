@@ -197,7 +197,12 @@ const AccountPage = ({ navigation }) => {
   };
 
   const handleSaveProfile = (updatedProfile) => {
-    setUserInfo({ ...userInfo, ...updatedProfile });
+    setUserInfo(prevUserInfo => ({
+      ...prevUserInfo,
+      ...updatedProfile
+    }));
+    // Optionally, you might want to refetch user info here to ensure consistency with the server
+    fetchUserInfo();
   };
 
   const handleDraftsPress = () => {
@@ -237,7 +242,11 @@ const AccountPage = ({ navigation }) => {
         isVisible={isEditProfileModalVisible}
         onClose={() => setIsEditProfileModalVisible(false)}
         onSave={handleSaveProfile}
-        initialProfile={userInfo}
+        initialProfile={{
+          name: userInfo.name,
+          username: userInfo.username,
+          bio: userInfo.bio || ''
+        }}
       />
     </View>
   );
