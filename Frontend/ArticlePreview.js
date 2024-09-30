@@ -34,7 +34,7 @@ const OptionsMenu = ({ onClose, onNotInterested, onReport }) => (
   </View>
 );
 
-const ArticlePreview = ({ item, onCommentPress, onArticlePress }) => {
+const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, commentCount }) => {
   const navigation = useNavigation();
   const { posts, currentUser, toggleLike, toggleRepost } = usePosts();
   const [showRepostMenu, setShowRepostMenu] = useState(false);
@@ -44,9 +44,7 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress }) => {
   const optionsButtonRef = useRef();
 
   const post = posts.find(p => p.id === item.id) || item;
-  const commentCount = post.comments ? post.comments.length : 0;
   const isLiked = post.likedBy?.includes(currentUser.handle);
-  const isReposted = post.repostedBy?.includes(currentUser.handle);
 
   const handleLike = () => {
     toggleLike(item.id);
@@ -108,64 +106,48 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress }) => {
   }
 
   return (
-    <TouchableOpacity onPress={() => onArticlePress(post)}>
-      <View style={styles.container}>
-        <View style={styles.postHeader}>
-          <View style={styles.titleContainer}>
-            <Text style={styles.title}>{post.title}</Text>
-            <View style={styles.nameAndPageContainer}>
-              <TouchableOpacity onPress={handleNamePress}>
-                <Text style={styles.username}>{post.username}</Text>
-              </TouchableOpacity>
-              <Text style={styles.pageCounter}>{post.pageCount || 1} page{post.pageCount !== 1 ? 's' : ''}</Text>
-            </View>
-          </View>
-          <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
-            <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.previewBoxContainer}>
-          <View style={styles.previewBoxShadow} />
-          <View style={styles.previewBox}>
-            <Text style={styles.previewContent}>
-              {truncatedContent}
-              {post.content.length > 150 && (
-                <Text style={styles.moreButton} onPress={handleMorePress}> more</Text>
-              )}
-            </Text>
+    <TouchableOpacity style={styles.container} onPress={onArticlePress}>
+      <View style={styles.postHeader}>
+        <View style={styles.titleContainer}>
+          <Text style={styles.title}>{post.title}</Text>
+          <View style={styles.nameAndPageContainer}>
+            <TouchableOpacity onPress={handleNamePress}>
+              <Text style={styles.username}>{post.username}</Text>
+            </TouchableOpacity>
+            <Text style={styles.pageCounter}>{post.pageCount || 1} page{post.pageCount !== 1 ? 's' : ''}</Text>
           </View>
         </View>
-        <View style={styles.toolBar}>
-          <TouchableOpacity style={styles.toolItem} onPress={() => onCommentPress(post)}>
-            <Ionicons name="chatbubble-outline" size={18} color="gray" />
-            <Text style={styles.toolCount}>{commentCount}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.toolItem} 
-            onPress={handleRepostPress}
-            ref={repostButtonRef}
-          >
-            <Ionicons 
-              name="repeat" 
-              size={18} 
-              color={isReposted ? REPOST_PINK : "gray"} 
-            />
-            <Text style={[styles.toolCount, isReposted && styles.repostedText]}>
-              {post.reposts}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
-            <Ionicons 
-              name={isLiked ? "heart" : "heart-outline"} 
-              size={18} 
-              color={isLiked ? "white" : "gray"} 
-            />
-            <Text style={styles.toolCount}>{post.likes}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.toolItem, styles.shareButton]}>
-            <Ionicons name="share-outline" size={18} color="gray" />
-          </TouchableOpacity>
+        <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
+          <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.previewBoxContainer}>
+        <View style={styles.previewBoxShadow} />
+        <View style={styles.previewBox}>
+          <Text style={styles.previewContent}>
+            {truncatedContent}
+            {post.content.length > 150 && (
+              <Text style={styles.moreButton} onPress={handleMorePress}> more</Text>
+            )}
+          </Text>
         </View>
+      </View>
+      <View style={styles.toolBar}>
+        <TouchableOpacity style={styles.toolItem} onPress={onCommentPress}>
+          <Ionicons name="chatbubble-outline" size={18} color="gray" />
+          <Text style={styles.toolCount}>{commentCount}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolItem} onPress={handleRepostPress}>
+          <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
+          <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{item.reposts}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
+          <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "red" : "gray"} />
+          <Text style={styles.toolCount}>{item.likes}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolItem}>
+          <Ionicons name="share-outline" size={18} color="gray" />
+        </TouchableOpacity>
       </View>
       <Popover
         isVisible={showRepostMenu}

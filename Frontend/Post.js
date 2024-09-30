@@ -37,7 +37,7 @@ const OptionsMenu = ({ onClose, onNotInterested, onReport, isComment }) => (
   </View>
 );
 
-const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
+const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => {
   const navigation = useNavigation();
   const { reposts, addRepost } = useReposts();
   const { posts, currentUser, toggleLike, toggleRepost } = usePosts();
@@ -48,7 +48,6 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   const optionsButtonRef = useRef();
 
   const post = posts.find(p => p.id === item.id) || item;
-  const commentCount = post.comments ? post.comments.length : 0;
   const isLiked = post.likedBy?.includes(currentUser.handle);
   const isReposted = post.repostedBy?.includes(currentUser.handle);
 
@@ -116,9 +115,10 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
         </View>
       );
     }
+    const truncatedContent = item.content.length > 300 ? item.content.slice(0, 300) + '...' : item.content;
     return (
-      <Text style={[styles.content, item.type === 'comment' && styles.commentText]} numberOfLines={item.type === 'comment' ? undefined : 3} ellipsizeMode="tail">
-        {item.content}
+      <Text style={[styles.content, item.type === 'comment' && styles.commentText]} numberOfLines={item.type === 'comment' ? undefined : undefined}>
+        {truncatedContent}
       </Text>
     );
   };
