@@ -68,6 +68,9 @@ const LoginPage = ({ navigation }) => {
         secureTextEntry
         placeholderTextColor="#666"
       />
+      <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+        <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+      </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
@@ -112,7 +115,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: '100%',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 15,
   },
   buttonText: {
     color: "#000",
@@ -129,6 +132,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'AbhayaLibre-Bold',
     textDecorationLine: 'underline',
+  },
+  forgotPasswordText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '400',
+    fontFamily: 'AbhayaLibre-Regular',
+    alignSelf: 'flex-start',
+    marginBottom: 16,
+    marginTop: -18,
+    marginLeft: 0,
+    width: '100%',
+    left: 117,
   },
 });
 

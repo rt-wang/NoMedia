@@ -1,208 +1,322 @@
-import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Modal, TouchableWithoutFeedback, Animated } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Animated, Modal, FlatList, ScrollView, PanResponder } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { usePosts } from './PostContext'; // Import usePosts
+import { usePosts } from './PostContext';
+
+// Import NOM_BOXES from NomsPage.js
+import { NOM_BOXES } from './NomsPage';
+
+const HighlightedTextInput = ({ value, onChangeText, placeholder, placeholderTextColor, style }) => {
+  // ... (HighlightedTextInput component remains the same)
+};
 
 const CreatePage = () => {
-  const [postType, setPostType] = useState('Nom');
-  const [showDropdown, setShowDropdown] = useState(false);
   const [body, setBody] = useState('');
-  const [showTopicSearch, setShowTopicSearch] = useState(false);
-  const [topicSearch, setTopicSearch] = useState('');
-  const [showMenu, setShowMenu] = useState(false);
+  const [title, setTitle] = useState('');
+  const [showTitle, setShowTitle] = useState(false);
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const [charCount, setCharCount] = useState(0);
+  const [selectedNom, setSelectedNom] = useState('Noms');
+  const [modalVisible, setModalVisible] = useState(false);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredNoms, setFilteredNoms] = useState(NOM_BOXES);
+  const [showCreateNomInput, setShowCreateNomInput] = useState(false);
+  const [newNomName, setNewNomName] = useState('');
+  const [allNoms, setAllNoms] = useState([...NOM_BOXES]);
 
   const navigation = useNavigation();
-  const { addPost } = usePosts(); // Get addPost function from PostContext
+  const { addPost } = usePosts();
 
-  const toggleDropdown = () => setShowDropdown(!showDropdown);
+  useEffect(() => {
+    loadNoms();
+  }, []);
 
-  const selectPostType = (type) => {
-    setPostType(type);
-    setShowDropdown(false);
+  const loadNoms = async () => {
+    try {
+      const storedNoms = await AsyncStorage.getItem('allNoms');
+      if (storedNoms) {
+        setAllNoms(JSON.parse(storedNoms));
+      }
+    } catch (error) {
+      console.error('Error loading noms:', error);
+    }
   };
 
-  const renderDropdownItem = ({ item, index, separators }) => (
-    <TouchableOpacity 
-      style={[
-        styles.dropdownItem, 
-        index === 1 && styles.lastDropdownItem
-      ]} 
-      onPress={() => selectPostType(item)}
-    >
-      <Text style={styles.dropdownItemText}>{item}</Text>
-      {item === postType && <Ionicons name="checkmark" size={20} color="#000" />}
-    </TouchableOpacity>
-  );
-
-  const toggleMenu = () => setShowMenu(!showMenu);
+  const saveNoms = async (noms) => {
+    try {
+      await AsyncStorage.setItem('allNoms', JSON.stringify(noms));
+    } catch (error) {
+      console.error('Error saving noms:', error);
+    }
+  };
 
   const saveAsDraft = async () => {
-    if (body.trim().length === 0) {
-      setShowMenu(false);
-      return;
-    }
+    if (body.trim().length === 0) return;
 
     try {
-      const draft = { postType, body, timestamp: Date.now() };
+      const draft = { title, body, timestamp: Date.now() };
       const existingDrafts = await AsyncStorage.getItem('drafts');
       let drafts = existingDrafts ? JSON.parse(existingDrafts) : [];
       drafts.push(draft);
       await AsyncStorage.setItem('drafts', JSON.stringify(drafts));
       setBody('');
+      setTitle('');
       showSavedAnimation();
-      setShowMenu(false);
     } catch (error) {
       console.error('Error saving draft:', error);
     }
-  };
-
-  const addTopic = () => {
-    setShowTopicSearch(true);
-    setShowMenu(false);
+    setShowDropdown(false);
   };
 
   const showSavedAnimation = () => {
     setShowSavedIndicator(true);
     Animated.sequence([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
       Animated.delay(1000),
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
+      Animated.timing(fadeAnim, { toValue: 0, duration: 300, useNativeDriver: true }),
     ]).start(() => setShowSavedIndicator(false));
   };
 
   const handlePost = async () => {
-    if (body.trim().length === 0) {
-      // Don't post empty content
-      return;
-    }
+    if (body.trim().length === 0) return;
 
     const newPost = {
-      type: postType.toLowerCase(),
+      type: 'nom',
+      title: title.trim(),
       content: body,
       reposts: 0,
       likes: 0,
-      isUserPost: true, // Ensure this flag is set to true
+      isUserPost: true,
     };
 
     addPost(newPost);
     setBody('');
+    setTitle('');
     navigation.goBack();
   };
 
-  const handleTopicChange = (text) => {
-    if (text.length <= 30) {
-      setBody(text);
-      setCharCount(text.length);
+  const handleTitleChange = (text) => {
+    if (text.length <= 50) {
+      setTitle(text);
     }
   };
 
+  const handleBodyChange = (text) => {
+    setBody(text);
+    if (text.length >= 300 && !showTitle) {
+      setShowTitle(true);
+    } else if (text.length < 300 && showTitle) {
+      setShowTitle(false);
+      setTitle('');
+    }
+  };
+
+  const handleNomSelect = (nom) => {
+    setSelectedNom(nom.title.substring(2)); // Remove the leading "/ "
+    closeModal();
+  };
+
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    const filtered = allNoms.filter(nom => 
+      nom.title.substring(2).toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredNoms(filtered);
+  };
+
+  const handleCheckPress = () => {
+    if (searchQuery.trim()) {
+      const existingNom = allNoms.find(nom => 
+        nom.title.substring(2).toLowerCase() === searchQuery.trim().toLowerCase()
+      );
+
+      if (existingNom) {
+        handleNomSelect(existingNom);
+      } else {
+        // Create new Nom
+        const newNom = { id: Date.now().toString(), title: `/ ${searchQuery.trim()}` };
+        const updatedNoms = [newNom, ...allNoms];
+        setAllNoms(updatedNoms);
+        setFilteredNoms(updatedNoms);
+        saveNoms(updatedNoms);
+        handleNomSelect(newNom);
+      }
+      setSearchQuery('');
+    }
+  };
+
+  const handleCreateNom = () => {
+    setShowCreateNomInput(true);
+  };
+
+  const handleNewNomSubmit = () => {
+    if (newNomName.trim()) {
+      // Here you would typically add the new Nom to your data source
+      // For now, we'll just add it to the filtered Noms
+      const newNom = { id: Date.now().toString(), title: `/ ${newNomName.trim()}` };
+      setFilteredNoms([newNom, ...filteredNoms]);
+      setNewNomName('');
+      setShowCreateNomInput(false);
+      // Optionally, you can select the newly created Nom
+      handleNomSelect(newNom);
+    }
+  };
+
+  const openModal = () => {
+    setModalVisible(true);
+    Animated.timing(slideAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const closeModal = () => {
+    Animated.timing(slideAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => setModalVisible(false));
+  };
+
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gestureState) => {
+      return gestureState.dy > 5;
+    },
+    onPanResponderRelease: (_, gestureState) => {
+      if (gestureState.dy > 50) {
+        closeModal();
+      }
+    },
+  });
+
+  const renderNomItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.nomItem}
+      onPress={() => handleNomSelect(item)}
+    >
+      <Text style={styles.nomItemText}>{item.title.substring(2)}</Text>
+      {item.title.substring(2) === selectedNom && (
+        <Ionicons name="checkmark" size={24} color="#FFFFFF" style={styles.checkmarkIcon} />
+      )}
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <TouchableWithoutFeedback onPress={() => { setShowTopicSearch(false); setShowMenu(false); }}>
-        <View style={styles.content}>
-          {showSavedIndicator && (
-            <Animated.View style={[styles.savedIndicator, { opacity: fadeAnim }]}>
-              <Ionicons name="checkmark-circle" size={24} color="#fff" />
-              <Text style={styles.savedIndicatorText}>Saved</Text>
-            </Animated.View>
+      <View style={styles.header}>
+        <View style={styles.titleContainer}>
+          {showTitle ? (
+            <TextInput
+              style={styles.titleInput}
+              placeholder="Add title"
+              placeholderTextColor="#666"
+              value={title}
+              onChangeText={handleTitleChange}
+              maxLength={50}
+            />
+          ) : (
+            <View style={styles.placeholderTitle} />
           )}
-          <View style={styles.postTypeContainer}>
-            <TouchableOpacity style={styles.postTypeButton} onPress={toggleDropdown}>
-              <Text style={styles.postTypeText}>{postType}</Text>
-              <Ionicons name="chevron-down" size={24} color="#fff" />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={toggleMenu}>
-              <Ionicons name="ellipsis-vertical" size={24} color="#fff" />
+        </View>
+        <View style={styles.headerRight}>
+          <TouchableOpacity onPress={() => setShowDropdown(true)} style={styles.ellipsisButton}>
+            <Ionicons name="ellipsis-vertical" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.postButton} onPress={handlePost}>
+            <Text style={styles.postButtonText}>Post</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View style={styles.content}>
+        <TextInput
+          style={styles.bodyInput}
+          placeholder="What's on your mind?"
+          placeholderTextColor="#666666"
+          value={body}
+          onChangeText={handleBodyChange}
+          multiline
+        />
+      </View>
+      <TouchableOpacity
+        style={styles.nomButton}
+        onPress={openModal}
+      >
+        <Text style={styles.nomButtonText}>{selectedNom}</Text>
+        <Ionicons name="chevron-up" size={16} color="#FFFFFF" style={styles.nomButtonIcon} />
+      </TouchableOpacity>
+      <Modal
+        visible={showDropdown}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDropdown(false)}
+      >
+        <TouchableOpacity 
+          style={styles.modalOverlay} 
+          activeOpacity={1} 
+          onPress={() => setShowDropdown(false)}
+        >
+          <View style={styles.dropdownMenu}>
+            <TouchableOpacity onPress={saveAsDraft} style={styles.dropdownItem}>
+              <Text style={styles.dropdownItemText}>Add as Draft</Text>
             </TouchableOpacity>
           </View>
-          {showMenu && (
-            <View style={styles.menu}>
-              <TouchableOpacity style={styles.menuItem} onPress={saveAsDraft}>
-                <Text style={styles.menuItemText}>Save as draft</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.menuItem} onPress={addTopic}>
-                <Text style={styles.menuItemText}>Add topic?</Text>
-              </TouchableOpacity>
-            </View>
-          )}
-          {showDropdown && (
-            <FlatList
-              style={styles.dropdown}
-              data={['Nom', 'Topic']}
-              renderItem={renderDropdownItem}
-              keyExtractor={(item) => item}
-            />
-          )}
-          {postType === 'Topic' ? (
-            <View>
-              <View style={styles.topicInputContainer}>
-                <Text style={styles.topicPrefix}>/</Text>
-                <TextInput
-                  style={styles.topicInput}
-                  placeholder="your topic"
-                  placeholderTextColor="#999"
-                  value={body}
-                  onChangeText={handleTopicChange}
-                  maxLength={30}
-                />
-              </View>
-              <Text style={styles.charCount}>{charCount}/30</Text>
-            </View>
-          ) : (
-            <View style={styles.bodyContainer}>
-              <TextInput
-                style={styles.bodyInput}
-                placeholder="What's on your mind?"
-                placeholderTextColor="#999"
-                multiline
-                value={body}
-                onChangeText={setBody}
-              />
-            </View>
-          )}
-          <Modal
-            visible={showTopicSearch}
-            transparent={true}
-            animationType="fade"
-            onRequestClose={() => setShowTopicSearch(false)}
+        </TouchableOpacity>
+      </Modal>
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="none"
+        onRequestClose={closeModal}
+      >
+        <TouchableOpacity
+          style={styles.nomModalOverlay}
+          activeOpacity={1}
+          onPress={closeModal}
+        >
+          <Animated.View
+            style={[
+              styles.nomModalContent,
+              {
+                transform: [
+                  {
+                    translateY: slideAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [300, 0],
+                    }),
+                  },
+                ],
+              },
+            ]}
+            {...panResponder.panHandlers}
           >
-            <TouchableWithoutFeedback onPress={() => setShowTopicSearch(false)}>
-              <View style={styles.modalOverlay}>
-                <TouchableWithoutFeedback onPress={(e) => e.stopPropagation()}>
-                  <View style={styles.topicSearchContainer}>
-                    <Text style={styles.topicSearchPrefix}>/</Text>
-                    <TextInput
-                      style={styles.topicSearchInput}
-                      placeholder="Search for a topic"
-                      placeholderTextColor="#999"
-                      value={topicSearch}
-                      onChangeText={setTopicSearch}
-                      autoFocus
-                    />
-                  </View>
-                </TouchableWithoutFeedback>
-              </View>
-            </TouchableWithoutFeedback>
-          </Modal>
-        </View>
-      </TouchableWithoutFeedback>
-      <TouchableOpacity style={styles.postButton} onPress={handlePost}>
-        <Text style={styles.postButtonText}>Post</Text>
-      </TouchableOpacity>
+            <View style={styles.searchContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Search or create Nom"
+                placeholderTextColor="#666"
+                value={searchQuery}
+                onChangeText={handleSearch}
+                onSubmitEditing={handleCheckPress}
+              />
+              <TouchableOpacity style={styles.checkButton} onPress={handleCheckPress}>
+                <Ionicons name="checkmark" size={24} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+            <FlatList
+              data={filteredNoms}
+              renderItem={renderNomItem}
+              keyExtractor={(item) => item.id}
+              style={styles.nomList}
+            />
+          </Animated.View>
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -210,173 +324,183 @@ const CreatePage = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#000000',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginTop: -30,
+  },
+  titleContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    marginBottom: -4,
+    marginLeft: 0,
+  },
+  titleInput: {
+    color: '#FFFFFF',
+    fontSize: 21,
+    fontFamily: 'Athelas',
+    borderBottomWidth: 1,
+    borderBottomColor: '#333333',
+    paddingBottom: 4,
+  },
+  placeholderTitle: {
+    height: 33, // Approximate height of the title input
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ellipsisButton: {
+    marginRight: 4,
+    marginBottom: -6,
+  },
+  postButton: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  postButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'SFProText-Regular',
   },
   content: {
     flex: 1,
-    padding: 16,
-  },
-  postTypeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: -25,
-    marginBottom: 16,
-  },
-  savedIndicator: {
-    position: 'absolute',
-    top: -24,
-    left: 123,
-    right: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    paddingVertical: 8,
     paddingHorizontal: 16,
-    borderRadius: 20,
-    alignSelf: 'center',
-    maxWidth: 120,
-    zIndex: 1,
-  },
-  savedIndicatorText: {
-    color: '#fff',
-    marginLeft: 5,
-    fontSize: 16,
-  },
-  postTypeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  postTypeText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginRight: 8,
-  },
-  postButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    backgroundColor: '#333',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 30,
-    elevation: 5,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  postButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  dropdown: {
-    position: 'absolute',
-    top: 50,
-    left: 16,
-    right: 16,
-    backgroundColor: '#333',
-    borderRadius: 8,
-    zIndex: 1,
-  },
-  dropdownItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#444',
-  },
-  lastDropdownItem: {
-    borderBottomWidth: 0,
-  },
-  dropdownItemText: {
-    color: '#fff',
-    fontSize: 18,
-  },
-  bodyContainer: {
-    flex: 1,
-    marginTop: 16,
+    paddingTop: 16,
   },
   bodyInput: {
-    color: '#fff',
-    fontSize: 18,
-    paddingTop: -30,
     flex: 1,
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontFamily: 'SFProText-Regular',
+    textAlignVertical: 'top',
+    padding: 0,
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  dropdownMenu: {
+    backgroundColor: '#111111',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingVertical: 8,
+  },
+  dropdownItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  dropdownItemText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontFamily: 'SFProText-Regular',
+  },
+  nomButton: {
+    position: 'absolute',
+    bottom: 16,
+    left: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Slightly more opaque white
+    paddingHorizontal: 12,
+    paddingVertical: 10, // Increased vertical padding for a more square shape
+    borderRadius: 12, // Reduced border radius for a more square appearance
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)', // More visible border
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between', // Spread out the text and icon
+    minWidth: 100, // Ensure a minimum width for the button
+  },
+  nomButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14, // Slightly larger font size
+    fontWeight: '600', // Make the text a bit bolder
+    fontFamily: 'SFProText-Semibold', // Use a semibold font if available
+  },
+  nomButtonIcon: {
+    marginLeft: 4,
+  },
+  nomModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'flex-end',
+  },
+  nomModalContent: {
+    backgroundColor: '#111111',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingTop: 16,
+    paddingHorizontal: 16,
+    height: 400, // Fixed height
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  searchInput: {
+    flex: 1,
+    height: 40,
+    backgroundColor: '#222',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    color: '#FFFFFF',
+    marginRight: 8,
+    fontFamily: 'SFProText-Regular',
+  },
+  checkButton: {
+    backgroundColor: 'rgba(255, 182, 193, 0.1)',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 182, 193, 0.3)',
   },
-  topicSearchContainer: {
+  createNomInputContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  createNomInput: {
+    flex: 1,
+    height: 40,
     backgroundColor: '#222',
-    borderRadius: 8,
-    padding: 8,
-    width: '80%',
-  },
-  topicSearchPrefix: {
-    color: '#666',
-    fontSize: 18,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    color: '#FFFFFF',
     marginRight: 8,
+    fontFamily: 'SFProText-Regular',
   },
-  topicSearchInput: {
+  nomList: {
     flex: 1,
-    color: '#fff',
-    fontSize: 18,
   },
-  topicInputContainer: {
+  nomItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#333',
-    paddingVertical: 8,
-    marginBottom: 16,
-    top: 10,
-    position: 'relative',
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
   },
-  topicPrefix: {
-    color: '#666',
-    fontSize: 25,
-    marginRight: 5,
-    top: 4,
-  },
-  topicInput: {
-    flex: 1,
-    color: '#fff',
-    fontSize: 20,
-    fontWeight: 'bold',
-    paddingVertical: 4,
-    top: 5.5,
-  },
-  charCount: {
-    alignSelf: 'flex-end',
-    color: '#666',
-    fontSize: 12,
-    marginTop: 0,
-  },
-  menu: {
-    position: 'absolute',
-    top: 50,
-    right: 10,
-    backgroundColor: '#333',
-    borderRadius: 8,
-    zIndex: 1,
-  },
-  menuItem: {
-    padding: 12,
-    borderBottomWidth: 0,
-    borderBottomColor: '#444',
-  },
-  menuItemText: {
-    color: '#fff',
+  nomItemText: {
+    color: '#FFFFFF',
     fontSize: 16,
+    fontFamily: 'SFProText-Regular',
+    flex: 1,
+  },
+  checkmarkIcon: {
+    marginLeft: 8,
   },
 });
 

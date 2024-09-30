@@ -17,7 +17,7 @@ WORKDIR /app
 # Copy the built jar from the previous stage
 COPY --from=build /app/postservice/target/postservice-*.jar postservice.jar
 
-EXPOSE 8081
+EXPOSE 8082
 
 ENTRYPOINT ["java", "-jar", "postservice.jar"]
 

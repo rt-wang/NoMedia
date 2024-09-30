@@ -34,7 +34,7 @@ services:
       dockerfile: postservice/Dockerfile
     container_name: postservice
     ports:
-      - "8081:8081"
+      - "8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/NoMedia?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root

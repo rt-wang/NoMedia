@@ -6,7 +6,7 @@ import ArticlePreview from './ArticlePreview';
 import Post from './Post';
 import { useReposts } from './RepostContext';
 import { usePosts } from './PostContext';
-import TopicsPage from './TopicsPage';
+import NomsPage from './NomsPage';
 import ProfilePromptModal from './ProfilePromptModal';
 
 const LIGHT_GREY = '#CCCCCC';
@@ -21,10 +21,10 @@ const TabNavigator = ({ activeTab, setActiveTab }) => (
       <Text style={[styles.tabText, activeTab === 'ForYou' && styles.activeTabText]}>For You Page</Text>
     </TouchableOpacity>
     <TouchableOpacity
-      style={[styles.tab, activeTab === 'Topics' && styles.activeTab]}
-      onPress={() => setActiveTab('Topics')}
+      style={[styles.tab, activeTab === 'Noms' && styles.activeTab]}
+      onPress={() => setActiveTab('Noms')}
     >
-      <Text style={[styles.tabText, activeTab === 'Topics' && styles.activeTabText]}>Topics</Text>
+      <Text style={[styles.tabText, activeTab === 'Noms' && styles.activeTabText]}>Noms</Text>
     </TouchableOpacity>
   </View>
 );
@@ -154,7 +154,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
           />
         </>
       ) : (
-        <TopicsPage navigation={navigation} />
+        <NomsPage navigation={navigation} />
       )}
     </View>
   );

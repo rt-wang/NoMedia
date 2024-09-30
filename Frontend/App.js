@@ -28,6 +28,9 @@ import LoginPage from './LoginPage';
 import FeedbackForm from './FeedbackForm';
 import VerificationPage from './VerificationPage';
 import UserAccountPage from './UserAccountPage';
+import ForgotPasswordPage from './ForgotPasswordPage';
+import NomsPage from './NomsPage';
+import NomObject from './NomObject';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -42,6 +45,8 @@ const HomeStack = () => (
     <Stack.Screen name="CommentSection" component={CommentSection} />
     <Stack.Screen name="ExplorePageAI" component={ExplorePageAI} />
     <Stack.Screen name="FeedbackForm" component={FeedbackForm} />
+    <Stack.Screen name="NomsPage" component={NomsPage} />
+    <Stack.Screen name="NomObject" component={NomObject} />
   </Stack.Navigator>
 );
 
@@ -58,6 +63,7 @@ const AuthStack = () => (
     <Stack.Screen name="Login" component={LoginPage} />
     <Stack.Screen name="Registration" component={RegistrationPage} />
     <Stack.Screen name="Verification" component={VerificationPage} />
+    <Stack.Screen name="ForgotPassword" component={ForgotPasswordPage} />
   </Stack.Navigator>
 );
 
