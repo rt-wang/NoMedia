@@ -6,8 +6,9 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="user-service" />
         <module name="common" />
+        <module name="postservice" />
+        <module name="user-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -21,6 +22,7 @@
       <module name="common1" options="-parameters" />
       <module name="demo" options="-parameters" />
       <module name="no-media-backend" options="-parameters" />
+      <module name="postservice" options="-parameters" />
       <module name="user-service" options="-parameters" />
     </option>
   </component>

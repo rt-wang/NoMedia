@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 
 public class LoginRequest {
 
-    @NotBlank(message = "Username cannot be blank")
-    private String username;
+    @NotBlank(message = "Username or Email cannot be blank")
+    private String usernameOrEmail;
 
     @NotBlank(message = "Password cannot be blank")
     private String password;
@@ -15,18 +15,18 @@ public class LoginRequest {
     }
 
     // Constructor with parameters
-    public LoginRequest(String username, String password) {
-        this.username = username;
+    public LoginRequest(String usernameOrEmail, String password) {
+        this.usernameOrEmail = usernameOrEmail;
         this.password = password;
     }
 
     // Getters and setters
-    public String getUsername() {
-        return username;
+    public String getUsernameOrEmail() {
+        return usernameOrEmail;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUsernameOrEmail(String usernameOrEmail) {
+        this.usernameOrEmail = usernameOrEmail;
     }
 
     public String getPassword() {

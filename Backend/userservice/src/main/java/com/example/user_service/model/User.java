@@ -1,13 +1,12 @@
 package com.example.user_service.model;
 
 import com.example.common.security.UserDetailsInterface;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table(name = "`User`")
@@ -32,7 +31,20 @@ public class User implements UserDetailsInterface {
     @Column(nullable = false)
     private LocalDateTime updated_at;
 
+    @Column
     private String bio;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 
     public Long getUserId() {
         return userId;
@@ -96,7 +108,7 @@ public class User implements UserDetailsInterface {
     }
 
     @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
+    public List<SimpleGrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
     }
 

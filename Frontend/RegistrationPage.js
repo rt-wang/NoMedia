@@ -1,16 +1,29 @@
 import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import axios from 'axios';
 
 const LIGHT_PINK = '#FFB6C1';
-const API_BASE_URL = `http://localhost:8080`; // Replace with your actual API base URL
+const API_BASE_URL = `http://localhost:8080`;
 
 const RegistrationPage = ({ navigation }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
+  const name = `${firstName} ${lastName}`;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+
+  const handleUsernameChange = (text) => {
+    if (text.includes('@')) {
+      setUsernameError('Username cannot contain @');
+    } else if (text.includes(' ')) {
+      setUsernameError('Username cannot contain spaces');
+    } else {
+      setUsernameError('');
+    }
+    setUsername(text);
+  };
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
@@ -18,10 +31,15 @@ const RegistrationPage = ({ navigation }) => {
       return;
     }
 
+    if (username.includes('@') || username.includes(' ')) {
+      Alert.alert('Error', 'Username cannot contain @ or spaces');
+      return;
+    }
+
     try {
       const response = await axios.post(`${API_BASE_URL}/api/users/register`, {
-        firstName,
-        lastName,
+        name,
+        username,
         email,
         password
       });
@@ -31,7 +49,13 @@ const RegistrationPage = ({ navigation }) => {
       }
     } catch (error) {
       console.error('Registration error:', error);
-      Alert.alert('Error', 'Registration failed. Please try again.');
+      if (error.response && error.response.status === 409) {
+        Alert.alert('Error', 'This username is already taken. Please choose a different one.');
+      } else if (error.response && error.response.data && error.response.data.message) {
+        Alert.alert('Error', error.response.data.message);
+      } else {
+        Alert.alert('Error', 'Registration failed. Please try again.');
+      }
     }
   };
 
@@ -103,7 +127,7 @@ const RegistrationPage = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -164,6 +188,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'AbhayaLibre-Bold',
     textDecorationLine: 'underline',
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 25,
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 5,
   },
 });
 

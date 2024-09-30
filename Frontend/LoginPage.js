@@ -1,22 +1,45 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 const LIGHT_PINK = '#FFB6C1';
+const API_BASE_URL = `http://localhost:8080`;
 
 const LoginPage = ({ navigation }) => {
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
-    // This is a mock login. In a real app, you'd validate against a backend.
     if (emailOrUsername && password) {
       try {
-        // Store the user info
-        await AsyncStorage.setItem('currentUser', emailOrUsername);
-        // Navigate to the main app
-        navigation.replace('MainApp');
+        const response = await axios.post(`${API_BASE_URL}/api/users/login`, {
+          usernameOrEmail: emailOrUsername,
+          password: password
+        });
+
+        if (response.status >= 200 && response.status < 300 && response.data.accessToken) {
+          const token = response.data.accessToken;
+          await AsyncStorage.setItem('token', token);
+          
+          let userId = JSON.stringify(response.data.userId);
+          let authorities = response.data.authorities;
+
+          if (authorities) {
+            await AsyncStorage.setItem('authorities', JSON.stringify(authorities));
+          } else {
+            await AsyncStorage.setItem('authorities', JSON.stringify(['ROLE_USER']));
+          }
+          
+          await AsyncStorage.setItem('userId', userId);
+          await AsyncStorage.setItem('authorities',JSON.stringify(authorities));
+          
+          navigation.replace('MainApp');
+        } else {
+          Alert.alert('Error', 'Failed to log in. Please try again.');
+        }
       } catch (error) {
+        console.error('Login error:', error);
         Alert.alert('Error', 'Failed to log in. Please try again.');
       }
     } else {

@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 const PINK_COLOR = '#FFB6C1';
 const MAX_CHARS = 300;
 
-const CommentSection = ({ route, navigation }) => {
+const CommentSection = ({ route, navigation, hideOriginalPost = false, isModal = false }) => {
   const { postId, commentId } = route.params;
   const { posts, addComment } = usePosts();
   const [comment, setComment] = useState('');
@@ -60,10 +60,10 @@ const CommentSection = ({ route, navigation }) => {
   const renderComments = () => {
     return comments.map((item) => (
       <TouchableOpacity key={item.id} onPress={() => handleCommentPress(item)}>
-        <View style={styles.commentContainer}>
+        <View style={[styles.commentContainer, isModal && styles.modalCommentContainer]}>
           <Post
             item={item}
-            onCommentPress={() => {}} // We don't need this anymore as the whole comment is touchable
+            onCommentPress={() => {}}
             commentCount={item.comments ? item.comments.length : 0}
           />
         </View>
@@ -95,21 +95,25 @@ const CommentSection = ({ route, navigation }) => {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, isModal && styles.modalContainer]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
       <KeyboardAwareScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, isModal && styles.modalScrollContent]}
         keyboardShouldPersistTaps="handled"
         extraScrollHeight={20}
       >
-        <View style={styles.originalPostContainer}>
-          {renderOriginalItem()}
-        </View>
-        <View style={styles.divider}>
-          <View style={styles.dividerLine} />
-        </View>
+        {!hideOriginalPost && (
+          <View style={styles.originalPostContainer}>
+            {renderOriginalItem()}
+          </View>
+        )}
+        {!hideOriginalPost && (
+          <View style={styles.divider}>
+            <View style={styles.dividerLine} />
+          </View>
+        )}
         {comments.length > 0 ? renderComments() : (
           <Text style={styles.emptyText}>No comments yet</Text>
         )}
@@ -227,6 +231,15 @@ const styles = StyleSheet.create({
   },
   originalPostContainer: {
     paddingHorizontal: 8, // Add horizontal padding to match For You page
+  },
+  modalContainer: {
+    paddingTop: 0,
+  },
+  modalScrollContent: {
+    paddingTop: 10, // Reduced from 50 to 10 to move content up
+  },
+  modalCommentContainer: {
+    paddingLeft: 10, // Reduce left padding for comments in modal view
   },
 });
 

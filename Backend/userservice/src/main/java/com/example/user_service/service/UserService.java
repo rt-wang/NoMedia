@@ -47,14 +47,43 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public User updateUser(String username, User updatedUser) {
-        User user = getUserByUsername(username);
-        // Update user fields...
-        return userRepository.save(user);
+    public User updateUser(Long userId, User updatedUser) {
+        User existingUser = getUserById(userId);
+        if (existingUser == null) {
+            throw new RuntimeException("User not found");
+        }
+
+        // Update bio if provided
+        if (updatedUser.getBio() != null) {
+            existingUser.setBio(updatedUser.getBio().trim());
+        }
+
+        // Update name if provided
+        if (updatedUser.getName() != null) {
+            existingUser.setName(updatedUser.getName().trim());
+        }
+
+        // Update username if provided and not already taken
+        if (updatedUser.getUsername() != null && !updatedUser.getUsername().equals(existingUser.getUsername())) {
+            if (userRepository.existsByUsername(updatedUser.getUsername())) {
+                throw new RuntimeException("Username is already taken");
+            }
+            existingUser.setUsername(updatedUser.getUsername().trim());
+        }
+
+        existingUser.setUpdatedAt(LocalDateTime.now());
+
+        return userRepository.save(existingUser);
     }
 
-    public User loginUser(String username, String password) {
-        User user = getUserByUsername(username);
+    public User loginUser(String usernameOrEmail, String password) {
+        User user;
+        if (usernameOrEmail.contains("@")) {
+            user = userRepository.findByEmail(usernameOrEmail)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+        } else {
+            user = getUserByUsername(usernameOrEmail);
+        }
         
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new RuntimeException("Invalid password");
@@ -64,8 +93,13 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
+        if (usernameOrEmail.contains("@")) {
+            return userRepository.findByEmail(usernameOrEmail)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + usernameOrEmail));
+        } else {
+            return userRepository.findByUsername(usernameOrEmail)
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + usernameOrEmail));
+        }
     }
 }
