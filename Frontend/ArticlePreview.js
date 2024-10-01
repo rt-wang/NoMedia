@@ -113,13 +113,14 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
           <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted
         </Text>
       )}
-      <View style={styles.articleContent}>
+      <View style={styles.postHeader}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{post.title}</Text>
           <View style={styles.userInfo}>
             <TouchableOpacity onPress={handleNamePress}>
               <Text style={styles.username}>{post.username}</Text>
             </TouchableOpacity>
+            <Text style={styles.handle}>@{post.handle}</Text>
             <Text style={styles.pageCounter}>{post.pageCount || 1} page{post.pageCount !== 1 ? 's' : ''}</Text>
           </View>
         </View>
@@ -202,7 +203,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: 'Athletas', // Reverted to original font
+    fontFamily: 'Athletas', // Ensure this font is correctly linked in your project
     fontSize: 18,
     color: '#fff',
     marginBottom: 4,
@@ -210,13 +211,19 @@ const styles = StyleSheet.create({
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
   username: {
     fontFamily: 'SFProText-Regular',
     fontSize: 16,
-    color: USERNAME_COLOR,
+    color: '#fff',
     fontWeight: 'bold',
+    marginRight: 4,
+  },
+  handle: {
+    fontFamily: 'SFProText-Regular',
+    fontSize: 14,
+    color: USERNAME_COLOR,
+    marginRight: 8,
   },
   pageCounter: {
     fontFamily: 'SFProText-Regular',
@@ -369,7 +376,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProText-Regular',
     fontSize: 14,
     color: '#687684',
-    left: 30,
+    left: 155,
   },
   shareButton: {
     marginTop: -3.5, // This will move the share button up by 3 pixels
@@ -379,6 +386,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 8,
     marginLeft: 8,
+  },
+  postHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 4,
   },
 });
 

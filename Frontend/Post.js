@@ -184,10 +184,13 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
           <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted
         </Text>
       )}
-      <View style={styles.postContent}>
-        <TouchableOpacity onPress={handleNamePress}>
-          <Text style={styles.username}>{item.username}</Text>
-        </TouchableOpacity>
+      <View style={styles.postHeader}>
+        <View style={styles.userInfo}>
+          <TouchableOpacity onPress={handleNamePress}>
+            <Text style={styles.username}>{item.username}</Text>
+          </TouchableOpacity>
+          <Text style={styles.handle}>@{item.handle}</Text>
+        </View>
         <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
           <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
         </TouchableOpacity>
@@ -234,16 +237,25 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: '#333',
   },
-  postContent: {
+  postHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 4,
   },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   username: {
     fontSize: 16,
-    color: USERNAME_COLOR,
+    color: '#fff',
     fontWeight: 'bold',
+    marginRight: 4,
+  },
+  handle: {
+    fontSize: 14,
+    color: USERNAME_COLOR,
   },
   content: {
     fontSize: 16,
