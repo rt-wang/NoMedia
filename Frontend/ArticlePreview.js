@@ -202,9 +202,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: 'SFProText-Regular', // Reverted to original font
+    fontFamily: 'Athletas', // Reverted to original font
     fontSize: 18,
-    fontWeight: 'bold',
     color: '#fff',
     marginBottom: 4,
   },
