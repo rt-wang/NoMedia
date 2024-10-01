@@ -5,9 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usePosts } from './PostContext';
+import axios from 'axios';
 
 // Import NOM_BOXES from NomsPage.js
 import { NOM_BOXES } from './NomsPage';
+
+const API_BASE_URL = 'http://localhost:8082'; // Replace with your actual API URL
 
 const HighlightedTextInput = ({ value, onChangeText, placeholder, placeholderTextColor, style }) => {
   // ... (HighlightedTextInput component remains the same)
@@ -85,19 +88,52 @@ const CreatePage = () => {
   const handlePost = async () => {
     if (body.trim().length === 0) return;
 
-    const newPost = {
-      type: 'nom',
-      title: title.trim(),
-      content: body,
-      reposts: 0,
-      likes: 0,
-      isUserPost: true,
-    };
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      const authorities = await AsyncStorage.getItem('authorities');
 
-    addPost(newPost);
-    setBody('');
-    setTitle('');
-    navigation.goBack();
+      if (!token || !userId) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      const newPost = {
+        user_id: userId,
+        content: body,
+        title: title.trim(),
+        post_format: 'Original',
+        topic_id: selectedNom !== 'Noms' ? selectedNom : null,
+      };
+
+      const response = await axios.post(`${API_BASE_URL}/api/posts`, newPost, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      console.log('Post created successfully:', response.data);
+
+      if (response.status === 201) {
+        //addPost(response.data);
+        setBody('');
+        setTitle('');
+        navigation.goBack();
+      } else {
+        console.error('Failed to create post:', response.status);
+      }
+    } catch (error) {
+      console.error('Error creating post:', error);
+      if (error.response) {
+        console.error('Response data:', error.response.data);
+        console.error('Response status:', error.response.status);
+        console.error('Response headers:', error.response.headers);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Error message:', error.message);
+      }
+    }
   };
 
   const handleTitleChange = (text) => {

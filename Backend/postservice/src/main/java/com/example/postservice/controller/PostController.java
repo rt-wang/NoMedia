@@ -7,19 +7,27 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/posts")
 public class PostController {
 
     private final PostService postService;
-
+    private static final Logger log = LoggerFactory.getLogger(PostController.class);
     public PostController(PostService postService) {
         this.postService = postService;
     }
 
     @PostMapping
     public ResponseEntity<PostDto> createPost(@RequestBody CreatePostRequest createPostRequest) {
+        log.info("Received request to create post: {}", createPostRequest);
         PostDto createdPost = postService.createPost(createPostRequest);
+        log.info("Created post: {}", createdPost);
         return new ResponseEntity<>(createdPost, HttpStatus.CREATED);
     }
 
@@ -27,5 +35,23 @@ public class PostController {
     public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
         postService.deletePost(postId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostDto> getPost(@PathVariable Long postId) {
+        PostDto post = postService.getPost(postId);
+        return new ResponseEntity<>(post, HttpStatus.OK);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<PostDto>> getPostsByUser(@PathVariable Long userId) {
+        log.info("Received request to get posts for user: {}", userId);
+        Long currentUserId = postService.getCurrentUserId();
+        if (!currentUserId.equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<PostDto> posts = postService.getPostsByUser(userId);
+        log.info("Returning {} posts for user: {}", posts.size(), userId);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 }

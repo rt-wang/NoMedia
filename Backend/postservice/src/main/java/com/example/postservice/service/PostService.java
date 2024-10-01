@@ -9,14 +9,18 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.common.security.UserDetailsInterface;
-
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class PostService {
 
     private final PostRepository postRepository;
-
+    private static final Logger log = LoggerFactory.getLogger(PostService.class);
     public PostService(PostRepository postRepository) {
         this.postRepository = postRepository;
     }
@@ -26,7 +30,7 @@ public class PostService {
         Post post = new Post();
         post.setContent(createPostRequest.getContent());
         post.setTitle(createPostRequest.getTitle());
-        post.setPostFormat(createPostRequest.getPostFormat());
+        post.setPostFormat(createPostRequest.getPostFormat() != null ? createPostRequest.getPostFormat() : Post.PostFormat.Original);
         post.setTopicId(createPostRequest.getTopicId());
         post.setUserId(getCurrentUserId());
         post.setCreatedAt(LocalDateTime.now());
@@ -48,14 +52,44 @@ public class PostService {
         postRepository.delete(post);
     }
 
-    private Long getCurrentUserId() {
+    public Long getCurrentUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new SecurityException("User not authenticated");
+        log.debug("Current authentication: {}", authentication);
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof UserDetailsInterface) {
+                Long userId = ((UserDetailsInterface) principal).getId();
+                log.info("Authenticated user ID: {}", userId);
+                return userId;
+            } else if (principal instanceof String) {
+                Long userId = Long.parseLong((String) principal);
+                log.info("Authenticated user ID: {}", userId);
+                return userId;
+            }
         }
-        if (!(authentication.getPrincipal() instanceof UserDetailsInterface)) {
-            throw new SecurityException("Invalid user details");
+        log.warn("User not authenticated");
+        throw new SecurityException("User not authenticated");
+    }
+
+    @Transactional
+    public PostDto getPost(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        return new PostDto(post);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostDto> getPostsByUser(Long userId) {
+
+        List<Post> posts = postRepository.findByUserId(userId);
+        
+        if (posts.isEmpty()) {
+            // Log this information
+            log.info("No posts found for user with id: {}", userId);
         }
-        return ((UserDetailsInterface) authentication.getPrincipal()).getId();
+
+        return posts.stream()
+                .map(PostDto::new)
+                .collect(Collectors.toList());
     }
 }
