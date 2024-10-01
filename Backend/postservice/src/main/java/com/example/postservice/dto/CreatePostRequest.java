@@ -2,6 +2,7 @@ package com.example.postservice.dto;
 
 import com.example.postservice.entity.Post;
 
+
 public class CreatePostRequest {
     private String content;
     private String title;

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, FlatList, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Post from './Post';
@@ -11,9 +11,8 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 
 const CONTENT_INDENT = '  '; // Two spaces for indentation
-const API_BASE_URL = `http://localhost:8080`;
-
-
+const USER_URL = `http://localhost:8080`;
+const POST_URL = `http://localhost:8082`;
 
 const PersonalInfo = ({ name, username, bio, following, followers }) => (
   <View style={styles.personalInfo}>
@@ -85,10 +84,17 @@ const AccountPage = ({ navigation }) => {
     following: 0,
     followers: 0,
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    fetchUserInfo();
-  }, []);
+    const loadData = async () => {
+      await fetchUserInfo();
+      await fetchContent();
+    };
+    loadData();
+  }, [activeTab]);
 
   const fetchUserInfo = async () => {
     console.log('Fetching user info');
@@ -96,15 +102,15 @@ const AccountPage = ({ navigation }) => {
       const token = await AsyncStorage.getItem('token');
       const userId = await AsyncStorage.getItem('userId');
       const authorities = await AsyncStorage.getItem(`authorities`);
-      console.log('Retrieved token:', token);
+
       
       if (!token || !userId) { // Update this condition
         console.error('No token or username found in AsyncStorage');
         return;
       }
 
-      console.log('Sending request with token:', token, userId);
-      const response = await axios.get(`${API_BASE_URL}/api/users/${userId}`, {
+      console.log('Sending request with token for users:', token, userId, authorities);
+      const response = await axios.get(`${USER_URL}/api/users/${userId}`, {
         headers: { 
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -117,6 +123,7 @@ const AccountPage = ({ navigation }) => {
 
       if (response.status === 200) {
         const userData = response.data;
+        setUserData(userData); // Store the entire userData in state
         setUserInfo({
           name: userData.name,
           username: userData.username,
@@ -142,30 +149,98 @@ const AccountPage = ({ navigation }) => {
   };
 
   useEffect(() => {
-    fetchContent();
-  }, [activeTab, reposts, userPosts, currentUser.handle]);
+    const loadContent = async () => {
+      await fetchContent();
+    };
+    loadContent();
+  }, [activeTab]);
 
-  const fetchContent = () => {
-    let newContent = [];
-    if (activeTab === 'Posts') {
-      // Combine user posts and reposts
-      const userReposts = reposts.filter(repost => repost.userId === currentUser.handle);
-      newContent = [...userPosts, ...userReposts].sort((a, b) => b.timestamp - a.timestamp);
-    } else if (activeTab === 'Replies') {
-      // Simulating replies data
-      newContent = [
-        { id: '3', username: 'John Doe', handle: 'johndoe', content: 'A reply', timestamp: Date.now(), reply: { username: 'Jane', handle: 'jane', content: 'Original post' } },
-      ];
-    } else if (activeTab === 'Likes') {
-      // Simulating liked posts
-      newContent = [
-        { id: '4', username: 'Jane', handle: 'jane', content: 'A liked post', timestamp: Date.now() - 2000 },
-      ];
+  const fetchContent = async () => {
+    if (activeTab !== 'Posts') return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      const authorities = await AsyncStorage.getItem('authorities');
+
+      if (!token || !userId || !authorities) {
+        throw new Error('User not authenticated or missing credentials');
+      }
+
+      console.log('Sending request with token for posts:', token, userId, authorities);
+      const response = await axios.get(`${POST_URL}/api/posts/user/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      console.log('API response:', response);
+      console.log('Response data:', response.data);
+
+      if (Array.isArray(response.data)) {
+        const validPosts = response.data
+          .filter(post => post.content && post.content.trim() !== '')
+          .map(post => ({
+            id: post.postId,
+            content: post.content,
+            title: post.title,
+            postFormat: post.postFormat,
+            topicId: post.topicId,
+            createdAt: post.createdAt,
+            likeCount: post.likeCount || 0,
+            commentCount: post.commentCount || 0,
+            repostCount: post.repostCount || 0,
+            username: userData ? userData.username : '',
+            name: userData ? userData.name : '',
+            type: 'post',
+            userId: post.userId
+          }));
+        
+        setContent(validPosts);
+      } else {
+        console.error('Unexpected response data structure:', response.data);
+        setContent([]);
+      }
+    } catch (error) {
+      console.error('Error fetching user posts:', error);
+      setError('Failed to fetch posts. Please try again later.');
+    } finally {
+      setIsLoading(false);
     }
-    setContent(newContent);
   };
 
+  const renderHeader = () => (
+    <>
+      <View style={styles.headerContainer}>
+        <PersonalInfo
+          name={userInfo.name}
+          username={userInfo.username}
+          bio={userInfo.bio}
+          following={userInfo.following}
+          followers={userInfo.followers}
+        />
+        <TouchableOpacity 
+          onPress={() => navigation.navigate('Settings')} 
+          style={styles.settingsButton}
+        >
+          <Ionicons name="settings-outline" size={22} color="#687684" />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.stickyHeader}>
+        <ActionButtons onEditProfile={handleEditProfile} onDraftsPress={handleDraftsPress} />
+        <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      </View>
+    </>
+  );
+
   const renderItem = ({ item }) => {
+    if (item.type === 'header') {
+      return renderHeader();
+    }
     if (activeTab === 'Replies') {
       return <ReplyContainer item={item} reply={item.reply} />;
     }
@@ -209,35 +284,33 @@ const AccountPage = ({ navigation }) => {
     navigation.navigate('Drafts');
   };
 
+  const renderContent = () => {
+    const headerItem = { type: 'header' };
+    const data = [headerItem, ...(content || [])];
+
+    return (
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => item.post_id?.toString() || `item-${index}`}
+        contentContainerStyle={styles.listContent}
+        ListEmptyComponent={
+          isLoading ? (
+            <Text style={styles.message}>Loading...</Text>
+          ) : error ? (
+            <Text style={styles.message}>Error: {error}</Text>
+          ) : (
+            <Text style={styles.message}>No posts yet. Create your first post!</Text>
+          )
+        }
+        stickyHeaderIndices={[0]}
+      />
+    );
+  };
+
   return (
     <View style={styles.container}>
-      <ScrollView stickyHeaderIndices={[1]}>
-        <View style={styles.headerContainer}>
-          <PersonalInfo
-            name={userInfo.name}
-            username={userInfo.username}
-            bio={userInfo.bio}
-            following={userInfo.following}
-            followers={userInfo.followers}
-          />
-          <TouchableOpacity 
-            onPress={() => navigation.navigate('Settings')} 
-            style={styles.settingsButton}
-          >
-            <Ionicons name="settings-outline" size={22} color="#687684" />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.stickyHeader}>
-          <ActionButtons onEditProfile={handleEditProfile} onDraftsPress={handleDraftsPress} />
-          <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-        </View>
-        <FlatList
-          data={content}
-          renderItem={renderItem}
-          keyExtractor={item => item.id.toString()}
-          scrollEnabled={false}
-        />
-      </ScrollView>
+      {renderContent()}
       <EditProfileModal
         isVisible={isEditProfileModalVisible}
         onClose={() => setIsEditProfileModalVisible(false)}
@@ -377,6 +450,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 4, // Reduced from 8 to 4
     top: 12,
+  },
+  message: {
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 20,
+    fontSize: 16,
   },
 });
 
