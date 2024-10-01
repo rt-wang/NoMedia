@@ -8,6 +8,7 @@ import { usePosts } from './PostContext';
 
 const LIGHT_GREY = '#CCCCCC';
 const REPOST_PINK = '#FFB6C1';
+const USERNAME_COLOR = '#FFE4E8'; // This is a very light pink
 
 const RepostMenu = ({ onRepost, onQuote, onClose }) => (
   <View style={styles.repostMenuContainer}>
@@ -178,7 +179,12 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
 
   return (
     <View style={styles.container}>
-      <View style={styles.postHeader}>
+      {isReposted && (
+        <Text style={styles.repostIndicator}>
+          <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted
+        </Text>
+      )}
+      <View style={styles.postContent}>
         <TouchableOpacity onPress={handleNamePress}>
           <Text style={styles.username}>{item.username}</Text>
         </TouchableOpacity>
@@ -225,21 +231,19 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 12,
     paddingHorizontal: 4,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#333',
   },
-  postHeader: {
+  postContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: -1,
+    marginBottom: 4,
   },
   username: {
     fontSize: 16,
-    color: '#fff',
-    flex: 1,
-  },
-  handle: {
-    fontSize: 16,
-    color: '#687684',
+    color: USERNAME_COLOR,
+    fontWeight: 'bold',
   },
   content: {
     fontSize: 16,
@@ -331,8 +335,6 @@ const styles = StyleSheet.create({
   },
   optionsButton: {
     padding: 5,
-    right: 5,
-    bottom: 3,
   },
   notInterestedContainer: {
     backgroundColor: 'rgba(26, 26, 26, 0.8)',

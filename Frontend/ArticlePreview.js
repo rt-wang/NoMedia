@@ -7,6 +7,7 @@ import { usePosts } from './PostContext';
 
 const LIGHT_GREY = '#CCCCCC';
 const REPOST_PINK = '#FFB6C1';
+const USERNAME_COLOR = '#FFE4E8';
 
 const RepostMenu = ({ onRepost, onQuote, onClose }) => (
   <View style={styles.repostMenuContainer}>
@@ -107,10 +108,15 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
 
   return (
     <TouchableOpacity style={styles.container} onPress={onArticlePress}>
-      <View style={styles.postHeader}>
+      {isReposted && (
+        <Text style={styles.repostIndicator}>
+          <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted
+        </Text>
+      )}
+      <View style={styles.articleContent}>
         <View style={styles.titleContainer}>
           <Text style={styles.title}>{post.title}</Text>
-          <View style={styles.nameAndPageContainer}>
+          <View style={styles.userInfo}>
             <TouchableOpacity onPress={handleNamePress}>
               <Text style={styles.username}>{post.username}</Text>
             </TouchableOpacity>
@@ -183,8 +189,10 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 12,
     paddingHorizontal: 4,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#333',
   },
-  postHeader: {
+  articleContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
@@ -192,20 +200,33 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flex: 1,
-    marginRight: 8,
   },
   title: {
-    fontFamily: 'Athelas',
-    fontSize: 22,
+    fontFamily: 'SFProText-Regular', // Reverted to original font
+    fontSize: 18,
     fontWeight: 'bold',
     color: '#fff',
-    marginBottom: 6,
+    marginBottom: 4,
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   username: {
     fontFamily: 'SFProText-Regular',
     fontSize: 16,
-    color: '#fff',
-    marginBottom: 2,
+    color: USERNAME_COLOR,
+    fontWeight: 'bold',
+  },
+  pageCounter: {
+    fontFamily: 'SFProText-Regular',
+    fontSize: 14,
+    color: '#687684',
+    marginLeft: 8,
+  },
+  optionsButton: {
+    padding: 5,
   },
   previewBoxContainer: {
     marginTop: 8,
@@ -291,10 +312,6 @@ const styles = StyleSheet.create({
   repostedText: {
     color: REPOST_PINK,
   },
-  optionsButton: {
-    padding: 5,
-    right: 5,
-  },
   optionsMenuPopover: {
     backgroundColor: '#222',
     borderRadius: 8,
@@ -349,11 +366,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  username: {
-    fontFamily: 'SFProText-Regular',
-    fontSize: 16,
-    color: '#fff',
-  },
   pageCounter: {
     fontFamily: 'SFProText-Regular',
     fontSize: 14,
@@ -362,6 +374,12 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     marginTop: -3.5, // This will move the share button up by 3 pixels
+  },
+  repostIndicator: {
+    color: REPOST_PINK,
+    fontSize: 14,
+    marginBottom: 8,
+    marginLeft: 8,
   },
 });
 
