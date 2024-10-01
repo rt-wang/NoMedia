@@ -121,7 +121,7 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
               <Text style={styles.username}>{post.username}</Text>
             </TouchableOpacity>
             <Text style={styles.handle}>@{post.handle}</Text>
-            <Text style={styles.pageCounter}>{post.pageCount || 1} page{post.pageCount !== 1 ? 's' : ''}</Text>
+            <Text style={styles.pageCounter}>{post.pageCount || 31} page{post.pageCount !== 1 ? 's' : ''}</Text>
           </View>
         </View>
         <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProText-Regular',
     fontSize: 14,
     color: '#687684',
-    left: 155,
+    left: 139,
   },
   shareButton: {
     marginTop: -3.5, // This will move the share button up by 3 pixels

@@ -54,9 +54,9 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         handle = "Dmac";
         break;
       default:
-        content = "When you join ISIS for work experience but they hand you the vest on day one . . . who relates?";
-        username = "Daniel Zhong";
-        handle = "mathenjoyer";
+        content = "I just saw the biggest gay guy ever! This nigga looked like hulf hogan with heels on! I can’t lie I got scared!!!!";
+        username = "Kevin Hart";
+        handle = "NotKevinHart";
     }
     console.log(`Generated post for ${type} with username: ${username} and handle: ${handle}`);
     return { content, username, handle };
@@ -66,10 +66,10 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     let title, content, username, handle;
     switch (type) {
       case 'tech':
-        title = "The Future of AI: Friend or Foe?";
-        content = "As artificial intelligence continues to advance at an unprecedented rate, experts debate its long-term implications for humanity. Some see AI as the key to solving global challenges, while others warn of potential risks. This article explores both perspectives and what they mean for our future.";
-        username = "TechGuru";
-        handle = "tech_enthusiast";
+        title = "Cantor's Infinite Revelation";
+        content = "Cantor's diagonal method proves that some infinities are larger than others, shattering our intuition of size. The theorem reveals that real numbers can't be listed, even by infinite means.";
+        username = "Terry Tao";
+        handle = "DaTaoist";
         break;
       case 'lifestyle':
         title = "Minimalism: Living More with Less";
