@@ -203,8 +203,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontFamily: 'Athletas', // Ensure this font is correctly linked in your project
-    fontSize: 18,
+    fontFamily: 'Athelas',
+    fontSize: 22,
     color: '#fff',
     marginBottom: 4,
   },
