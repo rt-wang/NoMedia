@@ -41,45 +41,49 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   const generatePostContent = (type) => {
     let content = '';
     let username = '';
+    let handle = '';
     switch (type) {
       case 'thought':
-        content = "When you join ISIS for work experience but they hand you the vest on the first day . . . who relates?";
-        username = "Frank Olsson";
-        break;
-      case 'question':
-        content = "Felt a sense of peace after writing this: To philosophize is to embrace complexity, to accept that life's contradictions are not failures of reason, but the essence of existence itself.";
-        username = "Thaddeus Richards";
+        content = "When you join ISIS for work experience but they hand you the vest on day one . . . who relates?";
+        username = "Daniel Zhong";
+        handle = "mathenjoyer";
         break;
       case 'opinion':
         content = "Felt a sense of peace after writing this: To philosophize is to embrace complexity, to accept that life's contradictions are not failures of reason, but the essence of existence itself.";
-        username = "Thaddeus Richards";
+        username = "Dylan McLeod";
+        handle = "Dmac";
         break;
       default:
-        content = "When you join ISIS for work experience but they hand you the vest on the first day . . . who relates?";
-        username = "Frank Olsson";
+        content = "When you join ISIS for work experience but they hand you the vest on day one . . . who relates?";
+        username = "Daniel Zhong";
+        handle = "mathenjoyer";
     }
-    console.log(`Generated post for ${type} with username: ${username}`);
-    return { content, username };
+    console.log(`Generated post for ${type} with username: ${username} and handle: ${handle}`);
+    return { content, username, handle };
   };
 
   const generateArticlePreview = (type) => {
+    let title, content, username, handle;
     switch (type) {
       case 'tech':
-        return {
-          title: "The Future of AI: Friend or Foe?",
-          content: "As artificial intelligence continues to advance at an unprecedented rate, experts debate its long-term implications for humanity. Some see AI as the key to solving global challenges, while others warn of potential risks. This article explores both perspectives and what they mean for our future.",
-        };
+        title = "The Future of AI: Friend or Foe?";
+        content = "As artificial intelligence continues to advance at an unprecedented rate, experts debate its long-term implications for humanity. Some see AI as the key to solving global challenges, while others warn of potential risks. This article explores both perspectives and what they mean for our future.";
+        username = "TechGuru";
+        handle = "tech_enthusiast";
+        break;
       case 'lifestyle':
-        return {
-          title: "Minimalism: Living More with Less",
-          content: "In a world of excess, minimalism is gaining traction as a lifestyle choice. This article delves into the benefits of adopting a minimalist approach, from reduced stress to increased focus on what truly matters. Discover practical tips for decluttering your life and finding joy in simplicity.",
-        };
+        title = "Minimalism: Living More with Less";
+        content = "In a world of excess, minimalism is gaining traction as a lifestyle choice. This article delves into the benefits of adopting a minimalist approach, from reduced stress to increased focus on what truly matters. Discover practical tips for decluttering your life and finding joy in simplicity.";
+        username = "MinimalistLiving";
+        handle = "less_is_more";
+        break;
       default:
-        return {
-          title: "Sample Article Title",
-          content: "This is a sample content for an article preview. It can be longer or shorter depending on the actual content.",
-        };
+        title = "Sample Article Title";
+        content = "This is a sample content for an article preview. It can be longer or shorter depending on the actual content.";
+        username = "DefaultUser";
+        handle = "default_handle";
     }
+    return { title, content, username, handle };
   };
 
   const fetchPosts = () => {
@@ -100,19 +104,21 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         const typeIndex = index % 3;
         const type = permutations[permutationIndex][typeIndex];
 
-        let postType, articleType, content, title, username;
+        let postType, articleType, content, title, username, handle;
 
         if (type === 'article') {
           articleType = Math.random() < 0.5 ? 'tech' : 'lifestyle';
           const article = generateArticlePreview(articleType);
           content = article.content;
           title = article.title;
-          username = `User${Math.floor(Math.random() * 1000)}`;
+          username = article.username;
+          handle = article.handle;
         } else {
           postType = ['thought', 'question', 'opinion'][Math.floor(Math.random() * 3)];
           const postContent = generatePostContent(postType);
           content = postContent.content;
           username = postContent.username;
+          handle = postContent.handle;
         }
 
         // Generate likes between 50 and 100
@@ -131,6 +137,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
           articleType: articleType,
           title: title,
           username: username,
+          handle: handle,
           content: content,
           comments: comments,
           reposts: reposts,

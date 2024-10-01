@@ -126,11 +126,11 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   header: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 20,
-    fontFamily: 'System',
+    fontFamily: 'Athelas',
   },
   nomsScrollContainer: {
     marginBottom: 24,
@@ -160,11 +160,11 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     color: '#fff',
     marginBottom: 14,
-    fontFamily: 'SFProText-Regular',
+    fontFamily: 'Athelas',
   },
   nomBoxPair: {
     width: 280,
