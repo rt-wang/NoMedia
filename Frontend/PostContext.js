@@ -10,20 +10,32 @@ export const PostProvider = ({ children }) => {
     handle: 'johndoe',
   });
 
+  console.log("PostProvider rendered");
+
   const addPost = (newPost) => {
+    console.log(`Received post in addPost. ID: ${newPost.id}, Username: ${newPost.username}, Content: ${newPost.content.substring(0, 20)}...`);
+    
     const postWithId = {
       ...newPost,
-      id: `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      username: currentUser.username,
-      handle: currentUser.handle,
+      id: newPost.id || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      username: newPost.username, // Remove the fallback to currentUser.username
+      handle: newPost.handle || currentUser.handle,
       timestamp: Date.now(),
-      comments: [],
-      type: newPost.type || 'post', // Ensure type is set, default to 'post'
+      comments: newPost.comments || [],
+      type: newPost.type || 'post',
     };
+
+    console.log(`Processed post in addPost. ID: ${postWithId.id}, Username: ${postWithId.username}, Content: ${postWithId.content.substring(0, 20)}...`);
+
     if (newPost.isUserPost) {
       setUserPosts(prevPosts => [postWithId, ...prevPosts]);
     } else {
-      setPosts(prevPosts => [postWithId, ...prevPosts]);
+      console.log(`Adding post to posts state. ID: ${postWithId.id}, Username: ${postWithId.username}, Content: ${postWithId.content.substring(0, 20)}...`);
+      setPosts(prevPosts => {
+        const newPosts = [postWithId, ...prevPosts];
+        console.log('Updated posts state:', newPosts.map(p => ({ id: p.id, username: p.username, content: p.content.substring(0, 20) })));
+        return newPosts;
+      });
     }
   };
 
@@ -146,4 +158,10 @@ export const PostProvider = ({ children }) => {
   );
 };
 
-export const usePosts = () => useContext(PostContext);
+export const usePosts = () => {
+  const context = useContext(PostContext);
+  if (!context) {
+    throw new Error('usePosts must be used within a PostProvider');
+  }
+  return context;
+};

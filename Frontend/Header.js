@@ -16,7 +16,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#000',
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
+    marginTop: -12,
   },
   headerText: {
     fontFamily: 'Athelas',

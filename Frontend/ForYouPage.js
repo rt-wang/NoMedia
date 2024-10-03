@@ -36,51 +36,116 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   const [activeTab, setActiveTab] = useState('ForYou');
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
 
-  useEffect(() => {
-    if (posts.length === 0) {
-      fetchPosts();
+  console.log("ForYouPage rendered");
+
+  const generatePostContent = (type) => {
+    let content = '';
+    let username = '';
+    let handle = '';
+    switch (type) {
+      case 'thought':
+        content = "When you join ISIS for work experience but they hand you the vest on day one . . . who relates?";
+        username = "Daniel Zhong";
+        handle = "mathenjoyer";
+        break;
+      case 'opinion':
+        content = "Felt a sense of peace after writing this: To philosophize is to embrace complexity, to accept that life's contradictions are not failures of reason, but the essence of existence itself.";
+        username = "Dylan McLeod";
+        handle = "Dmac";
+        break;
+      default:
+        content = "I just saw the biggest gay guy ever! This nigga looked like hulf hogan with heels on! I can’t lie I got scared!!!!";
+        username = "Kevin Hart";
+        handle = "NotKevinHart";
     }
+    console.log(`Generated post for ${type} with username: ${username} and handle: ${handle}`);
+    return { content, username, handle };
+  };
 
-    const checkAndShowProfilePrompt = async () => {
-      const currentUser = await AsyncStorage.getItem('currentUser');
-      const hasShownPrompt = await AsyncStorage.getItem(`hasShownPrompt_${currentUser}`);
-      if (currentUser && hasShownPrompt !== 'true') {
-        const timer = setTimeout(() => {
-          setShowProfilePrompt(true);
-          AsyncStorage.setItem(`hasShownPrompt_${currentUser}`, 'true');
-        }, 5000); // 30 seconds delay
-
-        return () => clearTimeout(timer);
-      }
-    };
-
-    checkAndShowProfilePrompt();
-  }, []);
+  const generateArticlePreview = (type) => {
+    let title, content, username, handle;
+    switch (type) {
+      case 'tech':
+        title = "Cantor's Infinite Revelation";
+        content = "Cantor's diagonal method proves that some infinities are larger than others, shattering our intuition of size. The theorem reveals that real numbers can't be listed, even by infinite means.";
+        username = "Terry Tao";
+        handle = "DaTaoist";
+        break;
+      case 'lifestyle':
+        title = "Minimalism: Living More with Less";
+        content = "In a world of excess, minimalism is gaining traction as a lifestyle choice. This article delves into the benefits of adopting a minimalist approach, from reduced stress to increased focus on what truly matters. Discover practical tips for decluttering your life and finding joy in simplicity.";
+        username = "MinimalistLiving";
+        handle = "less_is_more";
+        break;
+      default:
+        title = "Sample Article Title";
+        content = "This is a sample content for an article preview. It can be longer or shorter depending on the actual content.";
+        username = "DefaultUser";
+        handle = "default_handle";
+    }
+    return { title, content, username, handle };
+  };
 
   const fetchPosts = () => {
     setLoading(true);
     // Simulating API call
     setTimeout(() => {
-      const newPosts = Array(10).fill().map((_, index) => {
-        const isArticle = Math.random() > 0.6;
-        const baseContent = 'This is a sample content for the post or article preview. It can be longer or shorter depending on the actual content.';
-        const content = isArticle 
-          ? baseContent.repeat(Math.ceil(200 / baseContent.length)) 
-          : baseContent.slice(0, 150);
+      const permutations = [
+        ['post', 'post', 'article'],
+        ['post', 'article', 'post'],
+        ['article', 'post', 'post'],
+        ['post', 'article', 'article'],
+        ['article', 'post', 'article'],
+        ['article', 'article', 'post']
+      ];
+
+      const newPosts = Array(12).fill().map((_, index) => {
+        const permutationIndex = Math.floor(index / 3) % permutations.length;
+        const typeIndex = index % 3;
+        const type = permutations[permutationIndex][typeIndex];
+
+        let postType, articleType, content, title, username, handle;
+
+        if (type === 'article') {
+          articleType = Math.random() < 0.5 ? 'tech' : 'lifestyle';
+          const article = generateArticlePreview(articleType);
+          content = article.content;
+          title = article.title;
+          username = article.username;
+          handle = article.handle;
+        } else {
+          postType = ['thought', 'question', 'opinion'][Math.floor(Math.random() * 3)];
+          const postContent = generatePostContent(postType);
+          content = postContent.content;
+          username = postContent.username;
+          handle = postContent.handle;
+        }
+
+        // Generate likes between 50 and 100
+        const likes = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
+
+        // Set reposts to half of likes, capped at 40
+        const reposts = Math.min(Math.floor(likes / 2), 40);
+
+        // Generate comments between 10 and 30
+        const comments = Math.floor(Math.random() * (30 - 10 + 1)) + 10;
 
         return {
           id: `generated_${Date.now()}_${index}`,
-          type: isArticle ? 'article' : 'post',
-          title: isArticle ? 'Sample Article Title' : undefined,
-          username: `User${Math.floor(Math.random() * 1000)}`,
-          handle: `handle${Math.floor(Math.random() * 1000)}`,
+          type: type,
+          postType: postType,
+          articleType: articleType,
+          title: title,
+          username: username,
+          handle: handle,
           content: content,
-          comments: Math.floor(Math.random() * 100),
-          reposts: Math.floor(Math.random() * 100),
-          likes: Math.floor(Math.random() * 1000),
-          isUserPost: false, // Ensure this is false for generated posts
+          comments: comments,
+          reposts: reposts,
+          likes: likes,
+          isUserPost: false,
         };
       });
+
       newPosts.forEach(post => addPost(post));
       setLoading(false);
     }, 1000);
@@ -113,6 +178,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
           onCommentPress={() => handleCommentPress(item)}
           onArticlePress={() => handleArticlePress(item)}
           isReposted={isReposted}
+          commentCount={item.comments} // Add this line
         />
       );
     } else {
@@ -120,11 +186,16 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         <Post 
           item={item} 
           onCommentPress={() => handleCommentPress(item)}
-          commentCount={item.comments} // Pass the comment count to Post component
+          commentCount={item.comments} // Change this line
         />
       );
     }
   };
+
+  useEffect(() => {
+    console.log("useEffect in ForYouPage called");
+    fetchPosts();
+  }, []);
 
   return (
     <View style={styles.container}>

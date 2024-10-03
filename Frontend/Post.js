@@ -8,6 +8,7 @@ import { usePosts } from './PostContext';
 
 const LIGHT_GREY = '#CCCCCC';
 const REPOST_PINK = '#FFB6C1';
+const USERNAME_COLOR = '#FFE4E8'; // This is a very light pink
 
 const RepostMenu = ({ onRepost, onQuote, onClose }) => (
   <View style={styles.repostMenuContainer}>
@@ -37,7 +38,7 @@ const OptionsMenu = ({ onClose, onNotInterested, onReport, isComment }) => (
   </View>
 );
 
-const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
+const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => {
   const navigation = useNavigation();
   const { reposts, addRepost } = useReposts();
   const { posts, currentUser, toggleLike, toggleRepost } = usePosts();
@@ -48,7 +49,6 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
   const optionsButtonRef = useRef();
 
   const post = posts.find(p => p.id === item.id) || item;
-  const commentCount = post.comments ? post.comments.length : 0;
   const isLiked = post.likedBy?.includes(currentUser.handle);
   const isReposted = post.repostedBy?.includes(currentUser.handle);
 
@@ -116,9 +116,10 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
         </View>
       );
     }
+    const truncatedContent = item.content.length > 300 ? item.content.slice(0, 300) + '...' : item.content;
     return (
-      <Text style={[styles.content, item.type === 'comment' && styles.commentText]} numberOfLines={item.type === 'comment' ? undefined : 3} ellipsizeMode="tail">
-        {item.content}
+      <Text style={[styles.content, item.type === 'comment' && styles.commentText]} numberOfLines={item.type === 'comment' ? undefined : undefined}>
+        {truncatedContent}
       </Text>
     );
   };
@@ -178,10 +179,18 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false }) => {
 
   return (
     <View style={styles.container}>
+      {isReposted && (
+        <Text style={styles.repostIndicator}>
+          <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted
+        </Text>
+      )}
       <View style={styles.postHeader}>
-        <TouchableOpacity onPress={handleNamePress}>
-          <Text style={styles.username}>{item.username}</Text>
-        </TouchableOpacity>
+        <View style={styles.userInfo}>
+          <TouchableOpacity onPress={handleNamePress}>
+            <Text style={styles.username}>{item.username}</Text>
+          </TouchableOpacity>
+          <Text style={styles.handle}>@{item.handle}</Text>
+        </View>
         <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
           <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
         </TouchableOpacity>
@@ -225,21 +234,28 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 12,
     paddingHorizontal: 4,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#333',
   },
   postHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: -1,
+    marginBottom: 4,
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   username: {
     fontSize: 16,
     color: '#fff',
-    flex: 1,
+    fontWeight: 'bold',
+    marginRight: 4,
   },
   handle: {
-    fontSize: 16,
-    color: '#687684',
+    fontSize: 14,
+    color: USERNAME_COLOR,
   },
   content: {
     fontSize: 16,
@@ -331,8 +347,6 @@ const styles = StyleSheet.create({
   },
   optionsButton: {
     padding: 5,
-    right: 5,
-    bottom: 3,
   },
   notInterestedContainer: {
     backgroundColor: 'rgba(26, 26, 26, 0.8)',
