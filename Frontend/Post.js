@@ -187,9 +187,11 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
       <View style={styles.postHeader}>
         <View style={styles.userInfo}>
           <TouchableOpacity onPress={handleNamePress}>
-            <Text style={styles.username}>{item.username}</Text>
+            <View style={styles.nameContainer}>
+              <Text style={styles.name}>{item.name}</Text>
+              <Text style={styles.username}> @{item.username}</Text>
+            </View>
           </TouchableOpacity>
-          <Text style={styles.handle}>@{item.handle}</Text>
         </View>
         <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
           <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
@@ -241,19 +243,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
   },
   userInfo: {
+    flex: 1,
+  },
+  nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  username: {
+  name: {
     fontSize: 16,
-    color: '#fff',
     fontWeight: 'bold',
-    marginRight: 4,
+    color: '#fff',
   },
-  handle: {
+  username: {
     fontSize: 14,
     color: USERNAME_COLOR,
   },

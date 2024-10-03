@@ -40,26 +40,26 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
 
   const generatePostContent = (type) => {
     let content = '';
+    let name = '';
     let username = '';
-    let handle = '';
     switch (type) {
       case 'thought':
         content = "When you join ISIS for work experience but they hand you the vest on day one . . . who relates?";
-        username = "Daniel Zhong";
-        handle = "mathenjoyer";
+        name = "Daniel Zhong";
+        username = "mathenjoyer";
         break;
       case 'opinion':
         content = "Felt a sense of peace after writing this: To philosophize is to embrace complexity, to accept that life's contradictions are not failures of reason, but the essence of existence itself.";
-        username = "Dylan McLeod";
-        handle = "Dmac";
+        name = "Dylan McLeod";
+        username = "Dmac";
         break;
       default:
-        content = "I just saw the biggest gay guy ever! This nigga looked like hulf hogan with heels on! I can’t lie I got scared!!!!";
-        username = "Kevin Hart";
-        handle = "NotKevinHart";
+        content = "I just saw the biggest gay guy ever! This nigga looked like hulf hogan with heels on! I can't lie I got scared!!!!";
+        name = "Kevin Hart";
+        username = "NotKevinHart";
     }
-    console.log(`Generated post for ${type} with username: ${username} and handle: ${handle}`);
-    return { content, username, handle };
+    console.log(`Generated post for ${type} with name: ${name} and username: ${username}`);
+    return { content, name, username };
   };
 
   const generateArticlePreview = (type) => {
@@ -69,21 +69,21 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         title = "Cantor's Infinite Revelation";
         content = "Cantor's diagonal method proves that some infinities are larger than others, shattering our intuition of size. The theorem reveals that real numbers can't be listed, even by infinite means.";
         username = "Terry Tao";
-        handle = "DaTaoist";
+        name = "DaTaoist";
         break;
       case 'lifestyle':
         title = "Minimalism: Living More with Less";
         content = "In a world of excess, minimalism is gaining traction as a lifestyle choice. This article delves into the benefits of adopting a minimalist approach, from reduced stress to increased focus on what truly matters. Discover practical tips for decluttering your life and finding joy in simplicity.";
         username = "MinimalistLiving";
-        handle = "less_is_more";
+        name = "less_is_more";
         break;
       default:
         title = "Sample Article Title";
         content = "This is a sample content for an article preview. It can be longer or shorter depending on the actual content.";
         username = "DefaultUser";
-        handle = "default_handle";
+        name = "default_handle";
     }
-    return { title, content, username, handle };
+    return { title, content, username, name };
   };
 
   const fetchPosts = () => {
@@ -112,13 +112,13 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
           content = article.content;
           title = article.title;
           username = article.username;
-          handle = article.handle;
+          name = article.name;
         } else {
           postType = ['thought', 'question', 'opinion'][Math.floor(Math.random() * 3)];
           const postContent = generatePostContent(postType);
           content = postContent.content;
           username = postContent.username;
-          handle = postContent.handle;
+          name = postContent.name;
         }
 
         // Generate likes between 50 and 100
@@ -137,12 +137,13 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
           articleType: articleType,
           title: title,
           username: username,
-          handle: handle,
+          name: name,
           content: content,
           comments: comments,
           reposts: reposts,
           likes: likes,
           isUserPost: false,
+          pageCount: Math.floor(Math.random() * (100 - 50 + 1)) + 50, // Added page count
         };
       });
 
@@ -174,19 +175,19 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     if (item.type === 'article') {
       return (
         <ArticlePreview 
-          item={item} 
+          item={{...item, name: item.name, username: item.username, pageCount: item.pageCount}}
           onCommentPress={() => handleCommentPress(item)}
           onArticlePress={() => handleArticlePress(item)}
           isReposted={isReposted}
-          commentCount={item.comments} // Add this line
+          commentCount={item.comments}
         />
       );
     } else {
       return (
         <Post 
-          item={item} 
+          item={{...item, name: item.name, username: item.username}}
           onCommentPress={() => handleCommentPress(item)}
-          commentCount={item.comments} // Change this line
+          commentCount={item.comments}
         />
       );
     }

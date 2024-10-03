@@ -96,6 +96,14 @@ const AccountPage = ({ navigation }) => {
     loadData();
   }, [activeTab]);
 
+  useEffect(() => {
+    const loadData = async () => {
+      await fetchUserInfo();
+      await fetchContent();
+    };
+    loadData();
+  }, []);
+
   const fetchUserInfo = async () => {
     console.log('Fetching user info');
     try {
@@ -123,7 +131,7 @@ const AccountPage = ({ navigation }) => {
 
       if (response.status === 200) {
         const userData = response.data;
-        setUserData(userData); // Store the entire userData in state
+        setUserData(userData);
         setUserInfo({
           name: userData.name,
           username: userData.username,
@@ -194,10 +202,11 @@ const AccountPage = ({ navigation }) => {
             likeCount: post.likeCount || 0,
             commentCount: post.commentCount || 0,
             repostCount: post.repostCount || 0,
-            username: userData ? userData.username : '',
-            name: userData ? userData.name : '',
-            type: 'post',
-            userId: post.userId
+            username: userInfo.username, // Use userInfo instead of userData
+            name: userInfo.name, // Use userInfo instead of userData
+            type: post.title ? 'article' : 'post', // Determine type based on presence of title
+            userId: post.userId,
+            //pageCount: post.pageCount // Add this if available for articles
           }));
         
         setContent(validPosts);
@@ -250,21 +259,23 @@ const AccountPage = ({ navigation }) => {
           <Text style={styles.repostIndicator}>
             <Ionicons name="repeat" size={14} color="#FFB6C1" /> You Reposted
           </Text>
-          <Post item={item.originalPost} />
+          <Post item={{...item.originalPost, name: item.originalPost.name, username: item.originalPost.username}} />
         </View>
       );
     }
     if (item.type === 'quote') {
       return (
         <View style={styles.quoteRepostContainer}>
-          <Post item={{ ...item, content: item.quoteText }} />
+          <Post item={{ ...item, content: item.quoteText, name: item.name, username: item.username }} />
           <View style={styles.quotedPostContainer}>
-            <Post item={item.originalPost} />
+            <Post item={{...item.originalPost, name: item.originalPost.name, username: item.originalPost.username}} />
           </View>
         </View>
       );
     }
-    return item.type === 'article' ? <ArticlePreview item={item} /> : <Post item={item} />;
+    return item.type === 'article' ? 
+      <ArticlePreview item={{...item, name: item.name, username: item.username}} /> : 
+      <Post item={{...item, name: item.name, username: item.username}} />;
   };
 
   const handleEditProfile = () => {
