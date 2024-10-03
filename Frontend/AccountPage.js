@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -73,36 +73,33 @@ const ReplyContainer = ({ item, reply }) => {
 
 const AccountPage = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('Posts');
-  const [content, setContent] = useState([]);
+  const [userInfo, setUserInfo] = useState(null);
+  const [posts, setPosts] = useState([]);
   const { reposts } = useReposts();
   const { userPosts, currentUser } = usePosts();
   const [isEditProfileModalVisible, setIsEditProfileModalVisible] = useState(false);
-  const [userInfo, setUserInfo] = useState({
-    name: '',
-    username: '',
-    bio: '',
-    following: 0,
-    followers: 0,
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [userData, setUserData] = useState(null);
 
-  useEffect(() => {
-    const loadData = async () => {
-      await fetchUserInfo();
-      await fetchContent();
-    };
-    loadData();
-  }, [activeTab]);
+  // Add this new state to track if user info has been fetched
+  const [isUserInfoLoaded, setIsUserInfoLoaded] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
+      setIsLoading(true);
       await fetchUserInfo();
-      await fetchContent();
+      setIsLoading(false);
+      setIsUserInfoLoaded(true); // Set this to true after fetching user info
     };
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (userInfo) {
+      fetchContent();
+    }
+  }, [userInfo, activeTab]);
 
   const fetchUserInfo = async () => {
     console.log('Fetching user info');
@@ -156,18 +153,8 @@ const AccountPage = ({ navigation }) => {
     }
   };
 
-  useEffect(() => {
-    const loadContent = async () => {
-      await fetchContent();
-    };
-    loadContent();
-  }, [activeTab]);
-
   const fetchContent = async () => {
-    if (activeTab !== 'Posts') return;
-
-    setIsLoading(true);
-    setError(null);
+    if (activeTab !== 'Posts' || !userInfo) return;
 
     try {
       const token = await AsyncStorage.getItem('token');
@@ -193,32 +180,19 @@ const AccountPage = ({ navigation }) => {
         const validPosts = response.data
           .filter(post => post.content && post.content.trim() !== '')
           .map(post => ({
-            id: post.postId,
-            content: post.content,
-            title: post.title,
-            postFormat: post.postFormat,
-            topicId: post.topicId,
-            createdAt: post.createdAt,
-            likeCount: post.likeCount || 0,
-            commentCount: post.commentCount || 0,
-            repostCount: post.repostCount || 0,
-            username: userInfo.username, // Use userInfo instead of userData
-            name: userInfo.name, // Use userInfo instead of userData
-            type: post.title ? 'article' : 'post', // Determine type based on presence of title
-            userId: post.userId,
-            //pageCount: post.pageCount // Add this if available for articles
+            ...post,
+            name: userInfo.name,
+            username: userInfo.username,
+            type: post.title ? 'article' : 'post',
           }));
-        
-        setContent(validPosts);
+        console.log('Processed posts:', validPosts);
+        setPosts(validPosts);
       } else {
         console.error('Unexpected response data structure:', response.data);
-        setContent([]);
+        setPosts([]);
       }
     } catch (error) {
-      console.error('Error fetching user posts:', error);
-      setError('Failed to fetch posts. Please try again later.');
-    } finally {
-      setIsLoading(false);
+      console.error('Error fetching posts:', error);
     }
   };
 
@@ -246,7 +220,7 @@ const AccountPage = ({ navigation }) => {
     </>
   );
 
-  const renderItem = ({ item }) => {
+  const renderItem = useCallback(({ item }) => {
     if (item.type === 'header') {
       return renderHeader();
     }
@@ -274,9 +248,9 @@ const AccountPage = ({ navigation }) => {
       );
     }
     return item.type === 'article' ? 
-      <ArticlePreview item={{...item, name: item.name, username: item.username}} /> : 
-      <Post item={{...item, name: item.name, username: item.username}} />;
-  };
+      <ArticlePreview item={{...item, name: userInfo?.name, username: userInfo?.username}} /> : 
+      <Post item={{...item, name: userInfo?.name, username: userInfo?.username}} />;
+  }, [userInfo, activeTab]);
 
   const handleEditProfile = () => {
     setIsEditProfileModalVisible(true);
@@ -295,43 +269,40 @@ const AccountPage = ({ navigation }) => {
     navigation.navigate('Drafts');
   };
 
-  const renderContent = () => {
-    const headerItem = { type: 'header' };
-    const data = [headerItem, ...(content || [])];
-
-    return (
-      <FlatList
-        data={data}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => item.post_id?.toString() || `item-${index}`}
-        contentContainerStyle={styles.listContent}
-        ListEmptyComponent={
-          isLoading ? (
-            <Text style={styles.message}>Loading...</Text>
-          ) : error ? (
-            <Text style={styles.message}>Error: {error}</Text>
-          ) : (
-            <Text style={styles.message}>No posts yet. Create your first post!</Text>
-          )
-        }
-        stickyHeaderIndices={[0]}
-      />
-    );
-  };
-
   return (
     <View style={styles.container}>
-      {renderContent()}
-      <EditProfileModal
-        isVisible={isEditProfileModalVisible}
-        onClose={() => setIsEditProfileModalVisible(false)}
-        onSave={handleSaveProfile}
-        initialProfile={{
-          name: userInfo.name,
-          username: userInfo.username,
-          bio: userInfo.bio || ''
-        }}
-      />
+      {isUserInfoLoaded ? (
+        <FlatList
+          data={[{ type: 'header' }, ...(posts || [])]}
+          renderItem={renderItem}
+          keyExtractor={(item, index) => item.post_id?.toString() || `item-${index}`}
+          contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            isLoading ? (
+              <Text style={styles.message}>Loading...</Text>
+            ) : error ? (
+              <Text style={styles.message}>Error: {error}</Text>
+            ) : (
+              <Text style={styles.message}>No posts yet. Create your first post!</Text>
+            )
+          }
+          stickyHeaderIndices={[0]}
+        />
+      ) : (
+        <Text style={styles.message}>Loading user information...</Text>
+      )}
+      {isUserInfoLoaded && userInfo && (
+        <EditProfileModal
+          isVisible={isEditProfileModalVisible}
+          onClose={() => setIsEditProfileModalVisible(false)}
+          onSave={handleSaveProfile}
+          initialProfile={{
+            name: userInfo.name,
+            username: userInfo.username,
+            bio: userInfo.bio || ''
+          }}
+        />
+      )}
     </View>
   );
 };
@@ -346,6 +317,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     paddingRight: 16,
+    backgroundColor: '#000', // Add this to ensure the header has a background
   },
   settingsButton: {
     padding: 10,
@@ -353,7 +325,7 @@ const styles = StyleSheet.create({
   },
   personalInfo: {
     flex: 1,
-    padding: 16,
+    padding: 12,
   },
   name: {
     fontFamily: 'SFProText-Bold',
@@ -389,6 +361,8 @@ const styles = StyleSheet.create({
   stickyHeader: {
     backgroundColor: '#000',
     paddingTop: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
   },
   actionButtons: {
     flexDirection: 'row',
@@ -467,6 +441,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 20,
     fontSize: 16,
+  },
+  listContent: {
+    paddingBottom: 20,
+    paddingHorizontal: 16,
   },
 });
 

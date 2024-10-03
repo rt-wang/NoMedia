@@ -86,7 +86,52 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
     : indentedContent;
 
   const handleMorePress = () => {
-    onArticlePress(post);
+    const paragraphs = post.content.split('\n\n');
+    const threads = [];
+    let currentPage = '';
+    let pageNumber = 1;
+
+    paragraphs.forEach(paragraph => {
+      if (paragraph.length >= 200 && paragraph.length <= 400) {
+        if (currentPage.length > 0) {
+          threads.push({ content: currentPage.trim(), pageNumber: pageNumber++ });
+          currentPage = '';
+        }
+        threads.push({ content: paragraph, pageNumber: pageNumber++ });
+      } else {
+        while (paragraph.length > 0) {
+          if (currentPage.length + paragraph.length <= 300) {
+            currentPage += (currentPage.length > 0 ? '\n\n' : '') + paragraph;
+            paragraph = '';
+          } else {
+            const breakPoint = paragraph.lastIndexOf(' ', 300 - currentPage.length);
+            const chunk = paragraph.slice(0, breakPoint);
+            currentPage += (currentPage.length > 0 ? '\n\n' : '') + chunk;
+            paragraph = paragraph.slice(breakPoint + 1);
+          }
+
+          if (currentPage.length >= 200 || paragraph.length === 0) {
+            threads.push({ content: currentPage.trim(), pageNumber: pageNumber++ });
+            currentPage = '';
+          }
+        }
+      }
+    });
+
+    if (currentPage.length > 0) {
+      threads.push({ content: currentPage.trim(), pageNumber: pageNumber });
+    }
+
+    navigation.navigate('Threads', { 
+      item: {
+        ...post,
+        threads: threads.map(thread => ({
+          ...thread,
+          username: post.username,
+          name: post.name
+        })),
+      }
+    });
   };
 
   const handleNamePress = () => {
