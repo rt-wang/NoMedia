@@ -115,6 +115,8 @@ CREATE TABLE `Post` (
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `like_count` int DEFAULT '0',
+  `username` varchar(255) DEFAULT NULL,
+  `name` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`post_id`),
   KEY `topic_id` (`topic_id`),
   KEY `post_ibfk_1` (`user_id`),

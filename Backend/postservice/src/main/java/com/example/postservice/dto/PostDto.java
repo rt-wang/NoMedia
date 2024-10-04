@@ -11,7 +11,11 @@ public class PostDto {
     private Integer topicId;
     private LocalDateTime createdAt;
     private Integer likeCount;
+    private String username;
+    private String name;
 
+    public PostDto() {}
+    
     // Constructor
     public PostDto(Post post) {
         this.postId = post.getPostId();
@@ -78,5 +82,21 @@ public class PostDto {
 
     public void setLikeCount(Integer likeCount) {
         this.likeCount = likeCount;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

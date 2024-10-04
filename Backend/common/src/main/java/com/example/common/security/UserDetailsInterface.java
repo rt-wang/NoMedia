@@ -9,4 +9,5 @@ public interface UserDetailsInterface extends UserDetails {
     Long getId();
     String getEmail();
     List<SimpleGrantedAuthority> getAuthorities();
+    String getName();
 }

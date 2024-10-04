@@ -12,31 +12,22 @@ export const PostProvider = ({ children }) => {
 
   console.log("PostProvider rendered");
 
-  const addPost = (newPost) => {
-    console.log(`Received post in addPost. ID: ${newPost.id}, Username: ${newPost.username}, Content: ${newPost.content.substring(0, 20)}...`);
-    
-    const postWithId = {
-      ...newPost,
-      id: newPost.id || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      username: newPost.username, // Remove the fallback to currentUser.username
-      handle: newPost.handle || currentUser.handle,
-      timestamp: Date.now(),
-      comments: newPost.comments || [],
-      type: newPost.type || 'post',
-    };
-
-    console.log(`Processed post in addPost. ID: ${postWithId.id}, Username: ${postWithId.username}, Content: ${postWithId.content.substring(0, 20)}...`);
-
-    if (newPost.isUserPost) {
-      setUserPosts(prevPosts => [postWithId, ...prevPosts]);
-    } else {
-      console.log(`Adding post to posts state. ID: ${postWithId.id}, Username: ${postWithId.username}, Content: ${postWithId.content.substring(0, 20)}...`);
-      setPosts(prevPosts => {
-        const newPosts = [postWithId, ...prevPosts];
-        console.log('Updated posts state:', newPosts.map(p => ({ id: p.id, username: p.username, content: p.content.substring(0, 20) })));
-        return newPosts;
-      });
-    }
+  const addPost = (newPost, isRealPost = false) => {
+    setPosts(prevPosts => {
+      const updatedPost = {
+        ...newPost,
+        id: newPost.id || `generated_${Date.now()}_${prevPosts.length}`,
+        isRealPost: isRealPost,
+      };
+      
+      if (isRealPost) {
+        // Add real posts to the beginning of the array
+        return [updatedPost, ...prevPosts];
+      } else {
+        // Add generated posts to the end of the array
+        return [...prevPosts, updatedPost];
+      }
+    });
   };
 
   const addComment = (postId, commentContent, parentCommentId = null) => {

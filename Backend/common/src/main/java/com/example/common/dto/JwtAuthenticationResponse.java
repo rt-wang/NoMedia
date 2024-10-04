@@ -8,13 +8,15 @@ public class JwtAuthenticationResponse {
     private String username;
     private String email;
     private List<String> authorities;
+    private String name;
 
-    public JwtAuthenticationResponse(String accessToken, Long userId, String username, String email, List<String> authorities) {
+    public JwtAuthenticationResponse(String accessToken, Long userId, String username, String email, List<String> authorities, String name) {
         this.accessToken = accessToken;
         this.userId = userId;
         this.username = username;
         this.email = email;
         this.authorities = authorities;
+        this.name = name;
     }
 
     public String getAccessToken() {
@@ -58,4 +60,11 @@ public class JwtAuthenticationResponse {
         this.authorities = authorities;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

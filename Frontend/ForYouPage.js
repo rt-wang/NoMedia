@@ -8,9 +8,12 @@ import { useReposts } from './RepostContext';
 import { usePosts } from './PostContext';
 import NomsPage from './NomsPage';
 import ProfilePromptModal from './ProfilePromptModal';
+import axios from 'axios';
 
 const LIGHT_GREY = '#CCCCCC';
 const ACTIVE_TAB_COLOR = '#FFB6C1';
+const USER_URL = 'http://localhost:8080'; // Adjust this to your user service URL
+const POST_URL = 'http://localhost:8082'; // Your existing post service URL
 
 const TabNavigator = ({ activeTab, setActiveTab }) => (
   <View style={styles.tabNavigator}>
@@ -35,6 +38,9 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   const { reposts } = useReposts();
   const [activeTab, setActiveTab] = useState('ForYou');
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  const [page, setPage] = useState(0);
+  const [hasMorePosts, setHasMorePosts] = useState(true);
+  const [renderedPostCount, setRenderedPostCount] = useState(0);
 
   console.log("ForYouPage rendered");
 
@@ -63,7 +69,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   };
 
   const generateArticlePreview = (type) => {
-    let title, content, username, handle;
+    let title, content, username, name;
     switch (type) {
       case 'tech':
         title = "Cantor's Infinite Revelation";
@@ -86,20 +92,73 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     return { title, content, username, name };
   };
 
-  const fetchPosts = () => {
-    setLoading(true);
+  const fetchLatestPosts = async () => {
+    if (!hasMorePosts || loading) return;
+
+    try {
+      setLoading(true);
+
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      const name = await AsyncStorage.getItem('name');
+      const username = await AsyncStorage.getItem('username');
+
+      if (!token || !userId) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      const response = await axios.get(`${POST_URL}/api/posts/latest?page=${page}&size=20`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const latestPosts = response.data;
+      
+      if (latestPosts.length === 0) {
+        setHasMorePosts(false);
+        generatePosts(20);
+      } else {
+        const processedPosts = latestPosts.map(post => ({
+          ...post,
+          type: post.title ? 'article' : 'post',
+          name: post.name || name,
+          username: post.username || username,
+        }));
+        
+        processedPosts.forEach(post => addPost(post, true));
+        
+        if (latestPosts.length < 20) {
+          setHasMorePosts(false);
+          generatePosts(20 - latestPosts.length);
+        }
+      }
+
+      setPage(prevPage => prevPage + 1);
+      setRenderedPostCount(prevCount => prevCount + 20);
+    } catch (error) {
+      console.error('Error fetching latest posts:', error);
+      generatePosts(20);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const generatePosts = (count) => {
     // Simulating API call
     setTimeout(() => {
-      const permutations = [
-        ['post', 'post', 'article'],
-        ['post', 'article', 'post'],
-        ['article', 'post', 'post'],
-        ['post', 'article', 'article'],
-        ['article', 'post', 'article'],
-        ['article', 'article', 'post']
-      ];
+      const newPosts = Array(count).fill().map((_, index) => {
+        const permutations = [
+          ['post', 'post', 'article'],
+          ['post', 'article', 'post'],
+          ['article', 'post', 'post'],
+          ['post', 'article', 'article'],
+          ['article', 'post', 'article'],
+          ['article', 'article', 'post']
+        ];
 
-      const newPosts = Array(12).fill().map((_, index) => {
         const permutationIndex = Math.floor(index / 3) % permutations.length;
         const typeIndex = index % 3;
         const type = permutations[permutationIndex][typeIndex];
@@ -147,8 +206,8 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         };
       });
 
-      newPosts.forEach(post => addPost(post));
-      setLoading(false);
+      newPosts.forEach(post => addPost(post, false)); // Add generated posts
+      setRenderedPostCount(prevCount => prevCount + count);
     }, 1000);
   };
 
@@ -170,12 +229,18 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     navigation.navigate('Account', { screen: 'AccountMain' }); // Updated this line
   };
 
-  const renderItem = ({ item }) => {
+  const renderItem = ({ item, index }) => {
+    if (index >= renderedPostCount) return null;
     const isReposted = reposts.some(repost => repost.originalPost.id === item.id);
     if (item.type === 'article') {
       return (
         <ArticlePreview 
-          item={{...item, name: item.name, username: item.username, pageCount: item.pageCount}}
+          item={{
+            ...item,
+            name: item.name || 'Unknown',
+            username: item.username || 'unknown_user',
+            pageCount: item.pageCount || 1
+          }}
           onCommentPress={() => handleCommentPress(item)}
           onArticlePress={() => handleArticlePress(item)}
           isReposted={isReposted}
@@ -185,7 +250,12 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     } else {
       return (
         <Post 
-          item={{...item, name: item.name, username: item.username}}
+          item={{
+            ...item,
+            name: item.name || 'Unknown',
+            username: item.username || 'unknown_user',
+            title: item.title
+          }}
           onCommentPress={() => handleCommentPress(item)}
           commentCount={item.comments}
         />
@@ -193,9 +263,15 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     }
   };
 
+  const handleEndReached = () => {
+    if (!loading && posts.length >= renderedPostCount) {
+      fetchLatestPosts();
+    }
+  };
+
   useEffect(() => {
     console.log("useEffect in ForYouPage called");
-    fetchPosts();
+    fetchLatestPosts();
   }, []);
 
   return (
@@ -204,10 +280,10 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
       {activeTab === 'ForYou' ? (
         <>
           <FlatList
-            data={posts.filter(post => !post.isUserPost)} // Only display non-user posts
+            data={posts.filter(post => !post.isUserPost)}
             renderItem={renderItem}
-            keyExtractor={item => item.id.toString()}
-            onEndReached={fetchPosts}
+            keyExtractor={item => (item.id || '').toString()}
+            onEndReached={handleEndReached}
             onEndReachedThreshold={0.1}
             ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
             contentContainerStyle={styles.scrollContent}
