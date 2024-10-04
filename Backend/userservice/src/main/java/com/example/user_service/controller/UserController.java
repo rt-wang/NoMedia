@@ -58,7 +58,8 @@ public class UserController {
                 user.getEmail(),
                 user.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList())
+                    .collect(Collectors.toList()),
+                user.getName()
             );
 
             return ResponseEntity.ok(response);

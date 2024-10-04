@@ -108,6 +108,8 @@ const App = () => {
         'AbhayaLibre-SemiBold': require('./assets/fonts/AbhayaLibre-SemiBold.ttf'),
         'AbhayaLibre-Bold': require('./assets/fonts/AbhayaLibre-Bold.ttf'),
         'AbhayaLibre-ExtraBold': require('./assets/fonts/AbhayaLibre-ExtraBold.ttf'),
+        'SFProText-Regular': require('./assets/fonts/SFProText-Regular.otf'),
+        'SFProText-Bold': require('./assets/fonts/SFProText-Bold.otf'),
       });
       setFontsLoaded(true);
     }

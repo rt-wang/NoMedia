@@ -86,7 +86,52 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
     : indentedContent;
 
   const handleMorePress = () => {
-    onArticlePress(post);
+    const paragraphs = post.content.split('\n\n');
+    const threads = [];
+    let currentPage = '';
+    let pageNumber = 1;
+
+    paragraphs.forEach(paragraph => {
+      if (paragraph.length >= 200 && paragraph.length <= 400) {
+        if (currentPage.length > 0) {
+          threads.push({ content: currentPage.trim(), pageNumber: pageNumber++ });
+          currentPage = '';
+        }
+        threads.push({ content: paragraph, pageNumber: pageNumber++ });
+      } else {
+        while (paragraph.length > 0) {
+          if (currentPage.length + paragraph.length <= 300) {
+            currentPage += (currentPage.length > 0 ? '\n\n' : '') + paragraph;
+            paragraph = '';
+          } else {
+            const breakPoint = paragraph.lastIndexOf(' ', 300 - currentPage.length);
+            const chunk = paragraph.slice(0, breakPoint);
+            currentPage += (currentPage.length > 0 ? '\n\n' : '') + chunk;
+            paragraph = paragraph.slice(breakPoint + 1);
+          }
+
+          if (currentPage.length >= 200 || paragraph.length === 0) {
+            threads.push({ content: currentPage.trim(), pageNumber: pageNumber++ });
+            currentPage = '';
+          }
+        }
+      }
+    });
+
+    if (currentPage.length > 0) {
+      threads.push({ content: currentPage.trim(), pageNumber: pageNumber });
+    }
+
+    navigation.navigate('Threads', { 
+      item: {
+        ...post,
+        threads: threads.map(thread => ({
+          ...thread,
+          username: post.username,
+          name: post.name
+        })),
+      }
+    });
   };
 
   const handleNamePress = () => {
@@ -115,13 +160,21 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
       )}
       <View style={styles.postHeader}>
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>{post.title}</Text>
+          <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
+            {post.title}
+          </Text>
           <View style={styles.userInfo}>
-            <TouchableOpacity onPress={handleNamePress}>
-              <Text style={styles.username}>{post.username}</Text>
-            </TouchableOpacity>
-            <Text style={styles.handle}>@{post.handle}</Text>
-            <Text style={styles.pageCounter}>{post.pageCount || 31} page{post.pageCount !== 1 ? 's' : ''}</Text>
+            <View style={styles.nameAndPageContainer}>
+              <TouchableOpacity onPress={handleNamePress}>
+                <View style={styles.nameContainer}>
+                  <Text style={styles.name}>{post.name}</Text>
+                  <Text style={styles.username}> @{post.username}</Text>
+                </View>
+              </TouchableOpacity>
+              <View style={styles.pageCounterContainer}>
+                <Text style={styles.pageCounter}>{post.pageCount || 31} page{post.pageCount !== 1 ? 's' : ''}</Text>
+              </View>
+            </View>
           </View>
         </View>
         <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
@@ -206,30 +259,39 @@ const styles = StyleSheet.create({
     fontFamily: 'Athelas',
     fontSize: 22,
     color: '#fff',
-    marginBottom: 4,
+    lineHeight: 26, // Add this to ensure proper spacing between lines
   },
   userInfo: {
+    marginTop: 4,
+  },
+  nameAndPageContainer: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
-  username: {
-    fontFamily: 'SFProText-Regular',
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: 'bold',
-    marginRight: 4,
+  nameContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1, // This will allow the name container to take up available space
   },
-  handle: {
-    fontFamily: 'SFProText-Regular',
+  name: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  username: {
     fontSize: 14,
     color: USERNAME_COLOR,
-    marginRight: 8,
+  },
+  pageCounterContainer: {
+    marginLeft: 'auto', // This pushes the container to the right
+    paddingLeft: 12, // This adds some space between the username and page count
   },
   pageCounter: {
     fontFamily: 'SFProText-Regular',
     fontSize: 14,
     color: '#687684',
-    marginLeft: 8,
+    textAlign: 'right', // This ensures the text itself is right-aligned
   },
   optionsButton: {
     padding: 5,
@@ -366,17 +428,6 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProText-Regular',
     fontSize: 14,
     lineHeight: 20,
-  },
-  nameAndPageContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  pageCounter: {
-    fontFamily: 'SFProText-Regular',
-    fontSize: 14,
-    color: '#687684',
-    left: 139,
   },
   shareButton: {
     marginTop: -3.5, // This will move the share button up by 3 pixels
