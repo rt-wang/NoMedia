@@ -31,6 +31,7 @@ import UserAccountPage from './UserAccountPage';
 import ForgotPasswordPage from './ForgotPasswordPage';
 import NomsPage from './NomsPage';
 import NomObject from './NomObject';
+import MarketingEndScreen from './MarketingEndScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -47,6 +48,7 @@ const HomeStack = () => (
     <Stack.Screen name="FeedbackForm" component={FeedbackForm} />
     <Stack.Screen name="NomsPage" component={NomsPage} />
     <Stack.Screen name="NomObject" component={NomObject} />
+    <Stack.Screen name="MarketingEndScreen" component={MarketingEndScreen} />
   </Stack.Navigator>
 );
 

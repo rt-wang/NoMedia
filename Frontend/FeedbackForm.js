@@ -7,6 +7,7 @@ const LIGHT_PINK = '#FFB6C1';
 const FeedbackForm = ({ navigation }) => {
   const [improvements, setImprovements] = useState('');
   const [likes, setLikes] = useState('');
+  const [tapCount, setTapCount] = useState(0);
 
   const handleSubmit = () => {
     // Here you would typically send the feedback to your server
@@ -16,8 +17,23 @@ const FeedbackForm = ({ navigation }) => {
     navigation.goBack();
   };
 
+  const handleHiddenButtonPress = () => {
+    setTapCount(prevCount => prevCount + 1);
+    if (tapCount + 1 >= 5) {
+      navigation.navigate('MarketingEndScreen');
+    }
+  };
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <TouchableOpacity 
+        style={styles.hiddenButton} 
+        onPress={handleHiddenButtonPress}
+        activeOpacity={1}
+      >
+        <Text style={styles.hiddenButtonText}>NoMedia</Text>
+      </TouchableOpacity>
+
       <Text style={styles.label}>What's missing?</Text>
       <TextInput
         style={styles.input}
@@ -90,6 +106,16 @@ const styles = StyleSheet.create({
     color: "#000",
     fontSize: 18,
     fontFamily: 'AbhayaLibre-Regular',
+  },
+  hiddenButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    padding: 10,
+  },
+  hiddenButtonText: {
+    color: '#000000',
+    fontSize: 16,
   },
 });
 
