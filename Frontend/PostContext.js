@@ -9,10 +9,9 @@ export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
   const [currentUser, setCurrentUser] = useState({});
+  const { addRepost } = useReposts();
   
   console.log("PostProvider rendered");
-
-  const { addRepost } = useReposts(); // Move this to the top level of the component
 
   const addPost = (newPost, isRealPost = false) => {
     setPosts(prevPosts => {
@@ -139,7 +138,6 @@ export const PostProvider = ({ children }) => {
         return p;
       }));
 
-      // Add the new repost to the posts list
       addPost(newRepost, true);
 
     } catch (error) {

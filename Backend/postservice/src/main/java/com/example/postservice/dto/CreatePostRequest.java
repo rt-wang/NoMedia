@@ -4,14 +4,14 @@ import com.example.postservice.entity.Post;
 
 
 public class CreatePostRequest {
+    private Long userId;
+    private Post.PostFormat postFormat;
+    private Integer originalPostId;
+    private String name;
+    private String username;
     private String content;
     private String title;
-    private Post.PostFormat postFormat;
     private Integer topicId;
-    private Long userId;
-    private String username;
-    private String name;
-    private Integer originalPostId;
     // Constructors
     public CreatePostRequest(String content, String title, Post.PostFormat postFormat, Integer topicId, Long userId, String username, String name, Integer originalPostId) {
         this.content = content;

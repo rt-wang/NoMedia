@@ -51,10 +51,10 @@ public class PostService {
     public PostDto createPost(CreatePostRequest createPostRequest) {
         CurrentUserDetails userDetails = getCurrentUserDetails();
         Post post = new Post();
-        post.setUserId(userDetails.getId());
+        post.setUserId(createPostRequest.getUserId());
         post.setContent(createPostRequest.getContent());
         post.setTitle(createPostRequest.getTitle());
-        post.setPostFormat(createPostRequest.getPostFormat());
+        post.setPostFormat(createPostRequest.getPostFormat() != null ? createPostRequest.getPostFormat() : Post.PostFormat.Original);
         post.setCreatedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());
         post.setUsername(createPostRequest.getUsername());
@@ -62,15 +62,13 @@ public class PostService {
 
         Post savedPost = postRepository.save(post);
 
-        if (Post.PostFormat.Repost.equals(createPostRequest.getPostFormat()) || 
-            Post.PostFormat.Quote.equals(createPostRequest.getPostFormat())) {
+        if (Post.PostFormat.Repost.equals(createPostRequest.getPostFormat())) {
             PostRepost postRepost = new PostRepost();
             postRepost.setPostId(savedPost.getPostId());
             postRepost.setOriginalPostId(createPostRequest.getOriginalPostId());
             postRepost.setPostFormat(createPostRequest.getPostFormat());
             postRepostRepository.save(postRepost);
         }
-
         return convertToDto(savedPost);
     }
 

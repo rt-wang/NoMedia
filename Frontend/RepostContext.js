@@ -11,11 +11,12 @@ export const RepostProvider = ({ children }) => {
   const addRepost = async (post, userId, token, authorities, name, username) => {
     try {
       const repostData = {
-        user_id: userId,
-        post_format: 'Repost',
-        original_post_id: post.post_id,
+        userId: userId,
+        postFormat: 'Repost',  // Changed from 'post_format' to 'postFormat' and value to 'REPOST'
+        originalPostId: post.postId,  // Changed from 'post_id' to 'postId'
         name: name,
         username: username,
+        content: '',
       };
 
       const response = await axios.post(`${API_BASE_URL}/api/posts`, repostData, {
