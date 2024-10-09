@@ -4,19 +4,24 @@ import com.example.postservice.entity.Post;
 
 
 public class CreatePostRequest {
+    private Long userId;
+    private Post.PostFormat postFormat;
+    private Integer originalPostId;
+    private String name;
+    private String username;
     private String content;
     private String title;
-    private Post.PostFormat postFormat;
     private Integer topicId;
-    private Long userId;
-
     // Constructors
-    public CreatePostRequest(String content, String title, Post.PostFormat postFormat, Integer topicId, Long userId) {
+    public CreatePostRequest(String content, String title, Post.PostFormat postFormat, Integer topicId, Long userId, String username, String name, Integer originalPostId) {
         this.content = content;
         this.title = title;
         this.postFormat = postFormat;
         this.topicId = topicId;
         this.userId = userId;
+        this.username = username;
+        this.name = name;
+        this.originalPostId = originalPostId;
     }
 
     // Getters and setters
@@ -58,5 +63,29 @@ public class CreatePostRequest {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getOriginalPostId() {
+        return originalPostId;
+    }
+
+    public void setOriginalPostId(Integer originalPostId) {
+        this.originalPostId = originalPostId;
     }
 }

@@ -92,6 +92,8 @@ const CreatePage = () => {
       const token = await AsyncStorage.getItem('token');
       const userId = await AsyncStorage.getItem('userId');
       const authorities = await AsyncStorage.getItem('authorities');
+      const name = await AsyncStorage.getItem('name');
+      const username = await AsyncStorage.getItem('username');
 
       if (!token || !userId) {
         console.error('User not authenticated');
@@ -104,12 +106,15 @@ const CreatePage = () => {
         title: title.trim(),
         post_format: 'Original',
         topic_id: selectedNom !== 'Noms' ? selectedNom : null,
+        name: name,
+        username: username,
       };
 
       const response = await axios.post(`${API_BASE_URL}/api/posts`, newPost, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
+          'authorities': authorities,
         }
       });
       console.log('Post created successfully:', response.data);
@@ -120,6 +125,7 @@ const CreatePage = () => {
         setTitle('');
         navigation.goBack();
       } else {
+        console.log(response.data);
         console.error('Failed to create post:', response.status);
       }
     } catch (error) {

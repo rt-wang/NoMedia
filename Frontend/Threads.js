@@ -76,23 +76,8 @@ const Threads = () => {
   const { posts, toggleLike, toggleRepost, currentUser } = usePosts();
   const [isCommentModalVisible, setIsCommentModalVisible] = useState(false);
 
-  const firstThread = item.threads && item.threads.length > 0 ? item.threads[0] : { 
-    content: DEFAULT_CONTENT[0], 
-    pageNumber: 1,
-    likes: item.likes || 0,
-    comments: item.comments?.length || 0,
-    reposts: item.reposts || 0,
-  };
-
-  const [threads, setThreads] = useState(
-    Array(5).fill(firstThread).map((thread, index) => ({
-      ...thread,
-      pageNumber: index + 1,
-      likes: item.likes || 0,
-      comments: item.comments?.length || 0,
-      reposts: item.reposts || 0,
-    }))
-  );
+  // Use the passed thread information directly
+  const [threads, setThreads] = useState(item.threads || []);
 
   const handleViewableItemsChanged = useCallback(({ viewableItems }) => {
     if (viewableItems.length > 0) {
@@ -141,9 +126,9 @@ const Threads = () => {
   }, []);
 
   const renderItem = useCallback(({ item, index }) => {
-    const post = posts.find(p => p.id === item.id);
-    const isLiked = post?.likedBy?.includes(currentUser?.handle);
-    const isReposted = post?.repostedBy?.includes(currentUser?.handle);
+    const post = posts.find(p => p.id === item.id) || item;
+    const isLiked = post.likedBy?.includes(currentUser?.username);
+    const isReposted = post.repostedBy?.includes(currentUser?.username);
     
     const inputRange = [(index - 1) * height, index * height, (index + 1) * height];
     const scale = scrollY.interpolate({

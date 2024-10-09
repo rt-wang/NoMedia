@@ -24,6 +24,8 @@ const LoginPage = ({ navigation }) => {
           
           let userId = JSON.stringify(response.data.userId);
           let authorities = response.data.authorities;
+          let username = response.data.username;
+          let name = response.data.name;
 
           if (authorities) {
             await AsyncStorage.setItem('authorities', JSON.stringify(authorities));
@@ -32,8 +34,9 @@ const LoginPage = ({ navigation }) => {
           }
           
           await AsyncStorage.setItem('userId', userId);
-          await AsyncStorage.setItem('authorities',JSON.stringify(authorities));
-          
+          await AsyncStorage.setItem('username', username);
+          await AsyncStorage.setItem('name', name);
+
           navigation.replace('MainApp');
         } else {
           Alert.alert('Error', 'Failed to log in. Please try again.');

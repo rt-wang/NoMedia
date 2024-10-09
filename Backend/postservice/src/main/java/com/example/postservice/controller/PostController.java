@@ -6,7 +6,7 @@ import com.example.postservice.service.PostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +19,7 @@ public class PostController {
 
     private final PostService postService;
     private static final Logger log = LoggerFactory.getLogger(PostController.class);
+
     public PostController(PostService postService) {
         this.postService = postService;
     }
@@ -32,6 +33,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
         postService.deletePost(postId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -46,12 +48,18 @@ public class PostController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<PostDto>> getPostsByUser(@PathVariable Long userId) {
         log.info("Received request to get posts for user: {}", userId);
-        Long currentUserId = postService.getCurrentUserId();
-        if (!currentUserId.equals(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
         List<PostDto> posts = postService.getPostsByUser(userId);
         log.info("Returning {} posts for user: {}", posts.size(), userId);
+        return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
+    @GetMapping("/latest")
+    public ResponseEntity<List<PostDto>> getLatestPosts(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        log.info("Received request to get latest posts. Page: {}, Size: {}", page, size);
+        List<PostDto> posts = postService.getLatestPosts(page, size);
+        log.info("Returning {} latest posts", posts.size());
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 }

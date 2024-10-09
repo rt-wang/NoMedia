@@ -49,8 +49,8 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
   const optionsButtonRef = useRef();
 
   const post = posts.find(p => p.id === item.id) || item;
-  const isLiked = post.likedBy?.includes(currentUser.handle);
-  const isReposted = post.repostedBy?.includes(currentUser.handle);
+  const isLiked = post.likedBy?.includes(currentUser.username);
+  const isReposted = post.repostedBy?.includes(currentUser.username);
 
   const handleLike = () => {
     toggleLike(item.id);
@@ -115,8 +115,24 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
           </View>
         </View>
       );
+    } else if (item.type === 'repost') {
+      return (
+        <View>
+          <Text style={styles.repostIndicator}>
+            <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted by {item.name}
+          </Text>
+          <View style={styles.repostedPostContainer}>
+            <Post item={item.originalPost} isQuoteRepost={true} />
+          </View>
+        </View>
+      );
     }
-    const truncatedContent = item.content.length > 300 ? item.content.slice(0, 300) + '...' : item.content;
+    
+    let truncatedContent = '';
+    if (item.content != null) {
+      truncatedContent = item.content.length > 300 ? item.content.slice(0, 300) + '...' : item.content;
+    }
+    
     return (
       <Text style={[styles.content, item.type === 'comment' && styles.commentText]} numberOfLines={item.type === 'comment' ? undefined : undefined}>
         {truncatedContent}
@@ -179,26 +195,38 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
 
   return (
     <View style={styles.container}>
-      {isReposted && (
+      {item.type === 'repost' && (
         <Text style={styles.repostIndicator}>
-          <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted
+          <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted by {item.name}
         </Text>
       )}
-      <View style={styles.postHeader}>
-        <View style={styles.userInfo}>
-          <TouchableOpacity onPress={handleNamePress}>
-            <Text style={styles.username}>{item.username}</Text>
+      {isQuoteRepost ? (
+        renderContent()
+      ) : (
+        <>
+          <View style={styles.postHeader}>
+            <View style={styles.userInfo}>
+              <TouchableOpacity onPress={handleNamePress}>
+                <View style={styles.nameContainer}>
+                  <Text style={styles.name}>{item.type === 'repost' ? item.originalPost.name : item.name}</Text>
+                  <Text style={styles.username}> @{item.type === 'repost' ? item.originalPost.username : item.username}</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
+              <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity onPress={handlePostPress}>
+            {item.type === 'repost' ? renderContent() : (
+              <Text style={styles.content}>
+                {item.content != null ? (item.content.length > 300 ? item.content.slice(0, 300) + '...' : item.content) : ''}
+              </Text>
+            )}
           </TouchableOpacity>
-          <Text style={styles.handle}>@{item.handle}</Text>
-        </View>
-        <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
-          <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity onPress={handlePostPress}>
-        {renderContent()}
-      </TouchableOpacity>
-      {renderToolbar()}
+          {renderToolbar()}
+        </>
+      )}
       <Popover
         isVisible={showRepostMenu}
         onRequestClose={() => setShowRepostMenu(false)}
@@ -241,19 +269,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
   },
   userInfo: {
+    flex: 1,
+  },
+  nameContainer: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  username: {
+  name: {
     fontSize: 16,
-    color: '#fff',
     fontWeight: 'bold',
-    marginRight: 4,
+    color: '#fff',
   },
-  handle: {
+  username: {
     fontSize: 14,
     color: USERNAME_COLOR,
   },
@@ -305,7 +334,12 @@ const styles = StyleSheet.create({
     color: REPOST_PINK,
     fontSize: 14,
     marginBottom: 8,
-    marginLeft: 8,
+  },
+  repostedPostContainer: {
+    marginTop: 8,
+    borderLeftWidth: 2,
+    borderLeftColor: '#333',
+    paddingLeft: 8,
   },
   quotedPostContainer: {
     marginTop: 8,

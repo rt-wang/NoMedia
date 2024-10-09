@@ -12,32 +12,64 @@ import com.example.common.security.UserDetailsInterface;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import com.example.postservice.repository.PostRepostRepository;
+import com.example.postservice.entity.PostRepost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.example.postservice.dto.CurrentUserDetails;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostRepostRepository postRepostRepository;
     private static final Logger log = LoggerFactory.getLogger(PostService.class);
-    public PostService(PostRepository postRepository) {
+
+    public PostService(PostRepository postRepository, PostRepostRepository postRepostRepository) {
         this.postRepository = postRepository;
+        this.postRepostRepository = postRepostRepository;
+    }
+
+    public CurrentUserDetails getCurrentUserDetails() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        log.debug("Current authentication: {}", authentication);
+        if (authentication != null && authentication.isAuthenticated()) {
+            String userId = authentication.getName();
+            log.info("Authenticated user ID: {}", userId);
+            return new CurrentUserDetails(Long.parseLong(userId), null, null);
+        }
+        log.warn("User not authenticated");
+        throw new SecurityException("User not authenticated");
     }
 
     @Transactional
     public PostDto createPost(CreatePostRequest createPostRequest) {
+        CurrentUserDetails userDetails = getCurrentUserDetails();
         Post post = new Post();
+        post.setUserId(createPostRequest.getUserId());
         post.setContent(createPostRequest.getContent());
         post.setTitle(createPostRequest.getTitle());
         post.setPostFormat(createPostRequest.getPostFormat() != null ? createPostRequest.getPostFormat() : Post.PostFormat.Original);
-        post.setTopicId(createPostRequest.getTopicId());
-        post.setUserId(getCurrentUserId());
         post.setCreatedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());
+        post.setUsername(createPostRequest.getUsername());
+        post.setName(createPostRequest.getName());
 
         Post savedPost = postRepository.save(post);
-        return new PostDto(savedPost);
+
+        if (Post.PostFormat.Repost.equals(createPostRequest.getPostFormat())) {
+            PostRepost postRepost = new PostRepost();
+            postRepost.setPostId(savedPost.getPostId());
+            postRepost.setOriginalPostId(createPostRequest.getOriginalPostId());
+            postRepost.setPostFormat(createPostRequest.getPostFormat());
+            postRepostRepository.save(postRepost);
+        }
+        return convertToDto(savedPost);
     }
 
     @Transactional
@@ -91,5 +123,22 @@ public class PostService {
         return posts.stream()
                 .map(PostDto::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostDto> getLatestPosts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<Post> posts = postRepository.findLatestPosts(pageable);
+        return posts.stream()
+                .map(PostDto::new)
+                .collect(Collectors.toList());
+    }
+
+    private PostDto convertToDto(Post post) {
+        PostDto dto = new PostDto(post);
+        // ... existing field mappings ...
+        dto.setUsername(post.getUsername());
+        dto.setName(post.getName());
+        return dto;
     }
 }

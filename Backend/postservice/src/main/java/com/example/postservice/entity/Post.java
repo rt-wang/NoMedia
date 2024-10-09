@@ -23,7 +23,7 @@ public class Post {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "post_format", nullable = false)
-    private PostFormat postFormat = PostFormat.Original;
+    private PostFormat postFormat;
 
     @Column(name = "topic_id")
     private Integer topicId;
@@ -36,6 +36,12 @@ public class Post {
 
     @Column(name = "like_count")
     private Integer likeCount = 0;
+
+    @Column(name = "username")
+    private String username;
+
+    @Column(name = "name")
+    private String name;
 
     public enum PostFormat {
         Original, Repost, Quote
@@ -113,5 +119,21 @@ public class Post {
 
     public void setLikeCount(Integer likeCount) {
         this.likeCount = likeCount;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
