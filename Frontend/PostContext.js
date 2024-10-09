@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { useReposts } from './RepostContext';
@@ -11,6 +11,32 @@ export const PostProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState({});
   const { addRepost } = useReposts();
   
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        const username = await AsyncStorage.getItem('username');
+        const name = await AsyncStorage.getItem('name');
+        const token = await AsyncStorage.getItem('token');
+        const authorities = await AsyncStorage.getItem('authorities');
+
+        if (userId && username && name && token && authorities) {
+          setCurrentUser({
+            id: userId,
+            username,
+            name,
+            token,
+            authorities
+          });
+        }
+      } catch (error) {
+        console.error('Error loading user data:', error);
+      }
+    };
+
+    loadUserData();
+  }, []);
+
   console.log("PostProvider rendered");
 
   const addPost = (newPost, isRealPost = false) => {
@@ -121,11 +147,7 @@ export const PostProvider = ({ children }) => {
         return;
       }
 
-      const token = await AsyncStorage.getItem('token');
-      const userId = await AsyncStorage.getItem('userId');
-      const authorities = await AsyncStorage.getItem('authorities');
-
-      const newRepost = await addRepost(post, userId, token, authorities, currentUser.name, currentUser.username);
+      const newRepost = await addRepost(post, currentUser.id, currentUser.token, currentUser.authorities, currentUser.name, currentUser.username);
 
       setPosts(prevPosts => prevPosts.map(p => {
         if (p.id === postId) {
