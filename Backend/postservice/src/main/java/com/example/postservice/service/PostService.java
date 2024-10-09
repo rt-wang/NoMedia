@@ -20,8 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.example.postservice.dto.CurrentUserDetails;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PostService {
@@ -49,7 +47,6 @@ public class PostService {
 
     @Transactional
     public PostDto createPost(CreatePostRequest createPostRequest) {
-        CurrentUserDetails userDetails = getCurrentUserDetails();
         Post post = new Post();
         post.setUserId(createPostRequest.getUserId());
         post.setContent(createPostRequest.getContent());

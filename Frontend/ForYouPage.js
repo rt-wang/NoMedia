@@ -232,35 +232,57 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   const renderItem = ({ item, index }) => {
     if (index >= renderedPostCount) return null;
     const isReposted = reposts.some(repost => repost.originalPost.id === item.id);
-    if (item.type === 'article') {
+
+    const RepostWrapper = ({ children }) => (
+      <View style={styles.repostWrapper}>
+        <Text style={styles.repostIndicator}>
+          <Ionicons name="repeat" size={14} color="#FFB6C1" /> Reposted by {item.name}
+        </Text>
+        {children}
+      </View>
+    );
+
+    const renderContent = () => {
+      if (item.type === 'article') {
+        return (
+          <ArticlePreview 
+            item={{
+              ...item,
+              name: item.name || 'Unknown',
+              username: item.username || 'unknown_user',
+              pageCount: item.pageCount || 1
+            }}
+            onCommentPress={() => handleCommentPress(item)}
+            onArticlePress={() => handleArticlePress(item)}
+            isReposted={isReposted}
+            commentCount={item.comments}
+          />
+        );
+      } else {
+        return (
+          <Post 
+            item={{
+              ...item,
+              name: item.name || 'Unknown',
+              username: item.username || 'unknown_user',
+              title: item.title
+            }}
+            onCommentPress={() => handleCommentPress(item)}
+            commentCount={item.comments}
+          />
+        );
+      }
+    };
+
+    if (item.postFormat === 'Repost') {
       return (
-        <ArticlePreview 
-          item={{
-            ...item,
-            name: item.name || 'Unknown',
-            username: item.username || 'unknown_user',
-            pageCount: item.pageCount || 1
-          }}
-          onCommentPress={() => handleCommentPress(item)}
-          onArticlePress={() => handleArticlePress(item)}
-          isReposted={isReposted}
-          commentCount={item.comments}
-        />
-      );
-    } else {
-      return (
-        <Post 
-          item={{
-            ...item,
-            name: item.name || 'Unknown',
-            username: item.username || 'unknown_user',
-            title: item.title
-          }}
-          onCommentPress={() => handleCommentPress(item)}
-          commentCount={item.comments}
-        />
+        <RepostWrapper>
+          {renderContent(item.originalPost)}
+        </RepostWrapper>
       );
     }
+
+    return renderContent();
   };
 
   const handleEndReached = () => {
@@ -363,6 +385,17 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     fontFamily: 'SFProText-Regular',
     textAlign: 'center',
+  },
+  repostWrapper: {
+    backgroundColor: '#1A1A1A', // Slightly lighter than black for contrast
+    borderRadius: 8,
+    marginBottom: 10,
+    padding: 10,
+  },
+  repostIndicator: {
+    color: '#FFB6C1', // Light pink color
+    fontSize: 14,
+    marginBottom: 5,
   },
 });
 

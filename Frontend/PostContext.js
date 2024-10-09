@@ -2,8 +2,10 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
 import { useReposts } from './RepostContext';
+import axios from 'axios';
 
 const PostContext = createContext();
+const API_BASE_URL = 'http://localhost:8082';
 
 export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
@@ -168,6 +170,55 @@ export const PostProvider = ({ children }) => {
     }
   };
 
+  const quotePost = async (originalPost, quoteText) => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      const username = await AsyncStorage.getItem('username');
+      const name = await AsyncStorage.getItem('name');
+      const authorities = await AsyncStorage.getItem('authorities');
+      if (!token || !userId) {
+        Alert.alert('Error', 'You must be logged in to quote a post.');
+        return;
+      }
+
+      const quoteData = {
+        userId: userId,
+        postFormat: 'Quote',
+        originalPostId: originalPost.postId,  // Changed from 'id' to 'postId'
+        content: quoteText,
+        name: name,
+        username: username,
+      };
+
+      const response = await axios.post(`${API_BASE_URL}/api/posts`, quoteData, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'authorities': authorities,
+        }
+      });
+
+      if (response.status === 201) {
+        const newQuote = {
+          ...response.data,
+          type: 'quote',
+          originalPost: originalPost,
+          quoteText: quoteText,
+          timestamp: Date.now(),
+        };
+        addPost(newQuote, true);
+        return newQuote;
+      } else {
+        throw new Error('Failed to create quote');
+      }
+    } catch (error) {
+      console.error('Error creating quote:', error);
+      Alert.alert('Error', 'Failed to create quote. Please try again.');
+      throw error;
+    }
+  };
+
   return (
     <PostContext.Provider value={{ 
       posts, 
@@ -177,7 +228,8 @@ export const PostProvider = ({ children }) => {
       currentUser, 
       updateCurrentUser,
       toggleLike,
-      toggleRepost
+      toggleRepost,
+      quotePost
     }}>
       {children}
     </PostContext.Provider>
