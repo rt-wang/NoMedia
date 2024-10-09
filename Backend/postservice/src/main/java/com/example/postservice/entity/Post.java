@@ -23,7 +23,7 @@ public class Post {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "post_format", nullable = false)
-    private PostFormat postFormat = PostFormat.Original;
+    private PostFormat postFormat;
 
     @Column(name = "topic_id")
     private Integer topicId;

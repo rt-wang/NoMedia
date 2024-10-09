@@ -49,8 +49,8 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
   const optionsButtonRef = useRef();
 
   const post = posts.find(p => p.id === item.id) || item;
-  const isLiked = post.likedBy?.includes(currentUser.handle);
-  const isReposted = post.repostedBy?.includes(currentUser.handle);
+  const isLiked = post.likedBy?.includes(currentUser.username);
+  const isReposted = post.repostedBy?.includes(currentUser.username);
 
   const handleLike = () => {
     toggleLike(item.id);

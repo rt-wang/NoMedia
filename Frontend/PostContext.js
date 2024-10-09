@@ -1,16 +1,18 @@
 import React, { createContext, useState, useContext } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert } from 'react-native';
+import { useReposts } from './RepostContext';
 
 const PostContext = createContext();
 
 export const PostProvider = ({ children }) => {
   const [posts, setPosts] = useState([]);
   const [userPosts, setUserPosts] = useState([]);
-  const [currentUser, setCurrentUser] = useState({
-    username: 'John Doe',
-    handle: 'johndoe',
-  });
-
+  const [currentUser, setCurrentUser] = useState({});
+  
   console.log("PostProvider rendered");
+
+  const { addRepost } = useReposts(); // Move this to the top level of the component
 
   const addPost = (newPost, isRealPost = false) => {
     setPosts(prevPosts => {
@@ -83,7 +85,7 @@ export const PostProvider = ({ children }) => {
 
   const toggleLike = (postId) => {
     const updateLikes = (postArray) => {
-      return postArray.map(post => {
+      return (postArray || []).map(post => {
         if (post.id === postId) {
           const isLiked = post.likedBy?.includes(currentUser.handle);
           return {
@@ -107,30 +109,43 @@ export const PostProvider = ({ children }) => {
     setUserPosts(updateLikes);
   };
 
-  const toggleRepost = (postId) => {
-    const updateReposts = (postArray) => {
-      return postArray.map(post => {
-        if (post.id === postId) {
-          const isReposted = post.repostedBy?.includes(currentUser.handle);
+  const toggleRepost = async (postId) => {
+    try {
+      const post = posts.find(p => p.id === postId);
+      if (!post) return;
+
+      const isReposted = post.repostedBy?.includes(currentUser.username);
+      
+      if (isReposted) {
+        // TODO: Implement unrepost functionality on the backend
+        console.log('Unrepost functionality not implemented');
+        return;
+      }
+
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      const authorities = await AsyncStorage.getItem('authorities');
+
+      const newRepost = await addRepost(post, userId, token, authorities, currentUser.name, currentUser.username);
+
+      setPosts(prevPosts => prevPosts.map(p => {
+        if (p.id === postId) {
           return {
-            ...post,
-            reposts: isReposted ? post.reposts - 1 : post.reposts + 1,
-            repostedBy: isReposted 
-              ? post.repostedBy.filter(handle => handle !== currentUser.handle)
-              : [...(post.repostedBy || []), currentUser.handle],
-          };
-        } else if (post.comments) {
-          return {
-            ...post,
-            comments: updateReposts(post.comments),
+            ...p,
+            reposts: (p.reposts || 0) + 1,
+            repostedBy: [...(p.repostedBy || []), currentUser.username],
           };
         }
-        return post;
-      });
-    };
+        return p;
+      }));
 
-    setPosts(updateReposts);
-    setUserPosts(updateReposts);
+      // Add the new repost to the posts list
+      addPost(newRepost, true);
+
+    } catch (error) {
+      console.error('Error toggling repost:', error);
+      Alert.alert('Error', 'Failed to repost. Please try again.');
+    }
   };
 
   return (
@@ -149,10 +164,4 @@ export const PostProvider = ({ children }) => {
   );
 };
 
-export const usePosts = () => {
-  const context = useContext(PostContext);
-  if (!context) {
-    throw new Error('usePosts must be used within a PostProvider');
-  }
-  return context;
-};
+export const usePosts = () => useContext(PostContext);

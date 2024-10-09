@@ -23,7 +23,7 @@ import { PostProvider } from './PostContext';
 import ExplorePageAI from './ExplorePageAI';
 import RegistrationPage from './RegistrationPage';
 import * as Font from 'expo-font';
-import { RepostProvider } from './RepostContext';
+import { RepostProvider, useReposts } from './RepostContext';
 import LoginPage from './LoginPage';
 import FeedbackForm from './FeedbackForm';
 import VerificationPage from './VerificationPage';
@@ -121,9 +121,9 @@ const App = () => {
   }
 
   return (
-    <PostProvider>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <RepostProvider>
+    <RepostProvider>
+      <PostProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
           <SafeAreaProvider>
             <StatusBar barStyle="light-content" />
             <SafeAreaView style={styles.container}>
@@ -135,9 +135,9 @@ const App = () => {
               </NavigationContainer>
             </SafeAreaView>
           </SafeAreaProvider>
-        </RepostProvider>
-      </GestureHandlerRootView>
-    </PostProvider>
+        </GestureHandlerRootView>
+      </PostProvider>
+    </RepostProvider>
   );
 };
 
