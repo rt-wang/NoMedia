@@ -15,8 +15,7 @@ const CommentSpectrumPage = () => {
         <View style={styles.subtitle2Container}>
           <Text style={styles.subtitle2}>Instant Productivity</Text>
         </View>
-        <Text style={[styles.title, styles.commentSectionTitle]}>2. Perfect Comment Section</Text>
-        <Text style={styles.graphicTitle}>NoMedia Comment Distribution</Text>
+        <Text style={[styles.title, styles.commentSectionTitle]}>2. Comment Distribution</Text>
         <View style={styles.graphicOuterContainer}>
           <Svg height="200" width={width - 60}>
             {/* Left neighborhood */}
@@ -111,26 +110,17 @@ const styles = StyleSheet.create({
   subtitle2Container: {
     borderColor: MEDIUM_PINK,
     borderWidth: 2,
-    paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 5,
     marginBottom: 20,
     alignSelf: 'center',
   },
   subtitle2: {
-    fontSize: 22,
+    fontSize: 40,
     color: LIGHTER_PINK,
     fontFamily: 'AbhayaLibre-Regular',
     textAlign: 'center',
     letterSpacing: 0.5,
-  },
-  graphicTitle: {
-    fontSize: 18,
-    color: LIGHTER_PINK,
-    fontFamily: 'AbhayaLibre-Regular',
-    marginBottom: 10,
-    textAlign: 'center',
-    alignSelf: 'center',
   },
   graphicOuterContainer: {
     borderColor: MEDIUM_PINK,

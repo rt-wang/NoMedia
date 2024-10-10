@@ -50,9 +50,9 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     let username = '';
     switch (type) {
       case 'thought':
-        content = "When you join ISIS for work experience but they hand you the vest on day one . . . who relates?";
-        name = "Daniel Zhong";
-        username = "mathenjoyer";
+        content = "Hurricane Milton, a Category 5 storm, approaches Florida’s Gulf Coast with life-threatening winds, storm surges, and floods. Evacuations are underway, with shelters open and airports closed​ (FOX Weather).";
+        name = "WeatherGod";
+        username = "weathergod";
         break;
       case 'opinion':
         content = "Felt a sense of peace after writing this: To philosophize is to embrace complexity, to accept that life's contradictions are not failures of reason, but the essence of existence itself.";
@@ -92,175 +92,14 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     return { title, content, username, name };
   };
 
-  const fetchLatestPosts = async () => {
-    if (!hasMorePosts || loading) return;
-
-    try {
-      setLoading(true);
-
-      const token = await AsyncStorage.getItem('token');
-      const userId = await AsyncStorage.getItem('userId');
-      const name = await AsyncStorage.getItem('name');
-      const username = await AsyncStorage.getItem('username');
-
-      if (!token || !userId) {
-        console.error('User not authenticated');
-        return;
-      }
-
-      const response = await axios.get(`${POST_URL}/api/posts/latest?page=${page}&size=20`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
-      });
-
-      const latestPosts = response.data;
-      
-      if (latestPosts.length === 0) {
-        setHasMorePosts(false);
-        generatePosts(20);
-      } else {
-        const processedPosts = latestPosts.map(post => ({
-          ...post,
-          type: post.title ? 'article' : 'post',
-          name: post.name || name,
-          username: post.username || username,
-          topic_id: post.topic_id || null, // Ensure topic_id is included
-        }));
-        
-        processedPosts.forEach(post => addPost(post, true));
-        
-        if (latestPosts.length < 20) {
-          setHasMorePosts(false);
-          generatePosts(20 - latestPosts.length);
-        }
-      }
-
-      setPage(prevPage => prevPage + 1);
-      setRenderedPostCount(prevCount => prevCount + 20);
-    } catch (error) {
-      console.error('Error fetching latest posts:', error);
-      generatePosts(20);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generatePosts = (count) => {
-    setTimeout(() => {
-      const sequence = ['P', 'A', 'P', 'A', 'A', 'P', 'P', 'A', 'P', 'A', 'A'];
-      const newPosts = sequence.map((type, index) => {
-        if (type === 'P') {
-          const postContent = generateUniquePostContent(index);
-          return {
-            id: `generated_${Date.now()}_${index}`,
-            type: 'post',
-            postType: postContent.postType,
-            username: postContent.username,
-            name: postContent.name,
-            content: postContent.content,
-            comments: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
-            reposts: Math.min(Math.floor(Math.random() * 50), 40),
-            likes: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
-            isUserPost: false,
-            topic_id: postContent.topic_id,
-          };
-        } else {
-          const article = generateUniqueArticlePreview(index);
-          return {
-            id: `generated_${Date.now()}_${index}`,
-            type: 'article',
-            articleType: article.articleType,
-            title: article.title,
-            username: article.username,
-            name: article.name,
-            content: article.content,
-            comments: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
-            reposts: Math.min(Math.floor(Math.random() * 50), 40),
-            likes: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
-            isUserPost: false,
-            pageCount: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
-            topic_id: article.topic_id,
-          };
-        }
-      });
-
-      // If more posts are needed, fill with random posts
-      if (count > sequence.length) {
-        const additionalPosts = Array(count - sequence.length).fill().map((_, index) => {
-          const permutations = [
-            ['post', 'post', 'article'],
-            ['post', 'article', 'post'],
-            ['article', 'post', 'post'],
-            ['post', 'article', 'article'],
-            ['article', 'post', 'article'],
-            ['article', 'article', 'post']
-          ];
-
-          const permutationIndex = Math.floor(index / 3) % permutations.length;
-          const typeIndex = index % 3;
-          const type = permutations[permutationIndex][typeIndex];
-
-          let postType, articleType, content, title, username, handle;
-
-          if (type === 'article') {
-            articleType = Math.random() < 0.5 ? 'tech' : 'lifestyle';
-            const article = generateArticlePreview(articleType);
-            content = article.content;
-            title = article.title;
-            username = article.username;
-            name = article.name;
-          } else {
-            postType = ['thought', 'question', 'opinion'][Math.floor(Math.random() * 3)];
-            const postContent = generatePostContent(postType);
-            content = postContent.content;
-            username = postContent.username;
-            name = postContent.name;
-          }
-
-          // Generate likes between 50 and 100
-          const likes = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
-
-          // Set reposts to half of likes, capped at 40
-          const reposts = Math.min(Math.floor(likes / 2), 40);
-
-          // Generate comments between 10 and 30
-          const comments = Math.floor(Math.random() * (30 - 10 + 1)) + 10;
-
-          return {
-            id: `generated_${Date.now()}_${index}`,
-            type: type,
-            postType: postType,
-            articleType: articleType,
-            title: title,
-            username: username,
-            name: name,
-            content: content,
-            comments: comments,
-            reposts: reposts,
-            likes: likes,
-            isUserPost: false,
-            pageCount: Math.floor(Math.random() * (100 - 50 + 1)) + 50, // Added page count
-            topic_id: Math.random() < 0.5 ? `Nom${index}` : null, // Add a random topic_id to some posts
-          };
-        });
-        newPosts.push(...additionalPosts);
-      }
-
-      newPosts.forEach(post => addPost(post, true));
-      setRenderedPostCount(prevCount => prevCount + newPosts.length);
-    }, 1000);
-  };
-
   const generateUniquePostContent = (index) => {
     const uniquePosts = [
-      { postType: 'thought', content: "Just had a revelation: what if we're all just characters in a cosmic video game?", name: "Elon Musk", username: "elonmusk", topic_id: "Philosophy" },
+      { postType: 'thought', content: "If computational power allows for simulations to mirror reality, infinite regress becomes viable—each simulated universe creating another. Given finite resources and entropy, could our reality be nested within a parent simulation? Theoretical frameworks like Bostrom's Simulation Argument (pt. 1)", name: "Jan Cristelli", username: "janathan22", topic_id: "Debate" },
       { postType: 'opinion', content: "Hot take: pineapple on pizza is actually delicious. Fight me.", name: "Gordon Ramsay", username: "gordonramsay", topic_id: "Food" },
-      { postType: 'question', content: "If you could have dinner with any historical figure, who would it be and why?", name: "Neil deGrasse Tyson", username: "neiltyson", topic_id: "History" },
+      { postType: 'question', content: "Philosophical clarity is like therapy. Ludwig Wittgenstein’s Tractatus breaks down how language limits our world, but the real genius lies in realizing that what can't be said still matters deeply.", name: "Arun Baku", username: "neiltyson", topic_id: "Filosofie" },
       { postType: 'thought', content: "Sometimes I think about how wild it is that we can instantly communicate with people across the globe. What a time to be alive!", name: "Mark Zuckerberg", username: "zuck", topic_id: "Technology" },
       { postType: 'opinion', content: "Unpopular opinion: Mondays aren't that bad. It's all about perspective.", name: "Tony Robbins", username: "tonyrobbins", topic_id: "Motivation" },
-      { postType: 'question', content: "What's a skill you wish you had learned earlier in life?", name: "Bill Gates", username: "billgates", topic_id: "Self-Improvement" }
+      { postType: 'question', content: "Bro im not even lying this app has got me scrolling for hours reading about FUCKING PHYSICS my nigga", name: "Bill Gates", username: "billgates", topic_id: "Self-Improvement" }
     ];
 
     return uniquePosts[index] || generatePostContent('thought');
@@ -269,13 +108,174 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   const generateUniqueArticlePreview = (index) => {
     const uniqueArticles = [
       { articleType: 'tech', title: "The Future of AI: Friend or Foe?", content: "As AI continues to advance at an unprecedented rate, we explore the potential benefits and risks of this transformative technology.", username: "Lex Fridman", name: "lexfridman", topic_id: "AI" },
-      { articleType: 'lifestyle', title: "The Art of Digital Detox", content: "In an increasingly connected world, learn how to unplug and reclaim your mental space with these practical tips.", username: "Cal Newport", name: "calnewport", topic_id: "Wellness" },
+      { articleType: 'literature', title: "Ulysses Summary", content: "James Joyce's Ulysses, a modernist masterpiece, follows Leopold Bloom's odyssey through Dublin on June 16, 1904. The novel parallels Homer's Odyssey, exploring themes of identity, love, and the human condition through stream of consciousness and innovative literary techniques.", username: "Dillon McLeod", name: "dylanthefylan", topic_id: "Literature" },
       { articleType: 'science', title: "Breaking the Speed of Light: New Theories Emerge", content: "Recent breakthroughs in quantum physics suggest that faster-than-light travel might not be as impossible as once thought.", username: "Michio Kaku", name: "michiokaku", topic_id: "Physics" },
-      { articleType: 'culture', title: "The Renaissance of Vinyl: Why Analog is Making a Comeback", content: "Explore the resurgence of vinyl records and the cultural shift towards tangible, high-fidelity music experiences.", username: "Rolling Stone", name: "rollingstone", topic_id: "Music" },
-      { articleType: 'health', title: "The Gut-Brain Connection: Your Second Brain", content: "New research reveals the intricate relationship between your gut microbiome and mental health. Learn how your diet might be affecting your mood.", username: "Dr. Rhonda Patrick", name: "foundmyfitness", topic_id: "Nutrition" }
+      { articleType: 'politics', title: "Atomic Habits Summary", content: "Atomic Habits shows how small, consistent changes can lead to big results by focusing on habit-building systems, making it easier to achieve personal goals and long-term growth.", username: "Michael Duda", name: "mickydude", topic_id: "Music" },
+      { articleType: 'math', title: "Möbius Strip's Twist", content: "A surface with only one side and one boundary? The Möbius strip, a topological curiosity, defies our intuition about mathematical orientation and continuity.", username: "John Milnor", name: "TopologyWizard", topic_id: "Mathematics" }
     ];
 
     return uniqueArticles[index] || generateArticlePreview('tech');
+  };
+
+  const generatePageCount = () => {
+    // Generate a random number between 0 and 1
+    const rand = Math.random();
+    
+    if (rand < 0.6) {
+      // 60% chance of being between 7 and 12
+      return Math.floor(Math.random() * (12 - 7 + 1)) + 7;
+    } else if (rand < 0.8) {
+      // 20% chance of being between 5 and 6
+      return Math.floor(Math.random() * (6 - 5 + 1)) + 5;
+    } else {
+      // 20% chance of being between 13 and 20
+      return Math.floor(Math.random() * (20 - 13 + 1)) + 13;
+    }
+  };
+
+  const generatePosts = (count) => {
+    const sequence = ['P', 'A', 'P', 'A', 'A', 'P', 'P', 'A', 'P', 'A', 'A'];
+    const newPosts = sequence.map((type, index) => {
+      if (type === 'P') {
+        const postContent = generateUniquePostContent(index);
+        return {
+          id: `generated_${Date.now()}_${index}`,
+          type: 'post',
+          postType: postContent.postType,
+          username: postContent.username,
+          name: postContent.name,
+          content: postContent.content,
+          comments: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
+          reposts: Math.min(Math.floor(Math.random() * 50), 40),
+          likes: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
+          isUserPost: false,
+          topic_id: postContent.topic_id,
+        };
+      } else {
+        const article = generateUniqueArticlePreview(index);
+        return {
+          id: `generated_${Date.now()}_${index}`,
+          type: 'article',
+          articleType: article.articleType,
+          title: article.title,
+          username: article.username,
+          name: article.name,
+          content: article.content,
+          comments: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
+          reposts: Math.min(Math.floor(Math.random() * 50), 40),
+          likes: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
+          isUserPost: false,
+          pageCount: generatePageCount(),
+          topic_id: article.topic_id,
+        };
+      }
+    });
+
+    // If more posts are needed, fill with random posts
+    if (count > sequence.length) {
+      const additionalPosts = Array(count - sequence.length).fill().map((_, index) => {
+        if (Math.random() < 0.5) {
+          const postContent = generatePostContent('thought');
+          return {
+            id: `generated_${Date.now()}_${index + sequence.length}`,
+            type: 'post',
+            postType: 'thought',
+            username: postContent.username,
+            name: postContent.name,
+            content: postContent.content,
+            comments: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
+            reposts: Math.min(Math.floor(Math.random() * 50), 40),
+            likes: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
+            isUserPost: false,
+            topic_id: 'Random',
+          };
+        } else {
+          const article = generateArticlePreview('tech');
+          return {
+            id: `generated_${Date.now()}_${index + sequence.length}`,
+            type: 'article',
+            articleType: 'tech',
+            title: article.title,
+            username: article.username,
+            name: article.name,
+            content: article.content,
+            comments: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
+            reposts: Math.min(Math.floor(Math.random() * 50), 40),
+            likes: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
+            isUserPost: false,
+            pageCount: generatePageCount(),
+            topic_id: 'Random',
+          };
+        }
+      });
+      newPosts.push(...additionalPosts);
+    }
+
+    newPosts.forEach(post => addPost(post, true));
+    setRenderedPostCount(prevCount => prevCount + newPosts.length);
+  };
+
+  const fetchLatestPosts = async () => {
+    if (!hasMorePosts || loading) return;
+
+    try {
+      setLoading(true);
+
+      // Generate the first 11 posts
+      if (page === 0) {
+        generatePosts(11);
+        setPage(prevPage => prevPage + 1);
+        setRenderedPostCount(11);
+      } else {
+        // Fetch posts from the server for subsequent pages
+        const token = await AsyncStorage.getItem('token');
+        const userId = await AsyncStorage.getItem('userId');
+        const name = await AsyncStorage.getItem('name');
+        const username = await AsyncStorage.getItem('username');
+
+        if (!token || !userId) {
+          console.error('User not authenticated');
+          return;
+        }
+
+        const response = await axios.get(`${POST_URL}/api/posts/latest?page=${page}&size=20`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        });
+
+        const latestPosts = response.data;
+        
+        if (latestPosts.length === 0) {
+          setHasMorePosts(false);
+          generatePosts(20);
+        } else {
+          const processedPosts = latestPosts.map(post => ({
+            ...post,
+            type: post.title ? 'article' : 'post',
+            name: post.name || name,
+            username: post.username || username,
+            topic_id: post.topic_id || null,
+          }));
+          
+          processedPosts.forEach(post => addPost(post, true));
+          
+          if (latestPosts.length < 20) {
+            setHasMorePosts(false);
+            generatePosts(20 - latestPosts.length);
+          }
+        }
+
+        setPage(prevPage => prevPage + 1);
+        setRenderedPostCount(prevCount => prevCount + 20);
+      }
+    } catch (error) {
+      console.error('Error fetching latest posts:', error);
+      generatePosts(20);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCommentPress = (post) => {
