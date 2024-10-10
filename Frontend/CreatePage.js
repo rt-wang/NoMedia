@@ -105,10 +105,12 @@ const CreatePage = () => {
         content: body,
         title: title.trim(),
         post_format: 'Original',
-        topic_id: selectedNom !== 'Noms' ? selectedNom : null,
+        topic_id: selectedNom !== 'Noms' ? selectedNom : null, // Ensure this is set correctly
         name: name,
         username: username,
       };
+
+      console.log('New post data:', newPost); // Add this line for debugging
 
       const response = await axios.post(`${API_BASE_URL}/api/posts`, newPost, {
         headers: {
@@ -120,9 +122,11 @@ const CreatePage = () => {
       console.log('Post created successfully:', response.data);
 
       if (response.status === 201) {
-        //addPost(response.data);
+        // Make sure the response.data includes the topic_id
+        addPost(response.data);
         setBody('');
         setTitle('');
+        setSelectedNom('Noms'); // Reset the selected Nom
         navigation.goBack();
       } else {
         console.log(response.data);
@@ -424,7 +428,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'SFProText-Regular',
     textAlignVertical: 'top',
-    padding: 0,
+    marginBottom: 30,
   },
   modalOverlay: {
     flex: 1,

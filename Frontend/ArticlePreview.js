@@ -205,7 +205,7 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
           <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "red" : "gray"} />
           <Text style={styles.toolCount}>{item.likes}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.toolItem}>
+        <TouchableOpacity style={[styles.toolItem, styles.shareButton]}>
           <Ionicons name="share-outline" size={18} color="gray" />
         </TouchableOpacity>
       </View>
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   pageCounterContainer: {
     marginLeft: 'auto', // This pushes the container to the right
-    paddingLeft: 12, // This adds some space between the username and page count
+    marginRight: -20,
   },
   pageCounter: {
     fontFamily: 'SFProText-Regular',
@@ -344,7 +344,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 8,
-    marginLeft: 4,
   },
   toolItem: {
     flexDirection: 'row',

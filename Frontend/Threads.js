@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
   },
   toolbox: {
     position: 'absolute',
-    bottom: 130,
+    bottom: 210,
     right: 16,
     alignItems: 'flex-end',
   },

@@ -21,7 +21,7 @@ const TabNavigator = ({ activeTab, setActiveTab }) => (
       style={[styles.tab, activeTab === 'ForYou' && styles.activeTab]}
       onPress={() => setActiveTab('ForYou')}
     >
-      <Text style={[styles.tabText, activeTab === 'ForYou' && styles.activeTabText]}>For You Page</Text>
+      <Text style={[styles.tabText, activeTab === 'ForYou' && styles.activeTabText]}>For Your Mind</Text>
     </TouchableOpacity>
     <TouchableOpacity
       style={[styles.tab, activeTab === 'Noms' && styles.activeTab]}
@@ -126,6 +126,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
           type: post.title ? 'article' : 'post',
           name: post.name || name,
           username: post.username || username,
+          topic_id: post.topic_id || null, // Ensure topic_id is included
         }));
         
         processedPosts.forEach(post => addPost(post, true));
@@ -147,68 +148,134 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   };
 
   const generatePosts = (count) => {
-    // Simulating API call
     setTimeout(() => {
-      const newPosts = Array(count).fill().map((_, index) => {
-        const permutations = [
-          ['post', 'post', 'article'],
-          ['post', 'article', 'post'],
-          ['article', 'post', 'post'],
-          ['post', 'article', 'article'],
-          ['article', 'post', 'article'],
-          ['article', 'article', 'post']
-        ];
-
-        const permutationIndex = Math.floor(index / 3) % permutations.length;
-        const typeIndex = index % 3;
-        const type = permutations[permutationIndex][typeIndex];
-
-        let postType, articleType, content, title, username, handle;
-
-        if (type === 'article') {
-          articleType = Math.random() < 0.5 ? 'tech' : 'lifestyle';
-          const article = generateArticlePreview(articleType);
-          content = article.content;
-          title = article.title;
-          username = article.username;
-          name = article.name;
+      const sequence = ['P', 'A', 'P', 'A', 'A', 'P', 'P', 'A', 'P', 'A', 'A'];
+      const newPosts = sequence.map((type, index) => {
+        if (type === 'P') {
+          const postContent = generateUniquePostContent(index);
+          return {
+            id: `generated_${Date.now()}_${index}`,
+            type: 'post',
+            postType: postContent.postType,
+            username: postContent.username,
+            name: postContent.name,
+            content: postContent.content,
+            comments: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
+            reposts: Math.min(Math.floor(Math.random() * 50), 40),
+            likes: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
+            isUserPost: false,
+            topic_id: postContent.topic_id,
+          };
         } else {
-          postType = ['thought', 'question', 'opinion'][Math.floor(Math.random() * 3)];
-          const postContent = generatePostContent(postType);
-          content = postContent.content;
-          username = postContent.username;
-          name = postContent.name;
+          const article = generateUniqueArticlePreview(index);
+          return {
+            id: `generated_${Date.now()}_${index}`,
+            type: 'article',
+            articleType: article.articleType,
+            title: article.title,
+            username: article.username,
+            name: article.name,
+            content: article.content,
+            comments: Math.floor(Math.random() * (30 - 10 + 1)) + 10,
+            reposts: Math.min(Math.floor(Math.random() * 50), 40),
+            likes: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
+            isUserPost: false,
+            pageCount: Math.floor(Math.random() * (100 - 50 + 1)) + 50,
+            topic_id: article.topic_id,
+          };
         }
-
-        // Generate likes between 50 and 100
-        const likes = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
-
-        // Set reposts to half of likes, capped at 40
-        const reposts = Math.min(Math.floor(likes / 2), 40);
-
-        // Generate comments between 10 and 30
-        const comments = Math.floor(Math.random() * (30 - 10 + 1)) + 10;
-
-        return {
-          id: `generated_${Date.now()}_${index}`,
-          type: type,
-          postType: postType,
-          articleType: articleType,
-          title: title,
-          username: username,
-          name: name,
-          content: content,
-          comments: comments,
-          reposts: reposts,
-          likes: likes,
-          isUserPost: false,
-          pageCount: Math.floor(Math.random() * (100 - 50 + 1)) + 50, // Added page count
-        };
       });
 
-      newPosts.forEach(post => addPost(post, false)); // Add generated posts
-      setRenderedPostCount(prevCount => prevCount + count);
+      // If more posts are needed, fill with random posts
+      if (count > sequence.length) {
+        const additionalPosts = Array(count - sequence.length).fill().map((_, index) => {
+          const permutations = [
+            ['post', 'post', 'article'],
+            ['post', 'article', 'post'],
+            ['article', 'post', 'post'],
+            ['post', 'article', 'article'],
+            ['article', 'post', 'article'],
+            ['article', 'article', 'post']
+          ];
+
+          const permutationIndex = Math.floor(index / 3) % permutations.length;
+          const typeIndex = index % 3;
+          const type = permutations[permutationIndex][typeIndex];
+
+          let postType, articleType, content, title, username, handle;
+
+          if (type === 'article') {
+            articleType = Math.random() < 0.5 ? 'tech' : 'lifestyle';
+            const article = generateArticlePreview(articleType);
+            content = article.content;
+            title = article.title;
+            username = article.username;
+            name = article.name;
+          } else {
+            postType = ['thought', 'question', 'opinion'][Math.floor(Math.random() * 3)];
+            const postContent = generatePostContent(postType);
+            content = postContent.content;
+            username = postContent.username;
+            name = postContent.name;
+          }
+
+          // Generate likes between 50 and 100
+          const likes = Math.floor(Math.random() * (100 - 50 + 1)) + 50;
+
+          // Set reposts to half of likes, capped at 40
+          const reposts = Math.min(Math.floor(likes / 2), 40);
+
+          // Generate comments between 10 and 30
+          const comments = Math.floor(Math.random() * (30 - 10 + 1)) + 10;
+
+          return {
+            id: `generated_${Date.now()}_${index}`,
+            type: type,
+            postType: postType,
+            articleType: articleType,
+            title: title,
+            username: username,
+            name: name,
+            content: content,
+            comments: comments,
+            reposts: reposts,
+            likes: likes,
+            isUserPost: false,
+            pageCount: Math.floor(Math.random() * (100 - 50 + 1)) + 50, // Added page count
+            topic_id: Math.random() < 0.5 ? `Nom${index}` : null, // Add a random topic_id to some posts
+          };
+        });
+        newPosts.push(...additionalPosts);
+      }
+
+      newPosts.forEach(post => addPost(post, true));
+      setRenderedPostCount(prevCount => prevCount + newPosts.length);
     }, 1000);
+  };
+
+  const generateUniquePostContent = (index) => {
+    const uniquePosts = [
+      { postType: 'thought', content: "Just had a revelation: what if we're all just characters in a cosmic video game?", name: "Elon Musk", username: "elonmusk", topic_id: "Philosophy" },
+      { postType: 'opinion', content: "Hot take: pineapple on pizza is actually delicious. Fight me.", name: "Gordon Ramsay", username: "gordonramsay", topic_id: "Food" },
+      { postType: 'question', content: "If you could have dinner with any historical figure, who would it be and why?", name: "Neil deGrasse Tyson", username: "neiltyson", topic_id: "History" },
+      { postType: 'thought', content: "Sometimes I think about how wild it is that we can instantly communicate with people across the globe. What a time to be alive!", name: "Mark Zuckerberg", username: "zuck", topic_id: "Technology" },
+      { postType: 'opinion', content: "Unpopular opinion: Mondays aren't that bad. It's all about perspective.", name: "Tony Robbins", username: "tonyrobbins", topic_id: "Motivation" },
+      { postType: 'question', content: "What's a skill you wish you had learned earlier in life?", name: "Bill Gates", username: "billgates", topic_id: "Self-Improvement" }
+    ];
+
+    return uniquePosts[index] || generatePostContent('thought');
+  };
+
+  const generateUniqueArticlePreview = (index) => {
+    const uniqueArticles = [
+      { articleType: 'tech', title: "The Future of AI: Friend or Foe?", content: "As AI continues to advance at an unprecedented rate, we explore the potential benefits and risks of this transformative technology.", username: "Lex Fridman", name: "lexfridman", topic_id: "AI" },
+      { articleType: 'lifestyle', title: "The Art of Digital Detox", content: "In an increasingly connected world, learn how to unplug and reclaim your mental space with these practical tips.", username: "Cal Newport", name: "calnewport", topic_id: "Wellness" },
+      { articleType: 'science', title: "Breaking the Speed of Light: New Theories Emerge", content: "Recent breakthroughs in quantum physics suggest that faster-than-light travel might not be as impossible as once thought.", username: "Michio Kaku", name: "michiokaku", topic_id: "Physics" },
+      { articleType: 'culture', title: "The Renaissance of Vinyl: Why Analog is Making a Comeback", content: "Explore the resurgence of vinyl records and the cultural shift towards tangible, high-fidelity music experiences.", username: "Rolling Stone", name: "rollingstone", topic_id: "Music" },
+      { articleType: 'health', title: "The Gut-Brain Connection: Your Second Brain", content: "New research reveals the intricate relationship between your gut microbiome and mental health. Learn how your diet might be affecting your mood.", username: "Dr. Rhonda Patrick", name: "foundmyfitness", topic_id: "Nutrition" }
+    ];
+
+    return uniqueArticles[index] || generateArticlePreview('tech');
   };
 
   const handleCommentPress = (post) => {
@@ -254,7 +321,8 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
             ...item,
             name: item.name || 'Unknown',
             username: item.username || 'unknown_user',
-            title: item.title
+            title: item.title,
+            topic_id: item.topic_id, // Ensure topic_id is passed to Post component
           }}
           onCommentPress={() => handleCommentPress(item)}
           commentCount={item.comments}

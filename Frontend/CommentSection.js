@@ -109,11 +109,6 @@ const CommentSection = ({ route, navigation, hideOriginalPost = false, isModal =
             {renderOriginalItem()}
           </View>
         )}
-        {!hideOriginalPost && (
-          <View style={styles.divider}>
-            <View style={styles.dividerLine} />
-          </View>
-        )}
         {comments.length > 0 ? renderComments() : (
           <Text style={styles.emptyText}>No comments yet</Text>
         )}
@@ -160,14 +155,6 @@ const styles = StyleSheet.create({
     color: '#888',
     textAlign: 'center',
     padding: 20,
-  },
-  divider: {
-    marginVertical: 8,
-    paddingHorizontal: 16,
-  },
-  dividerLine: {
-    height: 1,
-    backgroundColor: '#333',
   },
   commentContainer: {
     flexDirection: 'row',

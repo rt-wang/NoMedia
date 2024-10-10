@@ -39,6 +39,7 @@ const OptionsMenu = ({ onClose, onNotInterested, onReport, isComment }) => (
 );
 
 const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => {
+  console.log('Post item:', item); // Add this line for debugging
   const navigation = useNavigation();
   const { reposts, addRepost } = useReposts();
   const { posts, currentUser, toggleLike, toggleRepost } = usePosts();
@@ -145,21 +146,28 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
     }
     return (
       <View style={styles.toolBar}>
-        <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
-          <Ionicons name="chatbubble-outline" size={18} color="gray" />
-          <Text style={styles.toolCount}>{commentCount}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.toolItem} onPress={handleRepostPress} ref={repostButtonRef}>
-          <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
-          <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{post.reposts}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
-          <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
-          <Text style={styles.toolCount}>{post.likes}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.toolItem, styles.shareButton]}>
-          <Ionicons name="share-outline" size={18} color="gray" />
-        </TouchableOpacity>
+        <View style={styles.toolBarLeft}>
+          <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
+            <Ionicons name="chatbubble-outline" size={18} color="gray" />
+            <Text style={styles.toolCount}>{commentCount}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.toolItem} onPress={handleRepostPress} ref={repostButtonRef}>
+            <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
+            <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{post.reposts}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
+            <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
+            <Text style={styles.toolCount}>{post.likes}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.toolItem, styles.shareButton]}>
+            <Ionicons name="share-outline" size={18} color="gray" />
+          </TouchableOpacity>
+        </View>
+        {item.topic_id && (
+          <View style={styles.nomContainer}>
+            <Text style={styles.nomText}>/{item.topic_id}</Text>
+          </View>
+        )}
       </View>
     );
   };
@@ -270,6 +278,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 4,
+    justifyContent: 'space-between', // This will push the Nom to the right
+  },
+  toolBarLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   toolItem: {
     flexDirection: 'row',
@@ -382,6 +395,18 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     marginTop: -3, // This will move the share button up by 3 pixels
+  },
+  nomContainer: {
+    backgroundColor: 'rgba(255, 182, 193, 0.1)', // Light pink background
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  nomText: {
+    color: USERNAME_COLOR,
+    fontSize: 12,
+    fontWeight: '600',
+    fontFamily: 'SFProText-Semibold',
   },
 });
 

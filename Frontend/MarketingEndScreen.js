@@ -6,7 +6,7 @@ const MarketingEndScreen = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.contentContainer}>
         <Text style={styles.title}>NoMedia.</Text>
-        <Text style={styles.subtitle1}>share your mind</Text>
+        <Text style={styles.subtitle1}>For Your Mind</Text>
       </View>
       <View style={styles.subtitle2Container}>
         <Text style={styles.subtitle2}>waitlist in bio</Text>

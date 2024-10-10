@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontFamily: 'AbhayaLibre-Bold',
+    fontFamily: 'Athelas-Bold',
     marginBottom: 30,
     color: '#FFFFFF',
   },
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     marginTop: -18,
     marginLeft: 0,
     width: '100%',
-    left: 117,
+    left: 125,
   },
 });
 
