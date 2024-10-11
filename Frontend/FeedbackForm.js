@@ -63,6 +63,13 @@ const FeedbackForm = ({ navigation }) => {
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit Feedback</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity
+        style={styles.visibleButton}
+        onPress={() => navigation.navigate('CommentDistribution')}
+      >
+        <Text style={styles.visibleButtonText}>Comment Distribution</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -99,12 +106,11 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   button: {
-    backgroundColor: '#FAF9F6',
-    padding: 15,
+    backgroundColor: LIGHT_PINK,
+    padding: 10,
     borderRadius: 5,
-    width: '100%',
-    alignItems: 'center',
     marginBottom: 20,
+    alignItems: 'center',
   },
   buttonText: {
     color: "#000",

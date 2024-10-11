@@ -34,6 +34,7 @@ import NomObject from './NomObject';
 import MarketingEndScreen from './MarketingEndScreen';
 import CommentSpectrumPage from './CommentSpectrumPage';
 import WelcomeScreen from './WelcomeScreen';
+import CommentDistributionPage from './CommentDistributionPage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -53,6 +54,7 @@ const HomeStack = () => (
     <Stack.Screen name="MarketingEndScreen" component={MarketingEndScreen} />
     <Stack.Screen name="CommentSpectrumPage" component={CommentSpectrumPage} />
     <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
+    <Stack.Screen name="CommentDistribution" component={CommentDistributionPage} />
   </Stack.Navigator>
 );
 

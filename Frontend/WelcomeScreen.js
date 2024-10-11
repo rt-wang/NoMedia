@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 const WelcomeScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}>Welcome to NoMedia.</Text>
+      <Text style={styles.welcomeText}><Text style={styles.welcomeTextBold}></Text>I. Intellectual Feed</Text>
     </View>
   );
 };
@@ -17,11 +17,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   welcomeText: {
-    fontSize: 34,
+    fontSize: 32,
     color: '#FFFFFF',
     fontFamily: 'Athelas-Bold', // Note: You may need to ensure this font is available in your project
     textAlign: 'center',
     left: 1,
+  },
+  welcomeTextBold: {
+    fontFamily: 'Athelas-Regular',
+    fontSize: 47,
   },
 });
 
