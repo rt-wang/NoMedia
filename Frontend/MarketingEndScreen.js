@@ -9,7 +9,7 @@ const MarketingEndScreen = () => {
         <Text style={styles.subtitle1}>For Your Mind</Text>
       </View>
       <View style={styles.subtitle2Container}>
-        <Text style={styles.subtitle2}>waitlist in bio</Text>
+        <Text style={styles.subtitle2}>Waitlist in bio</Text>
       </View>
     </SafeAreaView>
   );

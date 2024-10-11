@@ -4,7 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 const WelcomeScreen = () => {
   return (
     <View style={styles.container}>
-      <Text style={styles.welcomeText}><Text style={styles.welcomeTextBold}></Text>I. Intellectual Feed</Text>
+      <Text style={styles.welcomeText}><Text style={styles.welcomeTextBold}></Text>Waitlist in Bio</Text>
     </View>
   );
 };
