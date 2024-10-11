@@ -14,7 +14,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-
+import com.example.postservice.repository.PostRepostRepository;
+import com.example.postservice.entity.PostRepost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,9 +27,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostRepostRepository postRepostRepository;
     private static final Logger log = LoggerFactory.getLogger(PostService.class);
-    public PostService(PostRepository postRepository) {
+
+    public PostService(PostRepository postRepository, PostRepostRepository postRepostRepository) {
         this.postRepository = postRepository;
+        this.postRepostRepository = postRepostRepository;
     }
 
     public CurrentUserDetails getCurrentUserDetails() {
@@ -45,27 +49,27 @@ public class PostService {
 
     @Transactional
     public PostDto createPost(CreatePostRequest createPostRequest) {
-        try {
-            CurrentUserDetails userDetails = getCurrentUserDetails();
-            Post post = new Post();
-            post.setUserId(userDetails.getId());
-            post.setContent(createPostRequest.getContent());
-            post.setTitle(createPostRequest.getTitle());
-            post.setPostFormat(Post.PostFormat.Original);
-            post.setCreatedAt(LocalDateTime.now());
-            post.setUpdatedAt(LocalDateTime.now());
-            post.setUsername(createPostRequest.getUsername());
-            post.setName(createPostRequest.getName());
+        CurrentUserDetails userDetails = getCurrentUserDetails();
+        Post post = new Post();
+        post.setUserId(createPostRequest.getUserId());
+        post.setContent(createPostRequest.getContent());
+        post.setTitle(createPostRequest.getTitle());
+        post.setPostFormat(createPostRequest.getPostFormat() != null ? createPostRequest.getPostFormat() : Post.PostFormat.Original);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUpdatedAt(LocalDateTime.now());
+        post.setUsername(createPostRequest.getUsername());
+        post.setName(createPostRequest.getName());
 
-            Post savedPost = postRepository.save(post);
-            return convertToDto(savedPost);
-        } catch (SecurityException e) {
-            log.error("Failed to create post due to authentication error", e);
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authenticated", e);
-        } catch (Exception e) {
-            log.error("Unexpected error while creating post", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create post", e);
+        Post savedPost = postRepository.save(post);
+
+        if (Post.PostFormat.Repost.equals(createPostRequest.getPostFormat())) {
+            PostRepost postRepost = new PostRepost();
+            postRepost.setPostId(savedPost.getPostId());
+            postRepost.setOriginalPostId(createPostRequest.getOriginalPostId());
+            postRepost.setPostFormat(createPostRequest.getPostFormat());
+            postRepostRepository.save(postRepost);
         }
+        return convertToDto(savedPost);
     }
 
     @Transactional
