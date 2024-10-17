@@ -16,6 +16,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import com.example.postservice.repository.PostRepostRepository;
 import com.example.postservice.entity.PostRepost;
+import com.example.postservice.entity.PostComment;
+import com.example.postservice.repository.PostCommentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,11 +28,13 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostRepostRepository postRepostRepository;
+    private final PostCommentRepository postCommentRepository;
     private static final Logger log = LoggerFactory.getLogger(PostService.class);
 
-    public PostService(PostRepository postRepository, PostRepostRepository postRepostRepository) {
+    public PostService(PostRepository postRepository, PostRepostRepository postRepostRepository, PostCommentRepository postCommentRepository) {
         this.postRepository = postRepository;
         this.postRepostRepository = postRepostRepository;
+        this.postCommentRepository = postCommentRepository;
     }
 
     public CurrentUserDetails getCurrentUserDetails() {
@@ -65,6 +69,14 @@ public class PostService {
             postRepost.setOriginalPostId(createPostRequest.getOriginalPostId());
             postRepost.setPostFormat(createPostRequest.getPostFormat());
             postRepostRepository.save(postRepost);
+        }
+
+        if (Post.PostFormat.Comment.equals(createPostRequest.getPostFormat())) {
+            PostComment postComment = new PostComment();
+            postComment.setPostId(savedPost.getPostId());
+            postComment.setParentPostId(createPostRequest.getOriginalPostId());
+            postComment.setPostFormat(createPostRequest.getPostFormat());
+            postCommentRepository.save(postComment);
         }
         return convertToDto(savedPost);
     }
@@ -138,4 +150,5 @@ public class PostService {
         dto.setName(post.getName());
         return dto;
     }
+
 }

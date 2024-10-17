@@ -62,4 +62,11 @@ public class PostController {
         log.info("Returning {} latest posts", posts.size());
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
+
+    @PostMapping("/{postId}/comment")
+    public ResponseEntity<PostDto> createComment(@PathVariable Long postId, @RequestBody CreatePostRequest createCommentRequest){
+        createCommentRequest.setParentPostId(postId.intValue());
+        PostDto createdComment = postService.createPost(createCommentRequest);
+        return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
+    }
 }

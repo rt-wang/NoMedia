@@ -12,8 +12,10 @@ public class CreatePostRequest {
     private String content;
     private String title;
     private Integer topicId;
+    private Integer parentPostId;
+    
     // Constructors
-    public CreatePostRequest(String content, String title, Post.PostFormat postFormat, Integer topicId, Long userId, String username, String name, Integer originalPostId) {
+    public CreatePostRequest(String content, String title, Post.PostFormat postFormat, Integer topicId, Long userId, String username, String name, Integer originalPostId, Integer parentPostId) {
         this.content = content;
         this.title = title;
         this.postFormat = postFormat;
@@ -22,6 +24,7 @@ public class CreatePostRequest {
         this.username = username;
         this.name = name;
         this.originalPostId = originalPostId;
+        this.parentPostId = parentPostId;
     }
 
     // Getters and setters
@@ -87,5 +90,13 @@ public class CreatePostRequest {
 
     public void setOriginalPostId(Integer originalPostId) {
         this.originalPostId = originalPostId;
+    }
+
+    public Integer getParentPostId() {
+        return parentPostId;
+    }
+
+    public void setParentPostId(Integer parentPostId) {
+        this.parentPostId = parentPostId;
     }
 }
