@@ -221,54 +221,51 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     try {
       setLoading(true);
 
-      // Generate the first 11 posts
+      // Fetch user-created posts first
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      const name = await AsyncStorage.getItem('name');
+      const username = await AsyncStorage.getItem('username');
+
+      if (!token || !userId) {
+        console.error('User not authenticated');
+        return;
+      }
+
+      const response = await axios.get(`${POST_URL}/api/posts/latest?page=0&size=20`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const latestPosts = response.data;
+      
+      const processedPosts = latestPosts.map(post => ({
+        ...post,
+        type: post.title ? 'article' : 'post',
+        name: post.name || name,
+        username: post.username || username,
+        topic_id: post.topic_id || null,
+        isUserPost: true, // Mark these as user posts
+      }));
+      
+      // Clear existing posts and add user posts first
+      processedPosts.forEach(post => addPost(post, true));
+
+      // Generate and add auto-generated posts
       if (page === 0) {
         generatePosts(11);
         setPage(prevPage => prevPage + 1);
-        setRenderedPostCount(11);
+        setRenderedPostCount(11 + processedPosts.length);
       } else {
-        // Fetch posts from the server for subsequent pages
-        const token = await AsyncStorage.getItem('token');
-        const userId = await AsyncStorage.getItem('userId');
-        const name = await AsyncStorage.getItem('name');
-        const username = await AsyncStorage.getItem('username');
-
-        if (!token || !userId) {
-          console.error('User not authenticated');
-          return;
-        }
-
-        const response = await axios.get(`${POST_URL}/api/posts/latest?page=${page}&size=20`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }
-        });
-
-        const latestPosts = response.data;
-        
-        if (latestPosts.length === 0) {
-          setHasMorePosts(false);
-          generatePosts(20);
-        } else {
-          const processedPosts = latestPosts.map(post => ({
-            ...post,
-            type: post.title ? 'article' : 'post',
-            name: post.name || name,
-            username: post.username || username,
-            topic_id: post.topic_id || null,
-          }));
-          
-          processedPosts.forEach(post => addPost(post, true));
-          
-          if (latestPosts.length < 20) {
-            setHasMorePosts(false);
-            generatePosts(20 - latestPosts.length);
-          }
-        }
-
+        generatePosts(20);
         setPage(prevPage => prevPage + 1);
         setRenderedPostCount(prevCount => prevCount + 20);
+      }
+
+      if (latestPosts.length < 20) {
+        setHasMorePosts(false);
       }
     } catch (error) {
       console.error('Error fetching latest posts:', error);
@@ -348,7 +345,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
       {activeTab === 'ForYou' ? (
         <>
           <FlatList
-            data={posts.filter(post => !post.isUserPost)}
+            data={posts}
             renderItem={renderItem}
             keyExtractor={item => (item.id || '').toString()}
             onEndReached={handleEndReached}
