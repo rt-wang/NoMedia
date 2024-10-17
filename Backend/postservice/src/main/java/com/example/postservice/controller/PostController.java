@@ -63,10 +63,16 @@ public class PostController {
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
 
-    @PostMapping("/{postId}/comment")
-    public ResponseEntity<PostDto> createComment(@PathVariable Long postId, @RequestBody CreatePostRequest createCommentRequest){
-        createCommentRequest.setParentPostId(postId.intValue());
+    @PostMapping("/comment/{parentPostId}")
+    public ResponseEntity<PostDto> createComment(@PathVariable Long parentPostId, @RequestBody CreatePostRequest createCommentRequest){
+        createCommentRequest.setParentPostId(parentPostId.intValue());
         PostDto createdComment = postService.createPost(createCommentRequest);
         return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/comment/{parentPostId}")
+    public ResponseEntity<List<PostDto>> getComments(@PathVariable Long parentPostId) {
+        List<PostDto> comments = postService.getComments(parentPostId.intValue());
+        return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 }

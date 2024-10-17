@@ -151,4 +151,12 @@ public class PostService {
         return dto;
     }
 
+    @Transactional(readOnly = true)
+    public List<PostDto> getComments(Integer parentPostId) {
+        List<PostComment> comments = postCommentRepository.findByParentPostId(parentPostId);
+        return comments.stream()
+                .map(postComment -> new PostDto(postComment.getPost()))
+                .collect(Collectors.toList());
+    }
+
 }
