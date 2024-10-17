@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Make sure to import this
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ArticlePreview from './ArticlePreview';
@@ -33,7 +33,7 @@ const TabNavigator = ({ activeTab, setActiveTab }) => (
 );
 
 const ForYouPage = ({ navigation, showCommentModal }) => {
-  const { posts, addPost } = usePosts();
+  const { posts, addPost, clearPosts } = usePosts();
   const [loading, setLoading] = useState(false);
   const { reposts } = useReposts();
   const [activeTab, setActiveTab] = useState('ForYou');
@@ -41,6 +41,8 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   const [page, setPage] = useState(0);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [renderedPostCount, setRenderedPostCount] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const flatListRef = useRef(null);
 
   console.log("ForYouPage rendered");
 
@@ -215,8 +217,23 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     setRenderedPostCount(prevCount => prevCount + newPosts.length);
   };
 
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    setPage(0);
+    setHasMorePosts(true);
+    setRenderedPostCount(0);
+    clearPosts(true); // Clear posts but keep user-generated posts
+    fetchLatestPosts().then(() => {
+      setRefreshing(false);
+      // Scroll to top after refresh
+      if (flatListRef.current) {
+        flatListRef.current.scrollToOffset({ offset: 0, animated: true });
+      }
+    });
+  }, []);
+
   const fetchLatestPosts = async () => {
-    if (!hasMorePosts || loading) return;
+    if ((!hasMorePosts && page !== 0) || loading) return;
 
     try {
       setLoading(true);
@@ -250,19 +267,13 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         isUserPost: true, // Mark these as user posts
       }));
       
-      // Clear existing posts and add user posts first
+      // Add user posts to the beginning of the posts list
       processedPosts.forEach(post => addPost(post, true));
 
       // Generate and add auto-generated posts
-      if (page === 0) {
-        generatePosts(11);
-        setPage(prevPage => prevPage + 1);
-        setRenderedPostCount(11 + processedPosts.length);
-      } else {
-        generatePosts(20);
-        setPage(prevPage => prevPage + 1);
-        setRenderedPostCount(prevCount => prevCount + 20);
-      }
+      generatePosts(11);
+      setPage(1);
+      setRenderedPostCount(11 + processedPosts.length);
 
       if (latestPosts.length < 20) {
         setHasMorePosts(false);
@@ -345,13 +356,21 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
       {activeTab === 'ForYou' ? (
         <>
           <FlatList
+            ref={flatListRef}
             data={posts}
             renderItem={renderItem}
             keyExtractor={item => (item.id || '').toString()}
             onEndReached={handleEndReached}
             onEndReachedThreshold={0.1}
-            ListFooterComponent={loading ? <Text style={styles.loadingText}>Loading...</Text> : null}
+            ListFooterComponent={null} // Remove loading text
             contentContainerStyle={styles.scrollContent}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                tintColor="#FFFFFF"
+              />
+            }
           />
           <TouchableOpacity
             style={styles.feedbackButton}

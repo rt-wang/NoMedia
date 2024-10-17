@@ -39,19 +39,17 @@ export const PostProvider = ({ children }) => {
 
   console.log("PostProvider rendered");
 
-  const addPost = (newPost, isRealPost = false) => {
+  const addPost = (newPost, addToBeginning = false) => {
     setPosts(prevPosts => {
       const updatedPost = {
         ...newPost,
         id: newPost.id || `generated_${Date.now()}_${prevPosts.length}`,
-        isRealPost: isRealPost,
+        isUserPost: newPost.isUserPost || false,
       };
       
-      if (isRealPost) {
-        // Add real posts to the beginning of the array
+      if (addToBeginning) {
         return [updatedPost, ...prevPosts];
       } else {
-        // Add generated posts to the end of the array
         return [...prevPosts, updatedPost];
       }
     });
@@ -168,6 +166,17 @@ export const PostProvider = ({ children }) => {
     }
   };
 
+  // Add this new function
+  const clearPosts = (keepUserPosts = true) => {
+    setPosts(prevPosts => {
+      if (keepUserPosts) {
+        return prevPosts.filter(post => post.isUserPost);
+      } else {
+        return [];
+      }
+    });
+  };
+
   return (
     <PostContext.Provider value={{ 
       posts, 
@@ -177,7 +186,8 @@ export const PostProvider = ({ children }) => {
       currentUser, 
       updateCurrentUser,
       toggleLike,
-      toggleRepost
+      toggleRepost,
+      clearPosts // Add this to the context value
     }}>
       {children}
     </PostContext.Provider>
