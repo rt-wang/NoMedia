@@ -34,14 +34,15 @@ const TabNavigator = ({ activeTab, setActiveTab }) => (
 
 const ForYouPage = ({ navigation, showCommentModal }) => {
   const { posts, addPost, clearPosts } = usePosts();
-  const [loading, setLoading] = useState(false);
   const { reposts } = useReposts();
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('ForYou');
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMorePosts, setHasMorePosts] = useState(true);
   const [renderedPostCount, setRenderedPostCount] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const [refreshedPosts, setRefreshedPosts] = useState([]);
   const flatListRef = useRef(null);
 
   console.log("ForYouPage rendered");
@@ -222,17 +223,13 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     setPage(0);
     setHasMorePosts(true);
     setRenderedPostCount(0);
-    clearPosts(true); // Clear posts but keep user-generated posts
-    fetchLatestPosts().then(() => {
-      setRefreshing(false);
-      // Scroll to top after refresh
-      if (flatListRef.current) {
-        flatListRef.current.scrollToOffset({ offset: 0, animated: true });
-      }
-    });
-  }, []);
+    // Store the current reposted posts
+    const repostedPosts = posts.filter(post => post.type === 'repost');
+    setRefreshedPosts(repostedPosts);
+    fetchLatestPosts(true);
+  }, [posts]);
 
-  const fetchLatestPosts = async () => {
+  const fetchLatestPosts = async (isRefreshing = false) => {
     if ((!hasMorePosts && page !== 0) || loading) return;
 
     try {
@@ -264,16 +261,22 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         name: post.name || name,
         username: post.username || username,
         topic_id: post.topic_id || null,
-        isUserPost: true, // Mark these as user posts
+        isUserPost: true,
       }));
       
+      if (isRefreshing) {
+        clearPosts(true);
+        // Add back the reposted posts
+        refreshedPosts.forEach(post => addPost(post, true));
+      }
+
       // Add user posts to the beginning of the posts list
       processedPosts.forEach(post => addPost(post, true));
 
       // Generate and add auto-generated posts
       generatePosts(11);
       setPage(1);
-      setRenderedPostCount(11 + processedPosts.length);
+      setRenderedPostCount(prevCount => prevCount + 11 + processedPosts.length);
 
       if (latestPosts.length < 20) {
         setHasMorePosts(false);
@@ -283,6 +286,10 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
       generatePosts(20);
     } finally {
       setLoading(false);
+      setRefreshing(false);
+      if (isRefreshing && flatListRef.current) {
+        flatListRef.current.scrollToOffset({ offset: 0, animated: true });
+      }
     }
   };
 

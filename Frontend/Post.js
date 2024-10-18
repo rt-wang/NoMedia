@@ -106,87 +106,62 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
     navigation.navigate('UserAccountPage', { username: item.username });
   };
 
-  const renderContent = () => {
-    if (item.type === 'quote') {
-      return (
-        <View>
-          <Text style={styles.content}>{item.quoteText}</Text>
-          <View style={styles.quotedPostContainer}>
-            <Post item={item.originalPost} isQuoteRepost={true} />
-          </View>
-        </View>
-      );
-    } else if (item.type === 'repost') {
-      return (
-        <View>
-          <Text style={styles.repostIndicator}>
-            <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted by {item.name}
-          </Text>
-          <View style={styles.repostedPostContainer}>
-            <Post item={item.originalPost} isQuoteRepost={true} />
-          </View>
-        </View>
-      );
-    }
-    
-    let truncatedContent = '';
-    if (item.content != null) {
-      truncatedContent = item.content.length > 300 ? item.content.slice(0, 300) + '...' : item.content;
-    }
-    
-    return (
-      <Text style={[styles.content, item.type === 'comment' && styles.commentText]} numberOfLines={item.type === 'comment' ? undefined : undefined}>
-        {truncatedContent}
-      </Text>
-    );
-  };
+  const renderRepostIndicator = () => (
+    <Text style={styles.repostIndicator}>
+      <Ionicons name="repeat" size={14} color={REPOST_PINK} /> {item.name}
+    </Text>
+  );
 
-  const renderToolbar = () => {
-    if (item.type === 'comment') {
-      return (
-        <View style={styles.commentToolbar}>
-          <TouchableOpacity onPress={handleCommentPress} style={styles.toolItem}>
-            <Ionicons name="chatbubble-outline" size={18} color="gray" />
-            <Text style={styles.toolCount}>{commentCount}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleRepostPress} style={styles.toolItem} ref={repostButtonRef}>
-            <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
-            <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{post.reposts}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleLike} style={styles.toolItem}>
-            <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
-            <Text style={styles.toolCount}>{post.likes}</Text>
+  const renderPostContent = (postItem) => (
+    <>
+      <View style={styles.postHeader}>
+        <View style={styles.userInfo}>
+          <TouchableOpacity onPress={() => handleNamePress(postItem.username)}>
+            <View style={styles.nameContainer}>
+              <Text style={styles.name}>{postItem.name}</Text>
+              <Text style={styles.username}> @{postItem.username}</Text>
+            </View>
           </TouchableOpacity>
         </View>
-      );
-    }
-    return (
-      <View style={styles.toolBar}>
-        <View style={styles.toolBarLeft}>
-          <TouchableOpacity style={styles.toolItem} onPress={handleCommentPress}>
-            <Ionicons name="chatbubble-outline" size={18} color="gray" />
-            <Text style={styles.toolCount}>{commentCount}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.toolItem} onPress={handleRepostPress} ref={repostButtonRef}>
-            <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
-            <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{post.reposts}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.toolItem} onPress={handleLike}>
-            <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
-            <Text style={styles.toolCount}>{post.likes}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.toolItem, styles.shareButton]}>
-            <Ionicons name="share-outline" size={18} color="gray" />
-          </TouchableOpacity>
-        </View>
-        {item.topic_id && (
-          <View style={styles.nomContainer}>
-            <Text style={styles.nomText}>/{item.topic_id}</Text>
-          </View>
-        )}
+        <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
+          <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
+        </TouchableOpacity>
       </View>
-    );
-  };
+      <TouchableOpacity onPress={() => handlePostPress(postItem.id)}>
+        <Text style={styles.content}>
+          {postItem.content != null ? (postItem.content.length > 300 ? postItem.content.slice(0, 300) + '...' : postItem.content) : ''}
+        </Text>
+      </TouchableOpacity>
+      {renderToolbar(postItem)}
+    </>
+  );
+
+  const renderToolbar = (postItem) => (
+    <View style={styles.toolBar}>
+      <View style={styles.toolBarLeft}>
+        <TouchableOpacity style={styles.toolItem} onPress={() => handleCommentPress(postItem)}>
+          <Ionicons name="chatbubble-outline" size={18} color="gray" />
+          <Text style={styles.toolCount}>{postItem.comments}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolItem} onPress={handleRepostPress} ref={repostButtonRef}>
+          <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
+          <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{postItem.reposts}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.toolItem} onPress={() => handleLike(postItem.id)}>
+          <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
+          <Text style={styles.toolCount}>{postItem.likes}</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.toolItem, styles.shareButton]}>
+          <Ionicons name="share-outline" size={18} color="gray" />
+        </TouchableOpacity>
+      </View>
+      {postItem.topic_id && (
+        <View style={styles.nomContainer}>
+          <Text style={styles.nomText}>/{postItem.topic_id}</Text>
+        </View>
+      )}
+    </View>
+  );
 
   if (isNotInterested) {
     return (
@@ -203,38 +178,8 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
 
   return (
     <View style={styles.container}>
-      {item.type === 'repost' && (
-        <Text style={styles.repostIndicator}>
-          <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted by {item.name}
-        </Text>
-      )}
-      {isQuoteRepost ? (
-        renderContent()
-      ) : (
-        <>
-          <View style={styles.postHeader}>
-            <View style={styles.userInfo}>
-              <TouchableOpacity onPress={handleNamePress}>
-                <View style={styles.nameContainer}>
-                  <Text style={styles.name}>{item.type === 'repost' ? item.originalPost.name : item.name}</Text>
-                  <Text style={styles.username}> @{item.type === 'repost' ? item.originalPost.username : item.username}</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-            <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
-              <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity onPress={handlePostPress}>
-            {item.type === 'repost' ? renderContent() : (
-              <Text style={styles.content}>
-                {item.content != null ? (item.content.length > 300 ? item.content.slice(0, 300) + '...' : item.content) : ''}
-              </Text>
-            )}
-          </TouchableOpacity>
-          {renderToolbar()}
-        </>
-      )}
+      {item.type === 'repost' && renderRepostIndicator()}
+      {item.type === 'repost' ? renderPostContent(item.originalPost) : renderPostContent(item)}
       <Popover
         isVisible={showRepostMenu}
         onRequestClose={() => setShowRepostMenu(false)}
@@ -252,13 +197,11 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
         onRequestClose={() => setShowOptionsMenu(false)}
         from={optionsButtonRef}
         popoverStyle={styles.optionsMenuPopover}
-        placement="bottom" // Add this line
-        arrowSize={{ width: 0, height: 0 }} // Optional: removes the arrow
       >
-        <OptionsMenu 
+        <OptionsMenu
+          onClose={() => setShowOptionsMenu(false)}
           onNotInterested={handleNotInterested}
           onReport={handleReport}
-          onClose={() => setShowOptionsMenu(false)}
           isComment={item.type === 'comment'}
         />
       </Popover>
@@ -346,19 +289,8 @@ const styles = StyleSheet.create({
   repostIndicator: {
     color: REPOST_PINK,
     fontSize: 14,
-    marginBottom: 8,
-  },
-  repostedPostContainer: {
-    marginTop: 8,
-    borderLeftWidth: 2,
-    borderLeftColor: '#333',
-    paddingLeft: 8,
-  },
-  quotedPostContainer: {
-    marginTop: 8,
-    borderLeftWidth: 2,
-    borderLeftColor: '#333',
-    paddingLeft: 8,
+    marginBottom: 4,
+    marginLeft: -12,
   },
   commentToolbar: {
     flexDirection: 'row',
@@ -428,16 +360,16 @@ const styles = StyleSheet.create({
     marginTop: -3, // This will move the share button up by 3 pixels
   },
   nomContainer: {
-    backgroundColor: 'rgba(255, 182, 193, 0.1)', // Light pink background
+    backgroundColor: 'rgba(104, 118, 132, 0.2)', // Increased opacity from 0.1 to 0.2
     borderRadius: 12,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   nomText: {
-    color: USERNAME_COLOR,
+    color: '#8899A6', // Slightly lighter color for better contrast
     fontSize: 12,
-    fontWeight: '600',
-    fontFamily: 'SFProText-Semibold',
+    fontWeight: '400',
+    fontFamily: 'SFProText-Regular',
   },
 });
 
