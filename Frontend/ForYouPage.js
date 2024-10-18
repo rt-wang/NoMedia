@@ -311,34 +311,32 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     navigation.navigate('Account', { screen: 'AccountMain' }); // Updated this line
   };
 
-  const renderItem = ({ item, index }) => {
-    if (index >= renderedPostCount) return null;
-    const isReposted = reposts.some(repost => repost.originalPost.id === item.id);
-    if (item.type === 'article') {
+  const renderItem = ({ item }) => {
+    if (item.type === 'repost' && item.originalPost.type === 'article') {
       return (
-        <ArticlePreview 
-          item={{
-            ...item,
-            name: item.name || 'Unknown',
-            username: item.username || 'unknown_user',
-            pageCount: item.pageCount || 1
-          }}
+        <ArticlePreview
+          item={item.originalPost}
+          onCommentPress={() => handleCommentPress(item.originalPost)}
+          onArticlePress={() => handleArticlePress(item.originalPost)}
+          isReposted={true}
+          commentCount={item.originalPost.comments}
+          repostedBy={item.name}
+        />
+      );
+    } else if (item.type === 'article') {
+      return (
+        <ArticlePreview
+          item={item}
           onCommentPress={() => handleCommentPress(item)}
           onArticlePress={() => handleArticlePress(item)}
-          isReposted={isReposted}
+          isReposted={false}
           commentCount={item.comments}
         />
       );
     } else {
       return (
-        <Post 
-          item={{
-            ...item,
-            name: item.name || 'Unknown',
-            username: item.username || 'unknown_user',
-            title: item.title,
-            topic_id: item.topic_id, // Ensure topic_id is passed to Post component
-          }}
+        <Post
+          item={item}
           onCommentPress={() => handleCommentPress(item)}
           commentCount={item.comments}
         />

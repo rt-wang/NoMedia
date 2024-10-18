@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert, Dimensions, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert, Dimensions } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Popover from 'react-native-popover-view';
 import { useNavigation } from '@react-navigation/native';
@@ -35,7 +35,7 @@ const OptionsMenu = ({ onClose, onNotInterested, onReport }) => (
   </View>
 );
 
-const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, commentCount }) => {
+const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, commentCount, repostedBy }) => {
   const navigation = useNavigation();
   const { posts, currentUser, toggleLike, toggleRepost } = usePosts();
   const [showRepostMenu, setShowRepostMenu] = useState(false);
@@ -138,26 +138,8 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
     navigation.navigate('UserAccountPage', { username: item.username });
   };
 
-  if (isNotInterested) {
-    return (
-      <View style={[styles.container, styles.notInterestedContainer]}>
-        <View style={styles.notInterestedContent}>
-          <Text style={styles.notInterestedTitle}>Not Interested</Text>
-          <Text style={styles.notInterestedText}>
-            Content like this will be shown less frequently in your feed.
-          </Text>
-        </View>
-      </View>
-    );
-  }
-
-  return (
+  const renderArticleContent = () => (
     <TouchableOpacity style={styles.container} onPress={onArticlePress}>
-      {isReposted && (
-        <Text style={styles.repostIndicator}>
-          <Ionicons name="repeat" size={14} color={REPOST_PINK} /> Reposted
-        </Text>
-      )}
       <View style={styles.postHeader}>
         <View style={styles.titleContainer}>
           <Text style={styles.title} numberOfLines={2} ellipsizeMode="tail">
@@ -197,7 +179,11 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
           <Ionicons name="chatbubble-outline" size={18} color="gray" />
           <Text style={styles.toolCount}>{commentCount}</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.toolItem} onPress={handleRepostPress}>
+        <TouchableOpacity 
+          style={styles.toolItem} 
+          onPress={handleRepostPress}
+          ref={repostButtonRef}
+        >
           <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
           <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{item.reposts}</Text>
         </TouchableOpacity>
@@ -226,8 +212,6 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
         onRequestClose={() => setShowOptionsMenu(false)}
         from={optionsButtonRef}
         popoverStyle={styles.optionsMenuPopover}
-        placement="bottom" // Add this line
-        arrowSize={{ width: 0, height: 0 }} // Optional: removes the arrow
       >
         <OptionsMenu 
           onNotInterested={handleNotInterested}
@@ -236,6 +220,30 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
         />
       </Popover>
     </TouchableOpacity>
+  );
+
+  if (isNotInterested) {
+    return (
+      <View style={[styles.container, styles.notInterestedContainer]}>
+        <View style={styles.notInterestedContent}>
+          <Text style={styles.notInterestedTitle}>Not Interested</Text>
+          <Text style={styles.notInterestedText}>
+            Content like this will be shown less frequently in your feed.
+          </Text>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View>
+      {repostedBy && (
+        <Text style={styles.repostIndicator}>
+          <Ionicons name="repeat" size={14} color={REPOST_PINK} /> {repostedBy}
+        </Text>
+      )}
+      {renderArticleContent()}
+    </View>
   );
 };
 
@@ -434,8 +442,9 @@ const styles = StyleSheet.create({
   repostIndicator: {
     color: REPOST_PINK,
     fontSize: 14,
-    marginBottom: 8,
-    marginLeft: 8,
+    marginBottom: -6,
+    marginTop: 15,
+    marginLeft: -12,
   },
   postHeader: {
     flexDirection: 'row',
