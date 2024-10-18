@@ -4,52 +4,102 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import { usePosts } from './PostContext';
 import Post from './Post';
 import { Ionicons } from '@expo/vector-icons';
+import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const POST_URL = 'http://localhost:8082';
 
 const PINK_COLOR = '#FFB6C1';
 const MAX_CHARS = 300;
 
 const CommentSection = ({ route, navigation, hideOriginalPost = false, isModal = false }) => {
-  const { postId, commentId } = route.params;
+  const { postId, postData } = route.params;
   const { posts, addComment } = usePosts();
   const [comment, setComment] = useState('');
   const [charCount, setCharCount] = useState(0);
+  const [comments, setComments] = useState([]);
   const inputRef = useRef(null);
 
-  const findPostAndComment = (postId, commentId) => {
-    const post = posts.find(p => p.id === postId);
-    if (!post) return { post: null, comment: null };
-    
-    if (!commentId) return { post, comment: null };
-    
-    const findComment = (comments) => {
-      for (let c of comments) {
-        if (c.id === commentId) return c;
-        const nestedComment = findComment(c.comments || []);
-        if (nestedComment) return nestedComment;
-      }
-      return null;
-    };
-    
-    const comment = findComment(post.comments || []);
-    return { post, comment };
+  let token, userId, username, name, authorities;
+
+  const initializeUserData = async () => {
+    token = await AsyncStorage.getItem('token');
+    userId = await AsyncStorage.getItem('userId');
+    username = await AsyncStorage.getItem('username');
+    name = await AsyncStorage.getItem('name');
+    authorities = await AsyncStorage.getItem('authorities');
   };
 
-  const { post, comment: originalComment } = findPostAndComment(postId, commentId);
-  const comments = originalComment ? originalComment.comments || [] : post ? post.comments || [] : [];
+  useEffect(() => {
+    initializeUserData();
+  }, []);
 
   useEffect(() => {
     setCharCount(comment.length);
   }, [comment]);
 
-  const handleCommentPress = (clickedComment) => {
-    navigation.push('CommentSection', { postId, commentId: clickedComment.id });
+  useEffect(() => {
+    fetchComments();
+  }, [postId]);
+
+  const fetchComments = async () => {
+    try {
+      const response = await axios.get(`${POST_URL}/api/posts/comment/${postId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      setComments(response.data);
+    } catch (error) {
+      console.error('Error fetching comments:', error, "token", token);
+      Alert.alert('Error', 'Failed to fetch comments. Please try again.');
+    }
   };
 
-  const handleSendComment = () => {
+  const handleCommentPress = (clickedComment) => {
+    navigation.push('CommentSection', { postId, originalPost: clickedComment });
+  };
+
+  const handleSendComment = async () => {
     if (comment.trim().length > 0 && comment.length <= MAX_CHARS) {
-      addComment(postId, comment.trim(), commentId);
-      setComment('');
-      inputRef.current?.blur();
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const userId = await AsyncStorage.getItem('userId');
+        const username = await AsyncStorage.getItem('username');
+        const name = await AsyncStorage.getItem('name');
+        const authorities = await AsyncStorage.getItem('authorities');
+
+        const commentRequest = {
+          userId: userId,
+          content: comment.trim(),
+          postFormat: 'Comment',
+          originalPostId: postId,
+          username: username,
+          name: name,
+          authorities: authorities
+        };
+
+        const response = await axios.post(`${POST_URL}/api/posts/comment/${postId}`, commentRequest, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'authorities': authorities
+          }
+        });
+
+        if (response.status === 201) {
+          const newComment = response.data;
+          setComments(prevComments => [newComment, ...prevComments]);
+          setComment('');
+          inputRef.current?.blur();
+        } else {
+          throw new Error('Failed to create comment');
+        }
+      } catch (error) {
+        console.error('Error creating comment:', error);
+        Alert.alert('Error', 'Failed to create comment. Please try again.');
+      }
     } else if (comment.length > MAX_CHARS) {
       Alert.alert('Error', 'Comment exceeds maximum character limit');
     } else {
@@ -59,39 +109,39 @@ const CommentSection = ({ route, navigation, hideOriginalPost = false, isModal =
 
   const renderComments = () => {
     return comments.map((item) => (
-      <TouchableOpacity key={item.id} onPress={() => handleCommentPress(item)}>
+      <TouchableOpacity key={item.postId} onPress={() => handleCommentPress(item)}>
         <View style={[styles.commentContainer, isModal && styles.modalCommentContainer]}>
           <Post
             item={item}
             onCommentPress={() => {}}
-            commentCount={item.comments ? item.comments.length : 0}
+            commentCount={0} // We don't have nested comments count in this implementation
           />
         </View>
       </TouchableOpacity>
     ));
   };
 
-  if (!post) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>Post not found</Text>
-      </View>
-    );
-  }
-
   const renderOriginalItem = () => {
-    const item = originalComment || post;
+    if (!postData) return null;
     return (
       <Post
         item={{
-          ...item,
-          type: 'post', // Force the item to be treated as a post
+          ...postData,
+          type: 'post',
         }}
         onCommentPress={() => {}}
         commentCount={comments.length}
       />
     );
   };
+
+  if (!posts) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorText}>Post not found</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView

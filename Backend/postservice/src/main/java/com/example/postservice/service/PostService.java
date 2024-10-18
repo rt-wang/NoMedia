@@ -56,10 +56,12 @@ public class PostService {
         post.setContent(createPostRequest.getContent());
         post.setTitle(createPostRequest.getTitle());
         post.setPostFormat(createPostRequest.getPostFormat() != null ? createPostRequest.getPostFormat() : Post.PostFormat.Original);
+        post.setTopicId(createPostRequest.getTopicId());
         post.setCreatedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());
         post.setUsername(createPostRequest.getUsername());
         post.setName(createPostRequest.getName());
+        post.setLikeCount(0); // Initialize like count to 0
 
         Post savedPost = postRepository.save(post);
 

@@ -13,7 +13,7 @@ public class PostDto {
     private Integer likeCount;
     private String username;
     private String name;
-
+    private Long userId;
     public PostDto() {}
     
     // Constructor
@@ -25,6 +25,7 @@ public class PostDto {
         this.topicId = post.getTopicId();
         this.createdAt = post.getCreatedAt();
         this.likeCount = post.getLikeCount();
+        this.userId = post.getUserId();
     }
 
     // Getters and setters
@@ -98,5 +99,13 @@ public class PostDto {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }
