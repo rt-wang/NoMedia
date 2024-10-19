@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useReposts } from './RepostContext';
+import { usePosts } from './PostContext';
 
 const QuoteScreen = ({ route, navigation }) => {
   const { post } = route.params;
@@ -9,17 +10,39 @@ const QuoteScreen = ({ route, navigation }) => {
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 300;
   const { addRepost } = useReposts();
+  const { addPost } = usePosts();
 
   useEffect(() => {
     setCharCount(quoteText.length);
   }, [quoteText]);
 
+  useEffect(() => {
+    if (!post) {
+      console.error('No post data provided to QuoteScreen');
+      navigation.goBack();
+    }
+  }, [post, navigation]);
+
   const handlePost = () => {
-    if (quoteText.trim().length > 0 && quoteText.length <= MAX_CHARS) {
-      addRepost(post, quoteText);
+    if (quoteText.trim().length > 0 && quoteText.length <= MAX_CHARS && post) {
+      const newPost = {
+        type: 'repost',
+        repostType: 'quote',
+        originalPost: post,
+        content: quoteText,
+        id: Date.now().toString(), // Temporary ID, replace with a proper ID generation method
+        timestamp: new Date().toISOString(),
+        username: 'CurrentUser', // Replace with actual current user's username
+        handle: '@currentuser', // Replace with actual current user's handle
+      };
+      addPost(newPost);
       navigation.goBack();
     }
   };
+
+  if (!post) {
+    return null; // or return a loading indicator
+  }
 
   return (
     <KeyboardAvoidingView 
@@ -59,11 +82,11 @@ const QuoteScreen = ({ route, navigation }) => {
           <View style={styles.originalPostContainer}>
             <View style={styles.userInfoContainer}>
               <Text style={styles.originalPostUsername}>
-                {post.username} <Text style={styles.originalPostHandle}>@{post.handle}</Text>
+                {post.username || 'Unknown'} <Text style={styles.originalPostHandle}>@{post.handle || 'unknown'}</Text>
               </Text>
             </View>
             <View style={styles.grayOutlineBox}>
-              <Text style={styles.originalPostContent}>{post.content}</Text>
+              <Text style={styles.originalPostContent}>{post.content || 'No content'}</Text>
             </View>
           </View>
         </ScrollView>

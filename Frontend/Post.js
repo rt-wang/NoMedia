@@ -67,7 +67,10 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
   };
 
   const handleQuote = () => {
-    navigation.navigate('Quote', { post: item });
+    const postToQuote = item.type === 'repost' ? item.originalPost : item;
+    navigation.navigate('Quote', { 
+      post: postToQuote
+    });
     setShowRepostMenu(false);
   };
 
