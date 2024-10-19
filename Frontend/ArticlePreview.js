@@ -82,9 +82,9 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
 
   const handleCommentPress = () => {
     navigation.navigate('CommentSection', { 
-      postId: post.id,
+      postId: post.postId,
       postData: {
-        id: post.id,
+        id: post.postId,
         title: post.title,
         content: post.content,
         username: post.username,
