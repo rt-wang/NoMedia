@@ -161,4 +161,33 @@ public class PostService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    public PostDto createComment(CreatePostRequest createPostRequest) {
+        // First, create the Post entity
+        Post post = new Post();
+        post.setContent(createPostRequest.getContent());
+        post.setUserId(createPostRequest.getUserId());
+        post.setUsername(createPostRequest.getUsername());
+        post.setName(createPostRequest.getName());
+        post.setPostFormat(Post.PostFormat.Comment);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUpdatedAt(LocalDateTime.now());
+        post.setLikeCount(0);
+
+        // Save the Post first to generate the ID
+        post = postRepository.save(post);
+
+        // Now create the PostComment entity
+        PostComment postComment = new PostComment();
+        postComment.setPostId(post.getPostId());
+        postComment.setParentPostId(createPostRequest.getParentPostId());
+        postComment.setPostFormat(Post.PostFormat.Comment);
+
+        // Save the PostComment
+        postCommentRepository.save(postComment);
+
+        // Return the DTO
+        return new PostDto(post);
+    }
+
 }

@@ -4,18 +4,19 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "PostComment")
+@IdClass(PostCommentId.class)
 public class PostComment {
 
     @Id
     @Column(name = "post_id")
     private Integer postId;
 
-    @Column(name = "parent_post_id", nullable = false)
+    @Id
+    @Column(name = "parent_post_id")
     private Integer parentPostId;
 
-    @OneToOne
-    @MapsId
-    @JoinColumn(name = "post_id")
+    @ManyToOne
+    @JoinColumn(name = "post_id", insertable = false, updatable = false)
     private Post post;
 
     @ManyToOne
