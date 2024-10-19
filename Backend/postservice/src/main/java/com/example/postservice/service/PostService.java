@@ -16,23 +16,25 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import com.example.postservice.repository.PostRepostRepository;
 import com.example.postservice.entity.PostRepost;
+import com.example.postservice.entity.PostComment;
+import com.example.postservice.repository.PostCommentRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.example.postservice.dto.CurrentUserDetails;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PostService {
 
     private final PostRepository postRepository;
     private final PostRepostRepository postRepostRepository;
+    private final PostCommentRepository postCommentRepository;
     private static final Logger log = LoggerFactory.getLogger(PostService.class);
 
-    public PostService(PostRepository postRepository, PostRepostRepository postRepostRepository) {
+    public PostService(PostRepository postRepository, PostRepostRepository postRepostRepository, PostCommentRepository postCommentRepository) {
         this.postRepository = postRepository;
         this.postRepostRepository = postRepostRepository;
+        this.postCommentRepository = postCommentRepository;
     }
 
     public CurrentUserDetails getCurrentUserDetails() {
@@ -49,16 +51,17 @@ public class PostService {
 
     @Transactional
     public PostDto createPost(CreatePostRequest createPostRequest) {
-        CurrentUserDetails userDetails = getCurrentUserDetails();
         Post post = new Post();
         post.setUserId(createPostRequest.getUserId());
         post.setContent(createPostRequest.getContent());
         post.setTitle(createPostRequest.getTitle());
         post.setPostFormat(createPostRequest.getPostFormat() != null ? createPostRequest.getPostFormat() : Post.PostFormat.Original);
+        post.setTopicId(createPostRequest.getTopicId());
         post.setCreatedAt(LocalDateTime.now());
         post.setUpdatedAt(LocalDateTime.now());
         post.setUsername(createPostRequest.getUsername());
         post.setName(createPostRequest.getName());
+        post.setLikeCount(0); // Initialize like count to 0
 
         Post savedPost = postRepository.save(post);
 
@@ -68,6 +71,14 @@ public class PostService {
             postRepost.setOriginalPostId(createPostRequest.getOriginalPostId());
             postRepost.setPostFormat(createPostRequest.getPostFormat());
             postRepostRepository.save(postRepost);
+        }
+
+        if (Post.PostFormat.Comment.equals(createPostRequest.getPostFormat())) {
+            PostComment postComment = new PostComment();
+            postComment.setPostId(savedPost.getPostId());
+            postComment.setParentPostId(createPostRequest.getOriginalPostId());
+            postComment.setPostFormat(createPostRequest.getPostFormat());
+            postCommentRepository.save(postComment);
         }
         return convertToDto(savedPost);
     }
@@ -141,4 +152,42 @@ public class PostService {
         dto.setName(post.getName());
         return dto;
     }
+
+    @Transactional(readOnly = true)
+    public List<PostDto> getComments(Integer parentPostId) {
+        List<PostComment> comments = postCommentRepository.findByParentPostId(parentPostId);
+        return comments.stream()
+                .map(postComment -> new PostDto(postComment.getPost()))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public PostDto createComment(CreatePostRequest createPostRequest) {
+        // First, create the Post entity
+        Post post = new Post();
+        post.setContent(createPostRequest.getContent());
+        post.setUserId(createPostRequest.getUserId());
+        post.setUsername(createPostRequest.getUsername());
+        post.setName(createPostRequest.getName());
+        post.setPostFormat(Post.PostFormat.Comment);
+        post.setCreatedAt(LocalDateTime.now());
+        post.setUpdatedAt(LocalDateTime.now());
+        post.setLikeCount(0);
+
+        // Save the Post first to generate the ID
+        post = postRepository.save(post);
+
+        // Now create the PostComment entity
+        PostComment postComment = new PostComment();
+        postComment.setPostId(post.getPostId());
+        postComment.setParentPostId(createPostRequest.getParentPostId());
+        postComment.setPostFormat(Post.PostFormat.Comment);
+
+        // Save the PostComment
+        postCommentRepository.save(postComment);
+
+        // Return the DTO
+        return new PostDto(post);
+    }
+
 }

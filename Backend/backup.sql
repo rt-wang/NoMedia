@@ -110,7 +110,7 @@ CREATE TABLE `Post` (
   `user_id` bigint DEFAULT NULL,
   `content` text,
   `title` varchar(255) DEFAULT NULL,
-  `post_format` enum('Original','Repost','Quote') NOT NULL DEFAULT 'Original',
+  `post_format` enum('Original','Repost','Quote','Comment') NOT NULL DEFAULT 'Original',
   `topic_id` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

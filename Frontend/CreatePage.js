@@ -97,35 +97,36 @@ const CreatePage = () => {
 
       if (!token || !userId) {
         console.error('User not authenticated');
+        // You might want to show an error message to the user here
         return;
       }
 
       const newPost = {
-        user_id: userId,
+        userId: Number(userId), // Changed from UserId to userId
         content: body,
         title: title.trim(),
-        post_format: 'Original',
-        topic_id: selectedNom !== 'Noms' ? selectedNom : null,
+        postFormat: 'Original', // Changed from post_format to postFormat
+        topicId: selectedNom !== 'Noms' ? parseInt(selectedNom) : null, // Changed from topic_id to topicId
         name: name,
         username: username,
       };
+
+      console.log('Sending post data:', newPost); // Add this line for debugging
 
       const response = await axios.post(`${API_BASE_URL}/api/posts`, newPost, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-          'authorities': authorities,
         }
       });
+
       console.log('Post created successfully:', response.data);
 
       if (response.status === 201) {
-        //addPost(response.data);
         setBody('');
         setTitle('');
         navigation.goBack();
       } else {
-        console.log(response.data);
         console.error('Failed to create post:', response.status);
       }
     } catch (error) {

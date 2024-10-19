@@ -71,9 +71,18 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
   };
 
   const handleCommentPress = () => {
-    if (onCommentPress) {
-      onCommentPress(item);
-    }
+    navigation.navigate('CommentSection', { 
+      postId: item.id,
+      postData: {
+        id: item.id,
+        content: item.content,
+        username: item.username,
+        name: item.name,
+        timestamp: item.timestamp,
+        likeCount: item.likes,
+        repostCount: item.reposts
+      }
+    });
   };
 
   const handlePostPress = () => {

@@ -33,7 +33,6 @@ public class PostController {
     }
 
     @DeleteMapping("/{postId}")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
         postService.deletePost(postId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -61,5 +60,18 @@ public class PostController {
         List<PostDto> posts = postService.getLatestPosts(page, size);
         log.info("Returning {} latest posts", posts.size());
         return new ResponseEntity<>(posts, HttpStatus.OK);
+    }
+
+    @PostMapping("/comment/{postId}")
+    public ResponseEntity<PostDto> createComment(@PathVariable Integer postId, @RequestBody CreatePostRequest createPostRequest) {
+        createPostRequest.setParentPostId(postId);
+        PostDto createdComment = postService.createComment(createPostRequest);
+        return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/comment/{parentPostId}")
+    public ResponseEntity<List<PostDto>> getComments(@PathVariable Long parentPostId) {
+        List<PostDto> comments = postService.getComments(parentPostId.intValue());
+        return new ResponseEntity<>(comments, HttpStatus.OK);
     }
 }

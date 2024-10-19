@@ -44,7 +44,7 @@ public class Post {
     private String name;
 
     public enum PostFormat {
-        Original, Repost, Quote
+        Original, Repost, Quote, Comment
     }
 
     // Getters and setters
@@ -136,4 +136,5 @@ public class Post {
     public void setName(String name) {
         this.name = name;
     }
+
 }

@@ -1,23 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useReposts } from './RepostContext';
+import { usePosts } from './PostContext';
 
 const QuoteScreen = ({ route, navigation }) => {
   const { post } = route.params;
   const [quoteText, setQuoteText] = useState('');
   const [charCount, setCharCount] = useState(0);
   const MAX_CHARS = 300;
-  const { addRepost } = useReposts();
+  const { quotePost } = usePosts();
 
   useEffect(() => {
     setCharCount(quoteText.length);
   }, [quoteText]);
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (quoteText.trim().length > 0 && quoteText.length <= MAX_CHARS) {
-      addRepost(post, quoteText);
-      navigation.goBack();
+      try {
+        await quotePost(post, quoteText);
+        navigation.goBack();
+      } catch (error) {
+        Alert.alert('Error', 'Failed to create quote. Please try again.');
+      }
     }
   };
 
@@ -59,7 +63,7 @@ const QuoteScreen = ({ route, navigation }) => {
           <View style={styles.originalPostContainer}>
             <View style={styles.userInfoContainer}>
               <Text style={styles.originalPostUsername}>
-                {post.username} <Text style={styles.originalPostHandle}>@{post.handle}</Text>
+                {post.name} <Text style={styles.originalPostHandle}>@{post.username}</Text>
               </Text>
             </View>
             <View style={styles.grayOutlineBox}>

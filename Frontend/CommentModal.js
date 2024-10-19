@@ -2,6 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Modal, TouchableOpacity, TextInput, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { usePosts } from './PostContext';
+import axios from 'axios';
+import { Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const POST_URL = 'http://localhost:8082';
 
 const CommentModal = ({ isVisible, onClose, originalPost }) => {
   const [comment, setComment] = useState('');
@@ -13,11 +18,42 @@ const CommentModal = ({ isVisible, onClose, originalPost }) => {
     setCharCount(comment.length);
   }, [comment]);
 
-  const handlePostComment = () => {
+  const handlePostComment = async () => {
     if (comment.trim().length > 0 && comment.length <= MAX_CHARS) {
-      addComment(originalPost.id, comment);
-      setComment('');
-      onClose();
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      const name = await AsyncStorage.getItem('name');
+      const username = await AsyncStorage.getItem('username');
+      const authorities = await AsyncStorage.getItem('authorities');
+
+      const commentData = {
+        content: comment.trim(),
+        postFormat: 'Comment',
+        topicId: originalPost.topicId || 'null',
+        username: username,
+        name: name,
+      };
+
+      try {
+        const response = await axios.post(`${POST_URL}/api/posts/comment/${originalPost.postId}`, commentData, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        });
+
+        if (response.status === 201) {
+          const newComment = response.data;
+          addComment(originalPost.id, newComment);
+          setComment('');
+          onClose();
+        } else {
+          throw new Error('Failed to create comment');
+        }
+      } catch (error) {
+        console.error('Error creating comment:', error);
+        Alert.alert('Error', 'Failed to create comment. Please try again.');
+      }
     }
   };
 

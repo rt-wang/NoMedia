@@ -80,6 +80,23 @@ const ArticlePreview = ({ item, onCommentPress, onArticlePress, isReposted, comm
     Alert.alert('Report', 'Thank you for your report. We will review this article.');
   };
 
+  const handleCommentPress = () => {
+    navigation.navigate('CommentSection', { 
+      postId: post.id,
+      postData: {
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        username: post.username,
+        name: post.name,
+        timestamp: post.timestamp,
+        likeCount: post.likes,
+        repostCount: post.reposts,
+        pageCount: post.pageCount
+      }
+    });
+  };
+
   const indentedContent = '  ' + post.content;
   const truncatedContent = indentedContent.length > 150 
     ? indentedContent.slice(0, 147) + '...' 
