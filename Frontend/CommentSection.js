@@ -19,18 +19,13 @@ const CommentSection = ({ route, navigation, hideOriginalPost = false, isModal =
   const [charCount, setCharCount] = useState(0);
   const [comments, setComments] = useState([]);
   const inputRef = useRef(null);
-
-  let token, userId, username, name, authorities;
-
-  const initializeUserData = async () => {
-    token = await AsyncStorage.getItem('token');
-    userId = await AsyncStorage.getItem('userId');
-    username = await AsyncStorage.getItem('username');
-    name = await AsyncStorage.getItem('name');
-    authorities = await AsyncStorage.getItem('authorities');
-  };
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
+    const initializeUserData = async () => {
+      const storedToken = await AsyncStorage.getItem('token');
+      setToken(storedToken);
+    };
     initializeUserData();
   }, []);
 
@@ -39,11 +34,18 @@ const CommentSection = ({ route, navigation, hideOriginalPost = false, isModal =
   }, [comment]);
 
   useEffect(() => {
-    fetchComments();
-  }, [postId]);
+    if (token) {
+      fetchComments();
+    }
+  }, [postId, token]);
 
   const fetchComments = async () => {
     try {
+      if (!token) {
+        console.error('No token found');
+        Alert.alert('Error', 'You are not logged in. Please log in and try again.');
+        return;
+      }
       const response = await axios.get(`${POST_URL}/api/posts/comment/${postId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -68,23 +70,20 @@ const CommentSection = ({ route, navigation, hideOriginalPost = false, isModal =
         const userId = await AsyncStorage.getItem('userId');
         const username = await AsyncStorage.getItem('username');
         const name = await AsyncStorage.getItem('name');
-        const authorities = await AsyncStorage.getItem('authorities');
 
         const commentRequest = {
           userId: userId,
           content: comment.trim(),
           postFormat: 'Comment',
-          originalPostId: postId,
+          parentPostId: postId,
           username: username,
           name: name,
-          authorities: authorities
         };
 
         const response = await axios.post(`${POST_URL}/api/posts/comment/${postId}`, commentRequest, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
-            'authorities': authorities
           }
         });
 
@@ -97,7 +96,7 @@ const CommentSection = ({ route, navigation, hideOriginalPost = false, isModal =
           throw new Error('Failed to create comment');
         }
       } catch (error) {
-        console.error('Error creating comment:', error);
+        console.error('Error creating comment:', error, "postId", postId);
         Alert.alert('Error', 'Failed to create comment. Please try again.');
       }
     } else if (comment.length > MAX_CHARS) {

@@ -230,7 +230,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   };
 
   const renderItem = ({ item, index }) => {
-    if (index >= renderedPostCount) return null;
+    if (index >= renderedPostCount || item.postFormat === 'Comment') return null;
     const isReposted = reposts.some(repost => repost.originalPost.id === item.id);
 
     const RepostWrapper = ({ children }) => (

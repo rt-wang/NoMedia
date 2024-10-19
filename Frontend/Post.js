@@ -72,9 +72,9 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
 
   const handleCommentPress = () => {
     navigation.navigate('CommentSection', { 
-      postId: item.id,
+      postId: item.postId,
       postData: {
-        id: item.id,
+        id: item.postId,
         content: item.content,
         username: item.username,
         name: item.name,
@@ -86,7 +86,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
   };
 
   const handlePostPress = () => {
-    navigation.navigate('CommentSection', { postId: item.id });
+    navigation.navigate('CommentSection', { postId: item.postId });
   };
 
   const handleReply = () => {
