@@ -117,12 +117,17 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
 
   const renderPostContent = (postItem) => (
     <>
+      {postItem.type === 'repost' && !isQuoteRepost && (
+        <Text style={styles.repostIndicator}>
+          <Ionicons name="repeat" size={14} color={REPOST_PINK} /> {postItem.name}
+        </Text>
+      )}
       <View style={styles.postHeader}>
         <View style={styles.userInfo}>
-          <TouchableOpacity onPress={() => handleNamePress(postItem.username)}>
+          <TouchableOpacity onPress={() => handleNamePress(postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.username : postItem.username)}>
             <View style={styles.nameContainer}>
-              <Text style={styles.name}>{postItem.name || 'Unknown'}</Text>
-              <Text style={styles.username}> @{postItem.username || 'unknown'}</Text>
+              <Text style={styles.name}>{postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.name : postItem.name || 'Unknown'}</Text>
+              <Text style={styles.username}> @{postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.username : postItem.username || 'unknown'}</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -132,7 +137,10 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
       </View>
       <TouchableOpacity onPress={() => handlePostPress(postItem.id)}>
         <Text style={styles.content}>
-          {postItem.content != null ? (postItem.content.length > 300 ? postItem.content.slice(0, 300) + '...' : postItem.content) : ''}
+          {postItem.type === 'repost' && !isQuoteRepost
+            ? postItem.originalPost.content
+            : postItem.content
+          }
         </Text>
       </TouchableOpacity>
       {isQuoteRepost && (
@@ -153,23 +161,29 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
       <View style={styles.toolBarLeft}>
         <TouchableOpacity style={styles.toolItem} onPress={() => handleCommentPress(postItem)}>
           <Ionicons name="chatbubble-outline" size={18} color="gray" />
-          <Text style={styles.toolCount}>{postItem.comments}</Text>
+          <Text style={styles.toolCount}>
+            {postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.comments : postItem.comments}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.toolItem} onPress={handleRepostPress} ref={repostButtonRef}>
           <Ionicons name="repeat" size={18} color={isReposted ? REPOST_PINK : "gray"} />
-          <Text style={[styles.toolCount, isReposted && styles.repostedText]}>{postItem.reposts}</Text>
+          <Text style={[styles.toolCount, isReposted && styles.repostedText]}>
+            {postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.reposts : postItem.reposts}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.toolItem} onPress={() => handleLike(postItem.id)}>
           <Ionicons name={isLiked ? "heart" : "heart-outline"} size={18} color={isLiked ? "white" : "gray"} />
-          <Text style={styles.toolCount}>{postItem.likes}</Text>
+          <Text style={styles.toolCount}>
+            {postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.likes : postItem.likes}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.toolItem, styles.shareButton]}>
           <Ionicons name="share-outline" size={18} color="gray" />
         </TouchableOpacity>
       </View>
-      {postItem.topic_id && (
+      {(postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.topic_id : postItem.topic_id) && (
         <View style={styles.nomContainer}>
-          <Text style={styles.nomText}>/{postItem.topic_id}</Text>
+          <Text style={styles.nomText}>/{postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.topic_id : postItem.topic_id}</Text>
         </View>
       )}
     </View>
