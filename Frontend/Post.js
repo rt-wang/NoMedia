@@ -117,40 +117,32 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
 
   const renderPostContent = (postItem) => (
     <>
+      <View style={styles.postHeader}>
+        <View style={styles.userInfo}>
+          <TouchableOpacity onPress={() => handleNamePress(postItem.username)}>
+            <View style={styles.nameContainer}>
+              <Text style={styles.name}>{postItem.name || 'Unknown'}</Text>
+              <Text style={styles.username}> @{postItem.username || 'unknown'}</Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
+          <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity onPress={() => handlePostPress(postItem.id)}>
+        <Text style={styles.content}>
+          {postItem.content != null ? (postItem.content.length > 300 ? postItem.content.slice(0, 300) + '...' : postItem.content) : ''}
+        </Text>
+      </TouchableOpacity>
       {isQuoteRepost && (
         <View style={styles.quoteContainer}>
-          <Text style={styles.quoteText}>{postItem.content}</Text>
-          <View style={styles.originalPostContainer}>
-            <Text style={styles.originalPostUsername}>
-              {postItem.originalPost?.username || 'Unknown User'}
-            </Text>
-            <Text style={styles.originalPostContent}>
-              {postItem.originalPost?.content || 'No content'}
-            </Text>
+          <View style={styles.originalPostHeader}>
+            <Text style={styles.originalPostName}>{postItem.originalPost?.name || 'Unknown'}</Text>
+            <Text style={styles.originalPostUsername}>@{postItem.originalPost?.username || 'unknown'}</Text>
           </View>
+          <Text style={styles.originalPostContent}>{postItem.originalPost?.content || 'No content'}</Text>
         </View>
-      )}
-      {!isQuoteRepost && (
-        <>
-          <View style={styles.postHeader}>
-            <View style={styles.userInfo}>
-              <TouchableOpacity onPress={() => handleNamePress(postItem.username)}>
-                <View style={styles.nameContainer}>
-                  <Text style={styles.name}>{postItem.name || 'Unknown'}</Text>
-                  <Text style={styles.username}> @{postItem.username || 'unknown'}</Text>
-                </View>
-              </TouchableOpacity>
-            </View>
-            <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
-              <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
-            </TouchableOpacity>
-          </View>
-          <TouchableOpacity onPress={() => handlePostPress(postItem.id)}>
-            <Text style={styles.content}>
-              {postItem.content != null ? (postItem.content.length > 300 ? postItem.content.slice(0, 300) + '...' : postItem.content) : ''}
-            </Text>
-          </TouchableOpacity>
-        </>
       )}
       {renderToolbar(postItem)}
     </>
@@ -198,10 +190,7 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
 
   return (
     <View style={styles.container}>
-      {item.type === 'repost' && renderRepostIndicator()}
-      {item.type === 'repost' && item.repostType === 'quote'
-        ? renderPostContent(item)
-        : renderPostContent(item.type === 'repost' ? item.originalPost || item : item)}
+      {renderPostContent(item)}
       <Popover
         isVisible={showRepostMenu}
         onRequestClose={() => setShowRepostMenu(false)}
@@ -394,28 +383,32 @@ const styles = StyleSheet.create({
     fontFamily: 'SFProText-Regular',
   },
   quoteContainer: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#333', // A dark gray color for the border
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 8,
+    marginBottom: 12,
   },
-  quoteText: {
-    color: '#fff',
-    fontStyle: 'italic',
-    marginBottom: 10,
+  originalPostHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
   },
-  originalPostContainer: {
-    borderLeftWidth: 2,
-    borderLeftColor: '#fff',
-    paddingLeft: 10,
-  },
-  originalPostUsername: {
+  originalPostName: {
     color: '#fff',
     fontWeight: 'bold',
-    marginBottom: 5,
+    fontSize: 15,
+    marginRight: 4,
+  },
+  originalPostUsername: {
+    color: '#8899A6',
+    fontSize: 15,
   },
   originalPostContent: {
     color: '#fff',
+    fontSize: 15,
+    lineHeight: 20,
   },
 });
 
