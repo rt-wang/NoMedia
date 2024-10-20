@@ -23,22 +23,29 @@ const RepostMenu = ({ onRepost, onQuote, onClose }) => (
   </View>
 );
 
-const OptionsMenu = ({ onClose, onNotInterested, onReport, isComment }) => (
+const OptionsMenu = ({ onClose, onDelete, onReport, isOwnPost }) => (
   <View style={styles.optionsMenuContainer}>
-    {!isComment && (
-      <TouchableOpacity style={styles.optionItem} onPress={onNotInterested}>
-        <Ionicons name="eye-off-outline" size={16} color="white" />
-        <Text style={styles.optionText}>Not interested</Text>
+    {isOwnPost ? (
+      <TouchableOpacity style={styles.optionItem} onPress={onDelete}>
+        <Ionicons name="trash-outline" size={16} color="white" />
+        <Text style={styles.optionText}>Delete</Text>
       </TouchableOpacity>
+    ) : (
+      <>
+        <TouchableOpacity style={styles.optionItem} onPress={onNotInterested}>
+          <Ionicons name="eye-off-outline" size={16} color="white" />
+          <Text style={styles.optionText}>Not interested</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.optionItem} onPress={onReport}>
+          <Ionicons name="flag-outline" size={16} color="white" />
+          <Text style={styles.optionText}>Report</Text>
+        </TouchableOpacity>
+      </>
     )}
-    <TouchableOpacity style={styles.optionItem} onPress={onReport}>
-      <Ionicons name="flag-outline" size={16} color="white" />
-      <Text style={styles.optionText}>Report</Text>
-    </TouchableOpacity>
   </View>
 );
 
-const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => {
+const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount, isOwnPost = false }) => {
   console.log('Post item:', item); // Add this line for debugging
   const navigation = useNavigation();
   const { reposts, addRepost } = useReposts();
@@ -107,6 +114,12 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
 
   const handleNamePress = () => {
     navigation.navigate('UserAccountPage', { username: item.username });
+  };
+
+  const handleDelete = () => {
+    // Implement delete functionality later
+    console.log('Delete post:', item.id);
+    setShowOptionsMenu(false);
   };
 
   const renderRepostIndicator = () => (
@@ -225,9 +238,9 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
       >
         <OptionsMenu
           onClose={() => setShowOptionsMenu(false)}
-          onNotInterested={handleNotInterested}
+          onDelete={handleDelete}
           onReport={handleReport}
-          isComment={item.type === 'comment'}
+          isOwnPost={isOwnPost}
         />
       </Popover>
     </View>

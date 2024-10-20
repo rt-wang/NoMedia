@@ -233,14 +233,14 @@ const AccountPage = ({ navigation }) => {
           <Text style={styles.repostIndicator}>
             <Ionicons name="repeat" size={14} color="#FFB6C1" /> You Reposted
           </Text>
-          <Post item={{...item.originalPost, name: item.originalPost.name, username: item.originalPost.username}} />
+          <Post item={{...item.originalPost, name: item.originalPost.name, username: item.originalPost.username}} isOwnPost={true} />
         </View>
       );
     }
     if (item.type === 'quote') {
       return (
         <View style={styles.quoteRepostContainer}>
-          <Post item={{ ...item, content: item.quoteText, name: item.name, username: item.username }} />
+          <Post item={{ ...item, content: item.quoteText, name: item.name, username: item.username }} isOwnPost={true} />
           <View style={styles.quotedPostContainer}>
             <Post item={{...item.originalPost, name: item.originalPost.name, username: item.originalPost.username}} />
           </View>
@@ -249,7 +249,7 @@ const AccountPage = ({ navigation }) => {
     }
     return item.type === 'article' ? 
       <ArticlePreview item={{...item, name: userInfo?.name, username: userInfo?.username}} /> : 
-      <Post item={{...item, name: userInfo?.name, username: userInfo?.username}} />;
+      <Post item={{...item, name: userInfo?.name, username: userInfo?.username}} isOwnPost={true} />;
   }, [userInfo, activeTab]);
 
   const handleEditProfile = () => {
