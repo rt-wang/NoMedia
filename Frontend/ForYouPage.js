@@ -227,10 +227,13 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
     const repostedPosts = posts.filter(post => post.type === 'repost');
     setRefreshedPosts(repostedPosts);
     fetchLatestPosts(true);
-  }, [posts]);
+  }, [posts, fetchLatestPosts]);
 
-  const fetchLatestPosts = async (isRefreshing = false) => {
-    if ((!hasMorePosts && page !== 0) || loading) return;
+  const fetchLatestPosts = useCallback(async (isRefreshing = false) => {
+    if ((!hasMorePosts && page !== 0) || loading) {
+      setRefreshing(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -243,6 +246,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
 
       if (!token || !userId) {
         console.error('User not authenticated');
+        setRefreshing(false);
         return;
       }
 
@@ -291,7 +295,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         flatListRef.current.scrollToOffset({ offset: 0, animated: true });
       }
     }
-  };
+  }, [page, hasMorePosts, loading, refreshedPosts, clearPosts, addPost, generatePosts]);
 
   const handleCommentPress = (post) => {
     navigation.navigate('CommentSection', { postId: post.id });
