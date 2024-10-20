@@ -21,7 +21,7 @@ const TabNavigator = ({ activeTab, setActiveTab }) => (
       style={[styles.tab, activeTab === 'ForYou' && styles.activeTab]}
       onPress={() => setActiveTab('ForYou')}
     >
-      <Text style={[styles.tabText, activeTab === 'ForYou' && styles.activeTabText]}>For Your Mind</Text>
+      <Text style={[styles.tabText, activeTab === 'ForYou' && styles.activeTabText]}>For You Page</Text>
     </TouchableOpacity>
     <TouchableOpacity
       style={[styles.tab, activeTab === 'Noms' && styles.activeTab]}
@@ -312,18 +312,52 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
   };
 
   const renderItem = ({ item }) => {
-    if (item.type === 'repost' && item.originalPost.type === 'article') {
+    if (item.type === 'repost' && item.repostType === 'quote') {
       return (
-        <ArticlePreview
-          item={item.originalPost}
-          onCommentPress={() => handleCommentPress(item.originalPost)}
-          onArticlePress={() => handleArticlePress(item.originalPost)}
-          isReposted={true}
-          commentCount={item.originalPost.comments}
-          repostedBy={item.name}
+        <Post
+          item={item}
+          onCommentPress={() => handleCommentPress(item)}
+          commentCount={item.comments}
+          isQuoteRepost={true}
         />
       );
+    }
+    if (item.type === 'repost') {
+      if (item.repostType === 'quote') {
+        // Render quote post
+        return (
+          <Post
+            item={item}
+            onCommentPress={() => handleCommentPress(item)}
+            commentCount={item.comments}
+            isQuoteRepost={true}
+          />
+        );
+      } else if (item.originalPost.type === 'article') {
+        // Render reposted article
+        return (
+          <ArticlePreview
+            item={item.originalPost}
+            onCommentPress={() => handleCommentPress(item.originalPost)}
+            onArticlePress={() => handleArticlePress(item.originalPost)}
+            isReposted={true}
+            commentCount={item.originalPost.comments}
+            repostedBy={item.name}
+          />
+        );
+      } else {
+        // Render regular repost
+        return (
+          <Post
+            item={item}
+            onCommentPress={() => handleCommentPress(item)}
+            commentCount={item.comments}
+            isReposted={true}
+          />
+        );
+      }
     } else if (item.type === 'article') {
+      // Render regular article
       return (
         <ArticlePreview
           item={item}
@@ -334,6 +368,7 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
         />
       );
     } else {
+      // Render regular post
       return (
         <Post
           item={item}

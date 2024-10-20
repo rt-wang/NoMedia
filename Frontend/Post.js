@@ -117,24 +117,41 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
 
   const renderPostContent = (postItem) => (
     <>
-      <View style={styles.postHeader}>
-        <View style={styles.userInfo}>
-          <TouchableOpacity onPress={() => handleNamePress(postItem.username)}>
-            <View style={styles.nameContainer}>
-              <Text style={styles.name}>{postItem.name}</Text>
-              <Text style={styles.username}> @{postItem.username}</Text>
-            </View>
-          </TouchableOpacity>
+      {isQuoteRepost && (
+        <View style={styles.quoteContainer}>
+          <Text style={styles.quoteText}>{postItem.content}</Text>
+          <View style={styles.originalPostContainer}>
+            <Text style={styles.originalPostUsername}>
+              {postItem.originalPost?.username || 'Unknown User'}
+            </Text>
+            <Text style={styles.originalPostContent}>
+              {postItem.originalPost?.content || 'No content'}
+            </Text>
+          </View>
         </View>
-        <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
-          <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
-        </TouchableOpacity>
-      </View>
-      <TouchableOpacity onPress={() => handlePostPress(postItem.id)}>
-        <Text style={styles.content}>
-          {postItem.content != null ? (postItem.content.length > 300 ? postItem.content.slice(0, 300) + '...' : postItem.content) : ''}
-        </Text>
-      </TouchableOpacity>
+      )}
+      {!isQuoteRepost && (
+        <>
+          <View style={styles.postHeader}>
+            <View style={styles.userInfo}>
+              <TouchableOpacity onPress={() => handleNamePress(postItem.username)}>
+                <View style={styles.nameContainer}>
+                  <Text style={styles.name}>{postItem.name || 'Unknown'}</Text>
+                  <Text style={styles.username}> @{postItem.username || 'unknown'}</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity onPress={handleOptionsPress} ref={optionsButtonRef} style={styles.optionsButton}>
+              <Ionicons name="ellipsis-horizontal" size={18} color="gray" />
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity onPress={() => handlePostPress(postItem.id)}>
+            <Text style={styles.content}>
+              {postItem.content != null ? (postItem.content.length > 300 ? postItem.content.slice(0, 300) + '...' : postItem.content) : ''}
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
       {renderToolbar(postItem)}
     </>
   );
@@ -182,7 +199,9 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount }) => 
   return (
     <View style={styles.container}>
       {item.type === 'repost' && renderRepostIndicator()}
-      {item.type === 'repost' ? renderPostContent(item.originalPost) : renderPostContent(item)}
+      {item.type === 'repost' && item.repostType === 'quote'
+        ? renderPostContent(item)
+        : renderPostContent(item.type === 'repost' ? item.originalPost || item : item)}
       <Popover
         isVisible={showRepostMenu}
         onRequestClose={() => setShowRepostMenu(false)}
@@ -373,6 +392,30 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '400',
     fontFamily: 'SFProText-Regular',
+  },
+  quoteContainer: {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+  quoteText: {
+    color: '#fff',
+    fontStyle: 'italic',
+    marginBottom: 10,
+  },
+  originalPostContainer: {
+    borderLeftWidth: 2,
+    borderLeftColor: '#fff',
+    paddingLeft: 10,
+  },
+  originalPostUsername: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  originalPostContent: {
+    color: '#fff',
   },
 });
 
