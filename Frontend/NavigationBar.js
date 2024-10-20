@@ -12,7 +12,9 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
     if (screen === 'Home') {
       navigation.navigate('Home', { screen: 'ForYou' });
     } else if (screen === 'AI') {
-      navigation.navigate('ExplorePageAI'); // Navigate to ExplorePageAI
+      navigation.navigate('ExplorePageAI');
+    } else if (screen === 'Saved') {
+      navigation.navigate('Saved');
     } else {
       navigation.navigate(screen);
     }
@@ -24,13 +26,19 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
       return currentRoute.name === 'Home' || currentRoute.name === 'Threads' || currentRoute.name === 'ReadNext' || currentRoute.name === 'ForYou';
     }
     if (screenName === 'AI') {
-      return currentRoute.name === 'ExplorePageAI'; // Check if ExplorePageAI is active
+      return currentRoute.name === 'ExplorePageAI';
     }
-    return currentRoute.name === screenName && screenName !== 'Create';
+    return currentRoute.name === screenName;
   };
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity 
+        style={styles.createButtonContainer}
+        onPress={() => navigateTo('Create')}
+      >
+        <Ionicons name="document-text-outline" size={24} color={WHITE} />
+      </TouchableOpacity>
       <TouchableOpacity 
         style={[
           styles.iconContainer, 
@@ -59,35 +67,16 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
         </Text>
       </TouchableOpacity>
       <TouchableOpacity 
-        style={styles.addButtonContainer}
-        onPress={() => navigateTo('Create')}
-      >
-        <Ionicons name="add" size={32} color={WHITE} />
-      </TouchableOpacity>
-      <TouchableOpacity 
-        style={[
-          styles.iconContainer,
-          isActive('Notifications') && styles.activeIconContainer
-        ]}
-        onPress={() => navigateTo('Notifications')}
-      >
-        <Ionicons 
-          name="notifications" 
-          size={24} 
-          color={isActive('Notifications') ? BLACK : LIGHT_GREY}
-        />
-      </TouchableOpacity>
-      <TouchableOpacity 
         style={[
           styles.iconContainer, 
-          isActive('Account') && styles.activeIconContainer
+          isActive('Saved') && styles.activeIconContainer
         ]}
-        onPress={() => navigateTo('Account')}
+        onPress={() => navigateTo('Saved')}
       >
         <Ionicons 
-          name="person" 
+          name="bookmark-outline" 
           size={24} 
-          color={isActive('Account') ? BLACK : LIGHT_GREY} 
+          color={isActive('Saved') ? BLACK : LIGHT_GREY} 
         />
       </TouchableOpacity>
     </View>
@@ -97,11 +86,12 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'space-between',
     alignItems: 'center',
     height: 60,
     backgroundColor: BLACK,
     paddingBottom: 5,
+    paddingHorizontal: 16,
   },
   iconContainer: {
     padding: 10,
@@ -110,10 +100,10 @@ const styles = StyleSheet.create({
   activeIconContainer: {
     backgroundColor: WHITE,
   },
-  addButtonContainer: {
+  createButtonContainer: {
     backgroundColor: DARK_GREY,
-    width: 65,
-    height: 65,
+    width: 50,
+    height: 50,
     borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',

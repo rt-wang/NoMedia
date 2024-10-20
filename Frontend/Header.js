@@ -1,10 +1,26 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 const Header = () => {
+  const navigation = useNavigation();
+
   return (
     <View style={styles.header}>
-        <Text style={styles.headerText}>NoMedia.</Text>
+      <TouchableOpacity 
+        style={styles.iconContainer}
+        onPress={() => navigation.navigate('Account')}
+      >
+        <Ionicons name="person" size={24} color="#fff" />
+      </TouchableOpacity>
+      <Text style={styles.headerText}>NoMedia.</Text>
+      <TouchableOpacity 
+        style={styles.iconContainer}
+        onPress={() => navigation.navigate('Notifications')}
+      >
+        <Ionicons name="notifications" size={24} color="#fff" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -14,9 +30,9 @@ const styles = StyleSheet.create({
     height: 44,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     backgroundColor: '#000',
-    paddingHorizontal: 0,
+    paddingHorizontal: 16,
     marginTop: -12,
   },
   headerText: {
@@ -24,6 +40,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
+  },
+  iconContainer: {
+    padding: 5,
   },
 });
 
