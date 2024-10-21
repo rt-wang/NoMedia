@@ -11,8 +11,8 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
   const navigateTo = (screen) => {
     if (screen === 'Home') {
       navigation.navigate('Home', { screen: 'ForYou' });
-    } else if (screen === 'AI') {
-      navigation.navigate('ExplorePageAI');
+    } else if (screen === 'NomsPage') {
+      navigation.navigate('Home', { screen: 'NomsPage' });
     } else if (screen === 'Saved') {
       navigation.navigate('Saved');
     } else {
@@ -25,8 +25,8 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
     if (screenName === 'Home') {
       return currentRoute.name === 'Home' || currentRoute.name === 'Threads' || currentRoute.name === 'ReadNext' || currentRoute.name === 'ForYou';
     }
-    if (screenName === 'AI') {
-      return currentRoute.name === 'ExplorePageAI';
+    if (screenName === 'NomsPage') {
+      return currentRoute.name === 'NomsPage';
     }
     return currentRoute.name === screenName;
   };
@@ -55,15 +55,15 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
       <TouchableOpacity 
         style={[
           styles.iconContainer, 
-          isActive('AI') && styles.activeIconContainer
+          isActive('NomsPage') && styles.activeIconContainer
         ]}
-        onPress={() => navigateTo('AI')}
+        onPress={() => navigateTo('NomsPage')}
       >
         <Text style={[
-          styles.aiText, 
-          { color: isActive('AI') ? BLACK : LIGHT_GREY }
+          styles.nomsText, 
+          { color: isActive('NomsPage') ? BLACK : LIGHT_GREY }
         ]}>
-          AI
+          /
         </Text>
       </TouchableOpacity>
       <TouchableOpacity 
@@ -111,8 +111,8 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: BLACK,
   },
-  aiText: {
-    fontSize: 22,
+  nomsText: {
+    fontSize: 28,
     fontWeight: 'bold',
   },
 });

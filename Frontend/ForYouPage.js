@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
-import { Ionicons } from '@expo/vector-icons'; // Make sure to import this
+import { View, StyleSheet, FlatList, TouchableOpacity, RefreshControl, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ArticlePreview from './ArticlePreview';
 import Post from './Post';
 import { useReposts } from './RepostContext';
 import { usePosts } from './PostContext';
-import NomsPage from './NomsPage';
 import ProfilePromptModal from './ProfilePromptModal';
 import axios from 'axios';
 
@@ -15,28 +13,10 @@ const ACTIVE_TAB_COLOR = '#FFB6C1';
 const USER_URL = 'http://localhost:8080'; // Adjust this to your user service URL
 const POST_URL = 'http://localhost:8082'; // Your existing post service URL
 
-const TabNavigator = ({ activeTab, setActiveTab }) => (
-  <View style={styles.tabNavigator}>
-    <TouchableOpacity
-      style={[styles.tab, activeTab === 'ForYou' && styles.activeTab]}
-      onPress={() => setActiveTab('ForYou')}
-    >
-      <Text style={[styles.tabText, activeTab === 'ForYou' && styles.activeTabText]}>For You Page</Text>
-    </TouchableOpacity>
-    <TouchableOpacity
-      style={[styles.tab, activeTab === 'Noms' && styles.activeTab]}
-      onPress={() => setActiveTab('Noms')}
-    >
-      <Text style={[styles.tabText, activeTab === 'Noms' && styles.activeTabText]}>Noms</Text>
-    </TouchableOpacity>
-  </View>
-);
-
 const ForYouPage = ({ navigation, showCommentModal }) => {
   const { posts, addPost, clearPosts } = usePosts();
   const { reposts } = useReposts();
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('ForYou');
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   const [page, setPage] = useState(0);
   const [hasMorePosts, setHasMorePosts] = useState(true);
@@ -396,42 +376,35 @@ const ForYouPage = ({ navigation, showCommentModal }) => {
 
   return (
     <View style={styles.container}>
-      <TabNavigator activeTab={activeTab} setActiveTab={setActiveTab} />
-      {activeTab === 'ForYou' ? (
-        <>
-          <FlatList
-            ref={flatListRef}
-            data={posts}
-            renderItem={renderItem}
-            keyExtractor={item => (item.id || '').toString()}
-            onEndReached={handleEndReached}
-            onEndReachedThreshold={0.1}
-            ListFooterComponent={null} // Remove loading text
-            contentContainerStyle={styles.scrollContent}
-            refreshControl={
-              <RefreshControl
-                refreshing={refreshing}
-                onRefresh={onRefresh}
-                tintColor="#FFFFFF"
-              />
-            }
+      <FlatList
+        ref={flatListRef}
+        data={posts}
+        renderItem={renderItem}
+        keyExtractor={item => (item.id || '').toString()}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={null}
+        contentContainerStyle={styles.scrollContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor="#FFFFFF"
           />
-          <TouchableOpacity
-            style={styles.feedbackButton}
-            onPress={() => navigation.navigate('FeedbackForm')}
-          >
-            <Text style={styles.feedbackText}>Give</Text>
-            <Text style={styles.feedbackText}>Feedback</Text>
-          </TouchableOpacity>
-          <ProfilePromptModal
-            visible={showProfilePrompt}
-            onClose={() => setShowProfilePrompt(false)}
-            onNavigateToProfile={handleNavigateToProfile}
-          />
-        </>
-      ) : (
-        <NomsPage navigation={navigation} />
-      )}
+        }
+      />
+      <TouchableOpacity
+        style={styles.feedbackButton}
+        onPress={() => navigation.navigate('FeedbackForm')}
+      >
+        <Text style={styles.feedbackText}>Give</Text>
+        <Text style={styles.feedbackText}>Feedback</Text>
+      </TouchableOpacity>
+      <ProfilePromptModal
+        visible={showProfilePrompt}
+        onClose={() => setShowProfilePrompt(false)}
+        onNavigateToProfile={handleNavigateToProfile}
+      />
     </View>
   );
 };
@@ -444,33 +417,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 20,
     paddingHorizontal: 16,
-  },
-  loadingText: {
-    color: '#fff',
-    textAlign: 'center',
-    padding: 10,
-  },
-  tabNavigator: {
-    flexDirection: 'row',
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  activeTab: {
-    borderBottomWidth: 2,
-    borderBottomColor: ACTIVE_TAB_COLOR,
-  },
-  tabText: {
-    color: '#888',
-    fontSize: 16,
-  },
-  activeTabText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
   feedbackButton: {
     position: 'absolute',
@@ -487,7 +433,7 @@ const styles = StyleSheet.create({
   },
   feedbackText: {
     color: '#fff',
-    fontSize: 14, // Reduced by approximately 70% from 14
+    fontSize: 14,
     fontWeight: '400',
     fontFamily: 'SFProText-Regular',
     textAlign: 'center',
