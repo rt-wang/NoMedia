@@ -18,8 +18,6 @@ const HighlightedTextInput = ({ value, onChangeText, placeholder, placeholderTex
 
 const CreatePage = () => {
   const [body, setBody] = useState('');
-  const [title, setTitle] = useState('');
-  const [showTitle, setShowTitle] = useState(false);
   const [showSavedIndicator, setShowSavedIndicator] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -146,20 +144,8 @@ const CreatePage = () => {
     }
   };
 
-  const handleTitleChange = (text) => {
-    if (text.length <= 50) {
-      setTitle(text);
-    }
-  };
-
   const handleBodyChange = (text) => {
     setBody(text);
-    if (text.length >= 300 && !showTitle) {
-      setShowTitle(true);
-    } else if (text.length < 300 && showTitle) {
-      setShowTitle(false);
-      setTitle('');
-    }
   };
 
   const handleNomSelect = (nom) => {
@@ -255,22 +241,25 @@ const CreatePage = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.titleContainer}>
-          {showTitle ? (
-            <TextInput
-              style={styles.titleInput}
-              placeholder="Add title"
-              placeholderTextColor="#666"
-              value={title}
-              onChangeText={handleTitleChange}
-              maxLength={50}
-            />
-          ) : (
-            <View style={styles.placeholderTitle} />
-          )}
-        </View>
-        <View style={styles.headerRight}>
+      <View style={styles.content}>
+        <TextInput
+          style={styles.bodyInput}
+          value={body}
+          onChangeText={handleBodyChange}
+          multiline
+          selectionColor="#FFE4E8"
+          autoFocus={true}
+        />
+      </View>
+      <View style={styles.bottomContainer}>
+        <TouchableOpacity
+          style={styles.nomButton}
+          onPress={openModal}
+        >
+          <Text style={styles.nomButtonText}>{selectedNom}</Text>
+          <Ionicons name="chevron-up" size={16} color="#FFFFFF" style={styles.nomButtonIcon} />
+        </TouchableOpacity>
+        <View style={styles.rightButtons}>
           <TouchableOpacity onPress={() => setShowDropdown(true)} style={styles.ellipsisButton}>
             <Ionicons name="ellipsis-vertical" size={24} color="#FFFFFF" />
           </TouchableOpacity>
@@ -279,23 +268,6 @@ const CreatePage = () => {
           </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.content}>
-        <TextInput
-          style={styles.bodyInput}
-          placeholder="What's on your mind?"
-          placeholderTextColor="#666666"
-          value={body}
-          onChangeText={handleBodyChange}
-          multiline
-        />
-      </View>
-      <TouchableOpacity
-        style={styles.nomButton}
-        onPress={openModal}
-      >
-        <Text style={styles.nomButtonText}>{selectedNom}</Text>
-        <Ionicons name="chevron-up" size={16} color="#FFFFFF" style={styles.nomButtonIcon} />
-      </TouchableOpacity>
       <Modal
         visible={showDropdown}
         transparent={true}
@@ -372,55 +344,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000000',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    marginTop: -30,
-  },
-  titleContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    marginBottom: -4,
-    marginLeft: 0,
-  },
-  titleInput: {
-    color: '#FFFFFF',
-    fontSize: 21,
-    fontFamily: 'Athelas',
-    borderBottomWidth: 1,
-    borderBottomColor: '#333333',
-    paddingBottom: 4,
-  },
-  placeholderTitle: {
-    height: 33, // Approximate height of the title input
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  ellipsisButton: {
-    marginRight: 4,
-    marginBottom: -6,
-  },
-  postButton: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  postButtonText: {
-    color: '#000000',
-    fontSize: 16,
-    fontWeight: 'bold',
-    fontFamily: 'SFProText-Regular',
-  },
   content: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    paddingHorizontal: 18,
+    marginTop: -30,
   },
   bodyInput: {
     flex: 1,
@@ -428,7 +355,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'SFProText-Regular',
     textAlignVertical: 'top',
-    marginBottom: 30,
   },
   modalOverlay: {
     flex: 1,
@@ -450,20 +376,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'SFProText-Regular',
   },
-  nomButton: {
-    position: 'absolute',
-    bottom: 16,
-    left: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)', // Slightly more opaque white
-    paddingHorizontal: 12,
-    paddingVertical: 10, // Increased vertical padding for a more square shape
-    borderRadius: 12, // Reduced border radius for a more square appearance
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)', // More visible border
+  bottomContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  rightButtons: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // Spread out the text and icon
-    minWidth: 100, // Ensure a minimum width for the button
+  },
+  nomButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minWidth: 100,
   },
   nomButtonText: {
     color: '#FFFFFF',
@@ -547,6 +481,21 @@ const styles = StyleSheet.create({
   },
   checkmarkIcon: {
     marginLeft: 8,
+  },
+  ellipsisButton: {
+    marginRight: 12,
+  },
+  postButton: {
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  postButtonText: {
+    color: '#000000',
+    fontSize: 16,
+    fontWeight: 'bold',
+    fontFamily: 'SFProText-Regular',
   },
 });
 

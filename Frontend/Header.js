@@ -12,14 +12,14 @@ const Header = () => {
         style={styles.iconContainer}
         onPress={() => navigation.navigate('Account')}
       >
-        <Ionicons name="person" size={24} color="#fff" />
+        <Ionicons name="person-outline" size={24} color="#fff" />
       </TouchableOpacity>
       <Text style={styles.headerText}>NoMedia.</Text>
       <TouchableOpacity 
         style={styles.iconContainer}
         onPress={() => navigation.navigate('Notifications')}
       >
-        <Ionicons name="notifications" size={24} color="#fff" />
+        <Ionicons name="heart-outline" size={24} color="#fff" />
       </TouchableOpacity>
     </View>
   );
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#000',
     paddingHorizontal: 16,
-    marginTop: -12,
+    marginTop: -8,
   },
   headerText: {
     fontFamily: 'Athelas',
