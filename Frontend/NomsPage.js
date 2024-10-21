@@ -1,8 +1,7 @@
 export {NOM_BOXES}
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, TextInput } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-
 
 const NOMS = [
   "Anime & Cosplay", "Art", "Business & Finance", "Collectibles",
@@ -26,6 +25,13 @@ const NOM_BOXES = [
   { id: '7', title: '/ Dead Internet Theory' },
   { id: '8', title: '/ Bitcoin discussion' },
 ];
+
+const SearchBar = () => (
+  <View style={styles.searchBarContainer}>
+    <TextInput style={styles.searchBar} placeholder="Search NoMedia" placeholderTextColor="#999" />
+    <Ionicons name="search" size={24} color="#999" style={styles.searchIcon} />
+  </View>
+);
 
 const NomBox = ({ item, onPress }) => {
   const randomPosts = (Math.random() * (10000 - 500) + 500).toFixed(2);
@@ -71,8 +77,8 @@ const NomSection = ({ title, data, onNomPress }) => (
 
 const NomButtonsSection = () => {
   const rows = 2;
-  const buttonHeight = 36; // Adjust this value based on your button height
-  const containerHeight = rows * buttonHeight + (rows - 1) * 8; // 8 is the vertical margin between buttons
+  const buttonHeight = 36;
+  const containerHeight = rows * buttonHeight + (rows - 1) * 8;
 
   return (
     <View style={[styles.nomsScrollContainer, { height: containerHeight }]}>
@@ -105,7 +111,7 @@ const Noms = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.header}>Explore Noms</Text>
+      <SearchBar />
       <NomButtonsSection />
       <FlatList
         data={sections}
@@ -132,6 +138,22 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontFamily: 'Athelas',
   },
+  searchBarContainer: {
+    marginBottom: 16,
+  },
+  searchBar: {
+    backgroundColor: '#333',
+    borderRadius: 12,
+    padding: 10,
+    paddingLeft: 40,
+    color: '#fff',
+    marginBottom: 10,
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 10,
+    top: 8,
+  },
   nomsScrollContainer: {
     marginBottom: 24,
   },
@@ -142,7 +164,7 @@ const styles = StyleSheet.create({
     alignContent: 'flex-start',
   },
   nomButton: {
-    backgroundColor: 'rgba(255, 182, 193, 0.1)', // Light pink with opacity
+    backgroundColor: 'rgba(255, 182, 193, 0.1)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,

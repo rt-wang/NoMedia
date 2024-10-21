@@ -20,7 +20,6 @@ import Drafts from './Drafts';
 import SettingsPage from './SettingsPage';
 import CommentSection from './CommentSection';
 import { PostProvider } from './PostContext';
-import ExplorePageAI from './ExplorePageAI';
 import RegistrationPage from './RegistrationPage';
 import * as Font from 'expo-font';
 import { RepostProvider, useReposts } from './RepostContext';
@@ -47,7 +46,6 @@ const HomeStack = () => (
     <Stack.Screen name="Quote" component={QuoteScreen} />
     <Stack.Screen name="Repost" component={RepostScreen} />
     <Stack.Screen name="CommentSection" component={CommentSection} />
-    <Stack.Screen name="ExplorePageAI" component={ExplorePageAI} />
     <Stack.Screen name="FeedbackForm" component={FeedbackForm} />
     <Stack.Screen name="NomsPage" component={NomsPage} />
     <Stack.Screen name="NomObject" component={NomObject} />

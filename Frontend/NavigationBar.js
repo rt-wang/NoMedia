@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Text } from 'react-native';
+import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 const LIGHT_GREY = '#CCCCCC';
@@ -59,12 +59,11 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
         ]}
         onPress={() => navigateTo('NomsPage')}
       >
-        <Text style={[
-          styles.nomsText, 
-          { color: isActive('NomsPage') ? BLACK : LIGHT_GREY }
-        ]}>
-          /
-        </Text>
+        <Ionicons 
+          name="people-outline" 
+          size={24} 
+          color={isActive('NomsPage') ? BLACK : LIGHT_GREY} 
+        />
       </TouchableOpacity>
       <TouchableOpacity 
         style={[
@@ -110,10 +109,6 @@ const styles = StyleSheet.create({
     marginTop: -8,
     borderWidth: 4,
     borderColor: BLACK,
-  },
-  nomsText: {
-    fontSize: 28,
-    fontWeight: 'bold',
   },
 });
 
