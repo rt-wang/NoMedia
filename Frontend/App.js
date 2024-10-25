@@ -34,6 +34,7 @@ import MarketingEndScreen from './MarketingEndScreen';
 import CommentSpectrumPage from './CommentSpectrumPage';
 import WelcomeScreen from './WelcomeScreen';
 import CommentDistributionPage from './CommentDistributionPage';
+import NotesEditorPage from './NotesEditorPage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -53,6 +54,7 @@ const HomeStack = () => (
     <Stack.Screen name="CommentSpectrumPage" component={CommentSpectrumPage} />
     <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
     <Stack.Screen name="CommentDistribution" component={CommentDistributionPage} />
+    <Stack.Screen name="NotesEditorPage" component={NotesEditorPage} />
   </Stack.Navigator>
 );
 
@@ -82,22 +84,25 @@ const MainApp = () => {
 
   return (
     <View style={styles.content}>
-      <Header />
       <Stack.Navigator screenOptions={{ headerShown: false }}>
         <Stack.Screen name="Tabs">
-          {() => (
-            <Tab.Navigator
-              screenOptions={screenOptions}
-              tabBar={props => <NavigationBar {...props} />}
-            >
-              <Tab.Screen name="Home" component={HomeStack} />
-              <Tab.Screen name="Account" component={AccountStack} />
-              <Tab.Screen name="Notifications" component={NotificationsPage} />
-              <Tab.Screen name="Create" component={CreatePage} />
-            </Tab.Navigator>
+          {({ route }) => (
+            <>
+              {route.state?.routes[route.state.index]?.name !== 'NotesEditorPage' && <Header />}
+              <Tab.Navigator
+                screenOptions={screenOptions}
+                tabBar={props => <NavigationBar {...props} />}
+              >
+                <Tab.Screen name="Home" component={HomeStack} />
+                <Tab.Screen name="Account" component={AccountStack} />
+                <Tab.Screen name="Notifications" component={NotificationsPage} />
+                <Tab.Screen name="Create" component={CreatePage} />
+              </Tab.Navigator>
+            </>
           )}
         </Stack.Screen>
         <Stack.Screen name="UserAccountPage" component={UserAccountPage} />
+        <Stack.Screen name="NotesEditorPage" component={NotesEditorPage} />
       </Stack.Navigator>
     </View>
   );

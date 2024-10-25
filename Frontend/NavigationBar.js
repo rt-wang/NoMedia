@@ -14,6 +14,8 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
       navigation.navigate('Home', { screen: 'NomsPage' });
     } else if (screen === 'Saved') {
       navigation.navigate('Saved');
+    } else if (screen === 'NotesEditorPage') {
+      navigation.navigate('NotesEditorPage');
     } else {
       navigation.navigate(screen);
     }
@@ -27,6 +29,9 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
     if (screenName === 'NomsPage') {
       return currentRoute.name === 'NomsPage';
     }
+    if (screenName === 'NotesEditorPage') {
+      return currentRoute.name === 'NotesEditorPage';
+    }
     return currentRoute.name === screenName;
   };
 
@@ -34,12 +39,12 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
     <View style={styles.container}>
       <TouchableOpacity 
         style={styles.iconContainer}
-        onPress={() => navigateTo('Create')}
+        onPress={() => navigateTo('NotesEditorPage')}
       >
         <Ionicons 
           name="document-text-outline" 
           size={24} 
-          color={isActive('Create') ? WHITE : LIGHT_GREY} 
+          color={isActive('NotesEditorPage') ? WHITE : LIGHT_GREY} 
         />
       </TouchableOpacity>
       <TouchableOpacity 
