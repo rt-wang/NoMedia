@@ -5,7 +5,6 @@ import { Ionicons } from '@expo/vector-icons';
 const LIGHT_GREY = '#CCCCCC';
 const WHITE = '#FFFFFF';
 const BLACK = '#000000';
-const DARK_GREY = '#333333';
 
 const NavigationBar = ({ state, descriptors, navigation }) => {
   const navigateTo = (screen) => {
@@ -34,48 +33,43 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
   return (
     <View style={styles.container}>
       <TouchableOpacity 
-        style={styles.createButtonContainer}
+        style={styles.iconContainer}
         onPress={() => navigateTo('Create')}
       >
-        <Ionicons name="document-text-outline" size={24} color={WHITE} />
+        <Ionicons 
+          name="document-text-outline" 
+          size={24} 
+          color={isActive('Create') ? WHITE : LIGHT_GREY} 
+        />
       </TouchableOpacity>
       <TouchableOpacity 
-        style={[
-          styles.iconContainer, 
-          isActive('Home') && styles.activeIconContainer
-        ]}
+        style={styles.iconContainer}
         onPress={() => navigateTo('Home')}
       >
         <Ionicons 
           name="home" 
           size={24} 
-          color={isActive('Home') ? BLACK : LIGHT_GREY} 
+          color={isActive('Home') ? WHITE : LIGHT_GREY} 
         />
       </TouchableOpacity>
       <TouchableOpacity 
-        style={[
-          styles.iconContainer, 
-          isActive('NomsPage') && styles.activeIconContainer
-        ]}
+        style={styles.iconContainer}
         onPress={() => navigateTo('NomsPage')}
       >
         <Ionicons 
           name="people-outline" 
           size={24} 
-          color={isActive('NomsPage') ? BLACK : LIGHT_GREY} 
+          color={isActive('NomsPage') ? WHITE : LIGHT_GREY} 
         />
       </TouchableOpacity>
       <TouchableOpacity 
-        style={[
-          styles.iconContainer, 
-          isActive('Saved') && styles.activeIconContainer
-        ]}
+        style={styles.iconContainer}
         onPress={() => navigateTo('Saved')}
       >
         <Ionicons 
           name="bookmark-outline" 
           size={24} 
-          color={isActive('Saved') ? BLACK : LIGHT_GREY} 
+          color={isActive('Saved') ? WHITE : LIGHT_GREY} 
         />
       </TouchableOpacity>
     </View>
@@ -95,20 +89,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     padding: 10,
     borderRadius: 20,
-  },
-  activeIconContainer: {
-    backgroundColor: WHITE,
-  },
-  createButtonContainer: {
-    backgroundColor: DARK_GREY,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: -8,
-    borderWidth: 4,
-    borderColor: BLACK,
   },
 });
 
