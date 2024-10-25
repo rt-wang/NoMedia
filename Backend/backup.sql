@@ -79,7 +79,7 @@ DROP TABLE IF EXISTS `Like`;
 CREATE TABLE `Like` (
   `like_id` int NOT NULL AUTO_INCREMENT,
   `user_id` bigint DEFAULT NULL,
-  `post_id` int NOT NULL,
+  `post_id` bigint NOT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`like_id`),
   UNIQUE KEY `unique_like` (`user_id`,`post_id`),
@@ -106,7 +106,7 @@ DROP TABLE IF EXISTS `Post`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Post` (
-  `post_id` int NOT NULL AUTO_INCREMENT,
+  `post_id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` bigint DEFAULT NULL,
   `content` text,
   `title` varchar(255) DEFAULT NULL,
@@ -142,8 +142,8 @@ DROP TABLE IF EXISTS `PostComment`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `PostComment` (
-  `post_id` int NOT NULL,
-  `parent_post_id` int NOT NULL,
+  `post_id` bigint NOT NULL,
+  `parent_post_id` bigint NOT NULL,
   PRIMARY KEY (`post_id`),
   KEY `parent_post_id` (`parent_post_id`),
   CONSTRAINT `postcomment_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `Post` (`post_id`),
@@ -168,7 +168,7 @@ DROP TABLE IF EXISTS `PostKeyword`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `PostKeyword` (
-  `post_id` int NOT NULL,
+  `post_id` bigint NOT NULL,
   `keyword_id` int NOT NULL,
   PRIMARY KEY (`post_id`,`keyword_id`),
   KEY `keyword_id` (`keyword_id`),
@@ -194,8 +194,8 @@ DROP TABLE IF EXISTS `PostRepost`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `PostRepost` (
-  `post_id` int NOT NULL,
-  `original_post_id` int NOT NULL,
+  `post_id` bigint NOT NULL,
+  `original_post_id` bigint NOT NULL,
   `post_format` enum('Repost','Quote') NOT NULL,
   PRIMARY KEY (`post_id`),
   KEY `original_post_id` (`original_post_id`),
@@ -222,7 +222,7 @@ DROP TABLE IF EXISTS `Recommendation`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `Recommendation` (
   `user_id` bigint NOT NULL,
-  `post_id` int NOT NULL,
+  `post_id` bigint NOT NULL,
   `score` float NOT NULL,
   `generated_at` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`,`post_id`),
@@ -455,3 +455,4 @@ UNLOCK TABLES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2024-09-29 12:04:12
+
