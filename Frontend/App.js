@@ -35,6 +35,8 @@ import CommentSpectrumPage from './CommentSpectrumPage';
 import WelcomeScreen from './WelcomeScreen';
 import CommentDistributionPage from './CommentDistributionPage';
 import NotesEditorPage from './NotesEditorPage';
+import ChronologicalNotesPage from './ChronologicalNotesPage';
+import FoldersPage from './FoldersPage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -55,6 +57,8 @@ const HomeStack = () => (
     <Stack.Screen name="WelcomeScreen" component={WelcomeScreen} />
     <Stack.Screen name="CommentDistribution" component={CommentDistributionPage} />
     <Stack.Screen name="NotesEditorPage" component={NotesEditorPage} />
+    <Stack.Screen name="ChronologicalNotes" component={ChronologicalNotesPage} />
+    <Stack.Screen name="FoldersPage" component={FoldersPage} />
   </Stack.Navigator>
 );
 
@@ -88,7 +92,9 @@ const MainApp = () => {
         <Stack.Screen name="Tabs">
           {({ route }) => (
             <>
-              {route.state?.routes[route.state.index]?.name !== 'NotesEditorPage' && <Header />}
+              {route.state?.routes[route.state.index]?.name !== 'NotesEditorPage' &&
+               route.state?.routes[route.state.index]?.name !== 'FoldersPage' &&
+               route.state?.routes[route.state.index]?.name !== 'ChronologicalNotes' && <Header />}
               <Tab.Navigator
                 screenOptions={screenOptions}
                 tabBar={props => <NavigationBar {...props} />}
@@ -102,7 +108,30 @@ const MainApp = () => {
           )}
         </Stack.Screen>
         <Stack.Screen name="UserAccountPage" component={UserAccountPage} />
-        <Stack.Screen name="NotesEditorPage" component={NotesEditorPage} />
+        <Stack.Screen name="NotesEditorPage">
+          {(props) => (
+            <View style={{ flex: 1 }}>
+              <NotesEditorPage {...props} />
+              <NavigationBar {...props} />
+            </View>
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="FoldersPage">
+          {(props) => (
+            <View style={{ flex: 1 }}>
+              <FoldersPage {...props} />
+              <NavigationBar {...props} />
+            </View>
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="ChronologicalNotes">
+          {(props) => (
+            <View style={{ flex: 1 }}>
+              <ChronologicalNotesPage {...props} />
+              <NavigationBar {...props} />
+            </View>
+          )}
+        </Stack.Screen>
       </Stack.Navigator>
     </View>
   );

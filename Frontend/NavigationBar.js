@@ -1,12 +1,16 @@
 import React from 'react';
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const LIGHT_GREY = '#CCCCCC';
 const WHITE = '#FFFFFF';
 const BLACK = '#000000';
 
-const NavigationBar = ({ state, descriptors, navigation }) => {
+const NavigationBar = ({ state, descriptors, navigation: propNavigation }) => {
+  const navigation = propNavigation || useNavigation();
+  const route = useRoute();
+
   const navigateTo = (screen) => {
     if (screen === 'Home') {
       navigation.navigate('Home', { screen: 'ForYou' });
@@ -22,17 +26,17 @@ const NavigationBar = ({ state, descriptors, navigation }) => {
   };
 
   const isActive = (screenName) => {
-    const currentRoute = state.routes[state.index];
+    const currentRouteName = state?.routes?.[state.index]?.name || route.name;
     if (screenName === 'Home') {
-      return currentRoute.name === 'Home' || currentRoute.name === 'Threads' || currentRoute.name === 'ReadNext' || currentRoute.name === 'ForYou';
+      return ['Home', 'Threads', 'ReadNext', 'ForYou'].includes(currentRouteName);
     }
     if (screenName === 'NomsPage') {
-      return currentRoute.name === 'NomsPage';
+      return currentRouteName === 'NomsPage';
     }
     if (screenName === 'NotesEditorPage') {
-      return currentRoute.name === 'NotesEditorPage';
+      return currentRouteName === 'NotesEditorPage';
     }
-    return currentRoute.name === screenName;
+    return currentRouteName === screenName;
   };
 
   return (

@@ -4,9 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 
+const THEME_PINK = '#FFC6D1';
+
 const NotesEditorPage = () => {
   const [note, setNote] = useState('');
-  const [isTypewriterMode, setIsTypewriterMode] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const navigation = useNavigation();
 
@@ -18,70 +19,50 @@ const NotesEditorPage = () => {
     setShowShareModal(true);
   };
 
-  const toggleTypewriterMode = () => {
-    setIsTypewriterMode(!isTypewriterMode);
-  };
-
   const renderFormatToolbar = () => {
     // Implement floating toolbar for text formatting
-    return (
-      <View style={styles.formatToolbar}>
-        {/* Add formatting buttons here */}
-      </View>
-    );
+    return null;
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={handleGoBack}>
-          <Ionicons name="arrow-back" size={24} color="#FFB6C1" />
+          <Ionicons name="arrow-back" size={24} color={THEME_PINK} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={toggleTypewriterMode}>
-          <Text style={styles.typewriterButton}>
-            {isTypewriterMode ? 'Normal' : 'Typewriter'}
-          </Text>
-        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Typewriter</Text>
         <TouchableOpacity onPress={handleShare}>
-          <Ionicons name="share-outline" size={24} color="#FFB6C1" />
+          <Ionicons name="paper-plane-outline" size={24} color={THEME_PINK} />
         </TouchableOpacity>
       </View>
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.content}
+        style={styles.noteContainer}
       >
         <TextInput
-          style={[styles.noteInput, isTypewriterMode && styles.typewriterInput]}
+          style={styles.noteInput}
           multiline
           value={note}
           onChangeText={setNote}
           placeholder="Start typing..."
           placeholderTextColor="#666"
         />
+        {renderFormatToolbar()}
       </KeyboardAvoidingView>
-      {renderFormatToolbar()}
       <Modal
-        visible={showShareModal}
-        transparent={true}
         animationType="slide"
+        transparent={true}
+        visible={showShareModal}
+        onRequestClose={() => setShowShareModal(false)}
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalText}>Share to social media?</Text>
-            <TouchableOpacity 
-              style={styles.modalButton}
-              onPress={() => {
-                // Implement share functionality
-                setShowShareModal(false);
-              }}
-            >
-              <Text style={styles.modalButtonText}>Confirm</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
+            <Text style={styles.modalText}>Share options go here</Text>
+            <TouchableOpacity
               style={styles.modalButton}
               onPress={() => setShowShareModal(false)}
             >
-              <Text style={styles.modalButtonText}>Cancel</Text>
+              <Text style={styles.modalButtonText}>Close</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -101,43 +82,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
+    paddingRight: 20,
   },
-  typewriterButton: {
-    color: '#FFB6C1',
-    fontSize: 16,
+  headerTitle: {
+    color: THEME_PINK,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  content: {
+  noteContainer: {
     flex: 1,
+    padding: 16,
   },
   noteInput: {
     flex: 1,
     color: '#FFFFFF',
-    fontSize: 18,
-    padding: 16,
-  },
-  typewriterInput: {
-    textAlignVertical: 'center',
-  },
-  formatToolbar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#111',
-    padding: 8,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
+    fontSize: 16,
   },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
     backgroundColor: '#111',
     padding: 20,
-    borderRadius: 0,
+    borderRadius: 10,
     alignItems: 'center',
   },
   modalText: {
@@ -146,11 +116,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   modalButton: {
-    backgroundColor: '#FFB6C1',
+    backgroundColor: THEME_PINK,
     padding: 10,
-    marginTop: 10,
-    width: 150,
-    alignItems: 'center',
+    borderRadius: 5,
   },
   modalButtonText: {
     color: '#000000',
