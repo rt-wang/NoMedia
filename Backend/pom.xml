@@ -15,6 +15,7 @@
         <module>common</module>
         <module>userservice</module>
         <module>postservice</module>
+        <module>interaction</module>
         <!-- Add other modules here -->
     </modules>
 

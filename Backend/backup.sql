@@ -367,10 +367,12 @@ DROP TABLE IF EXISTS `UserPostInteraction`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `UserPostInteraction` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `user_id` bigint DEFAULT NULL,
-  `post_id` int NOT NULL,
-  `interaction_type` enum('view','like','comment','repost','quote','dislike') NOT NULL,
+  `post_id` bigint NOT NULL,
+  `interaction_type` enum('VIEW','LIKE','COMMENT','REPOST','QUOTE','DISLIKE') NOT NULL,
   `interaction_time` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
   KEY `post_id` (`post_id`),
   KEY `idx_user_post` (`user_id`,`post_id`),
   CONSTRAINT `userpostinteraction_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `User` (`user_id`),
