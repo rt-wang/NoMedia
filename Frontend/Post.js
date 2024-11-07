@@ -45,7 +45,7 @@ const OptionsMenu = ({ onClose, onDelete, onReport, isOwnPost }) => (
   </View>
 );
 
-const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount, isOwnPost = false }) => {
+const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount, isOwnPost = false, matchScore }) => {
   console.log('Post item:', item); // Add this line for debugging
   const navigation = useNavigation();
   const { reposts, addRepost } = useReposts();
@@ -128,6 +128,26 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount, isOwn
     </Text>
   );
 
+  const renderContent = (content) => {
+    if (!content) return null;
+    
+    // Split the content by the bold markers
+    const parts = content.split(/(\*\*.*?\*\*)/g);
+    
+    return (
+      <Text style={styles.content}>
+        {parts.map((part, index) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            // Remove the ** markers and render the text in bold
+            const boldText = part.slice(2, -2);
+            return <Text key={index} style={[styles.content, styles.boldText]}>{boldText}</Text>;
+          }
+          return <Text key={index}>{part}</Text>;
+        })}
+      </Text>
+    );
+  };
+
   const renderPostContent = (postItem) => (
     <>
       {postItem.type === 'repost' && !isQuoteRepost && (
@@ -149,12 +169,10 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount, isOwn
         </TouchableOpacity>
       </View>
       <TouchableOpacity onPress={() => handlePostPress(postItem.id)}>
-        <Text style={styles.content}>
-          {postItem.type === 'repost' && !isQuoteRepost
-            ? postItem.originalPost.content
-            : postItem.content
-          }
-        </Text>
+        {renderContent(postItem.type === 'repost' && !isQuoteRepost
+          ? postItem.originalPost.content
+          : postItem.content
+        )}
       </TouchableOpacity>
       {isQuoteRepost && (
         <View style={styles.quoteContainer}>
@@ -194,7 +212,12 @@ const Post = ({ item, onCommentPress, isQuoteRepost = false, commentCount, isOwn
           <Ionicons name="share-outline" size={18} color="gray" />
         </TouchableOpacity>
       </View>
-      {(postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.topic_id : postItem.topic_id) && (
+      {matchScore ? (
+        <View style={styles.matchScoreContainer}>
+          <Ionicons name="pulse" size={14} color="#FFB6C1" />
+          <Text style={styles.matchScoreText}>{matchScore}</Text>
+        </View>
+      ) : (postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.topic_id : postItem.topic_id) && (
         <View style={styles.nomContainer}>
           <Text style={styles.nomText}>/{postItem.type === 'repost' && !isQuoteRepost ? postItem.originalPost.topic_id : postItem.topic_id}</Text>
         </View>
@@ -436,6 +459,24 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 15,
     lineHeight: 20,
+  },
+  matchScoreContainer: {
+    backgroundColor: 'rgba(104, 118, 132, 0.2)',
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  matchScoreText: {
+    color: '#FFB6C1',
+    fontSize: 12,
+    marginLeft: 4,
+    fontFamily: 'SFProText-Regular',
+  },
+  boldText: {
+    fontWeight: 'bold',
+    color: USERNAME_COLOR,
   },
 });
 

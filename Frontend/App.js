@@ -37,6 +37,7 @@ import CommentDistributionPage from './CommentDistributionPage';
 import NotesEditorPage from './NotesEditorPage';
 import ChronologicalNotesPage from './ChronologicalNotesPage';
 import FoldersPage from './FoldersPage';
+import SentimentMatchingDemo from './SentimentMatchingDemo';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -59,6 +60,7 @@ const HomeStack = () => (
     <Stack.Screen name="NotesEditorPage" component={NotesEditorPage} />
     <Stack.Screen name="ChronologicalNotes" component={ChronologicalNotesPage} />
     <Stack.Screen name="FoldersPage" component={FoldersPage} />
+    <Stack.Screen name="SentimentMatchingDemo" component={SentimentMatchingDemo} />
   </Stack.Navigator>
 );
 

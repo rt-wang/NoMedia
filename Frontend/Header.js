@@ -43,6 +43,7 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     padding: 5,
+    width: 34, // Fixed width to ensure header text stays centered
   },
 });
 

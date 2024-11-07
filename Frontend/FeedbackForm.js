@@ -70,6 +70,13 @@ const FeedbackForm = ({ navigation }) => {
       >
         <Text style={styles.visibleButtonText}>Comment Distribution</Text>
       </TouchableOpacity>
+
+      <TouchableOpacity 
+        style={styles.demoButton}
+        onPress={() => navigation.navigate('SentimentMatchingDemo')}
+      >
+        <Text style={styles.demoButtonText}>View Sentiment Matching Demo</Text>
+      </TouchableOpacity>
     </ScrollView>
   );
 };
@@ -128,6 +135,20 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 16,
     fontFamily: 'AbhayaLibre-Regular',
+  },
+  demoButton: {
+    backgroundColor: 'rgba(255, 182, 193, 0.1)',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#FFB6C1',
+  },
+  demoButtonText: {
+    color: '#FFB6C1',
+    fontSize: 16,
+    fontWeight: '500',
   },
 });
 

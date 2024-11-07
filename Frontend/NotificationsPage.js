@@ -15,15 +15,15 @@ const NotificationItem = ({ item }) => {
   const renderIcon = () => {
     switch (item.type) {
       case NotificationType.NEW_FOLLOWER:
-        return <Ionicons name="person-add" size={24} color="#1DA1F2" />;
+        return <Ionicons name="person-add" size={24} color='#B2DFDB' />;
       case NotificationType.LIKE_POST:
       case NotificationType.LIKE_COMMENT:
       case NotificationType.MULTIPLE_LIKES:
-        return <Ionicons name="heart" size={24} color="#E0245E" />;
+        return <Ionicons name="heart" size={24} color="#fff" />;
       case NotificationType.COMMENT:
-        return <Ionicons name="chatbubble" size={24} color="#1DA1F2" />;
+        return <Ionicons name="chatbubble" size={24} color="#B0E0E6" />;
       case NotificationType.RETWEET:
-        return <Ionicons name="repeat" size={24} color="#17BF63" />;
+        return <Ionicons name="repeat" size={24} color='#FFB6C1' />;
       default:
         return null;
     }
@@ -115,9 +115,6 @@ const NotificationsPage = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Notifications</Text>
-      </View>
       <FlatList
         data={notifications}
         renderItem={({ item }) => <NotificationItem item={item} />}
@@ -134,15 +131,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-  },
-  header: {
-    padding: 8,
-  },
-  headerTitle: {
-    fontFamily: 'Athelas',
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#fff',
   },
   scrollContent: {
     paddingBottom: 20,
