@@ -44,8 +44,39 @@ services:
     networks:
       - app-network
 
+  redis:
+    image: redis:7.0
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+  interaction:
+    build:
+      context: .
+      dockerfile: interaction/Dockerfile
+    container_name: interaction
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/NoMedia?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: rootuser
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    depends_on:
+      - mysql
+      - redis
+      - postservice
+    networks:
+      - app-network
+
 networks:
   app-network:
 
 volumes:
   mysql_data:
+  redis_data:
