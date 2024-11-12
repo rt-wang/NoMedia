@@ -15,7 +15,7 @@ const NavigationBar = ({ state, descriptors, navigation: propNavigation }) => {
     if (screen === 'Home') {
       navigation.navigate('Home', { screen: 'ForYou' });
     } else if (screen === 'NomsPage') {
-      navigation.navigate('Home', { screen: 'NomsPage' });
+      navigation.navigate('NomsPage');
     } else if (screen === 'Saved') {
       navigation.navigate('Saved');
     } else if (screen === 'NotesEditorPage') {

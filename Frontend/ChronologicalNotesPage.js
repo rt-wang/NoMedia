@@ -10,7 +10,13 @@ const NoteItem = ({ title, preview, createdTime }) => (
   <View style={styles.noteItem}>
     <View style={styles.noteContent}>
       <Text style={styles.noteTitle}>{title}</Text>
-      <Text style={styles.notePreview}>{preview}</Text>
+      <Text 
+        style={styles.notePreview}
+        numberOfLines={1}
+        ellipsizeMode="tail"
+      >
+        {preview}
+      </Text>
     </View>
     <Text style={styles.noteTime}>{createdTime}</Text>
   </View>
@@ -25,16 +31,38 @@ const ChronologicalNotesPage = () => {
     navigation.navigate('FoldersPage');
   };
 
-  // Dummy data for demonstration
+  // Updated realistic notes data
   const notes = [
-    { id: '1', content: 'First note content', createdTime: '10:00 AM' },
-    { id: '2', content: 'Second note with a longer content for preview', createdTime: '11:30 AM' },
-    { id: '3', content: 'Third note', createdTime: '2:45 PM' },
+    {
+      id: '1',
+      content: "Warriors vs Celtics Analysis\nThe Warriors' offensive strategy this season shows a clear evolution from their 2015-2018 dynasty years. While the motion offense remains, there's less reliance on off-ball screens and more emphasis on isolation plays. Interesting to see if this adapts as the season progresses.",
+      createdTime: '2:15 PM'
+    },
+    {
+      id: '2',
+      content: "Remote Work Revelation\nMet someone today who changed my perspective on remote work. They've been digital nomading for 5 years and built a 7-figure business. Key insight: consistency matters more than location. Need to rethink my approach to productivity.",
+      createdTime: '11:30 AM'
+    },
+    {
+      id: '3',
+      content: "Philosophy 301 - Kant\nKant's Categorical Imperative discussion today was mind-bending. The idea that moral laws should be universal, like 'what if everyone did this?' makes sense, but gets complex with real-world applications. Example from class about lying to protect someone raised good counter-arguments.",
+      createdTime: '10:45 AM'
+    },
+    {
+      id: '4',
+      content: "Consciousness Theory\nIf consciousness is an emergent property of complex systems, at what exact point does a system become complex enough to be conscious? Is there a gradual spectrum of consciousness rather than a binary state? Need to research more on integrated information theory.",
+      createdTime: '9:20 AM'
+    },
+    {
+      id: '5',
+      content: "App Idea - MindMap\nAI-powered journal that identifies patterns in your daily entries and suggests actionable insights. Could help with personal growth and mental health. Key features: sentiment analysis, habit tracking, and personalized recommendations.",
+      createdTime: 'Yesterday'
+    }
   ];
 
   const renderNote = ({ item }) => {
     const title = item.content.split('\n')[0];
-    const preview = item.content.length > 70 ? item.content.substring(0, 70) + '...' : item.content;
+    const preview = item.content.split('\n')[1];
     return <NoteItem title={title} preview={preview} createdTime={item.createdTime} />;
   };
 
@@ -69,6 +97,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 16,
+    paddingRight: 24,
   },
   noteItem: {
     flexDirection: 'row',
@@ -87,6 +116,7 @@ const styles = StyleSheet.create({
   notePreview: {
     color: '#CCCCCC',
     fontSize: 14,
+    lineHeight: 18,
   },
   noteTime: {
     color: '#999999',

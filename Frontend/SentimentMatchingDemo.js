@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   postContainer: {
-    paddingHorizontal: 8,
+    paddingHorizontal: 16,
     borderBottomWidth: 0,
     borderBottomColor: '#333',
   },

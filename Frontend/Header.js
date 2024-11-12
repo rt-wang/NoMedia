@@ -16,8 +16,8 @@ const Header = () => {
       </TouchableOpacity>
       <Text style={styles.headerText}>NoMedia.</Text>
       <TouchableOpacity 
-        style={styles.iconContainer}
-        onPress={() => navigation.navigate('Notifications')}
+        style={[styles.iconContainer, styles.iconPadding]}
+        onPress={() => navigation.navigate('NotificationsPage')}
       >
         <Ionicons name="heart-outline" size={24} color="#fff" />
       </TouchableOpacity>
@@ -40,10 +40,14 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: '#fff',
+    marginRight: -3,
   },
   iconContainer: {
     padding: 5,
-    width: 34, // Fixed width to ensure header text stays centered
+    width: 34,
+  },
+  iconPadding: {
+    marginRight: 3,
   },
 });
 

@@ -51,7 +51,6 @@ const HomeStack = () => (
     <Stack.Screen name="Repost" component={RepostScreen} />
     <Stack.Screen name="CommentSection" component={CommentSection} />
     <Stack.Screen name="FeedbackForm" component={FeedbackForm} />
-    <Stack.Screen name="NomsPage" component={NomsPage} />
     <Stack.Screen name="NomObject" component={NomObject} />
     <Stack.Screen name="MarketingEndScreen" component={MarketingEndScreen} />
     <Stack.Screen name="CommentSpectrumPage" component={CommentSpectrumPage} />
@@ -65,10 +64,36 @@ const HomeStack = () => (
 );
 
 const AccountStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
-    <Stack.Screen name="AccountMain" component={AccountPage} />
-    <Stack.Screen name="Drafts" component={Drafts} />
-    <Stack.Screen name="Settings" component={SettingsPage} />
+  <Stack.Navigator 
+    screenOptions={{ 
+      headerShown: false,
+      header: () => null,
+      presentation: 'transparentModal',
+      cardStyleInterpolator: ({ current }) => ({
+        cardStyle: {
+          opacity: current.progress,
+        },
+      }),
+    }}
+  >
+    <Stack.Screen 
+      name="AccountMain" 
+      component={AccountPage}
+      options={{ 
+        header: () => null,
+        headerShown: false 
+      }}
+    />
+    <Stack.Screen 
+      name="Drafts" 
+      component={Drafts}
+      options={{ header: () => null }}
+    />
+    <Stack.Screen 
+      name="Settings" 
+      component={SettingsPage}
+      options={{ header: () => null }}
+    />
   </Stack.Navigator>
 );
 
@@ -85,31 +110,114 @@ const MainApp = () => {
   const screenOptions = ({ route }) => ({
     headerShown: false,
     tabBarStyle: { display: 'none' },
-    tabBar: (props) => <NavigationBar {...props} currentRoute={route.name} />
+    tabBar: (props) => <NavigationBar {...props} currentRoute={route.name} />,
+    cardStyleInterpolator: ({ current }) => ({
+      cardStyle: {
+        opacity: current.progress,
+      },
+    }),
+    transitionSpec: {
+      open: {
+        animation: 'timing',
+        config: {
+          duration: 200,
+          easing: Easing.ease,
+        },
+      },
+      close: {
+        animation: 'timing',
+        config: {
+          duration: 200,
+          easing: Easing.ease,
+        },
+      },
+    },
+    animation: 'fade',
+    animationDuration: 200,
   });
 
   return (
     <View style={styles.content}>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator 
+        screenOptions={{ 
+          headerShown: false,
+          presentation: 'transparentModal',
+          cardStyleInterpolator: ({ current }) => ({
+            cardStyle: {
+              opacity: current.progress,
+            },
+          }),
+          transitionSpec: {
+            open: {
+              animation: 'timing',
+              config: {
+                duration: 200,
+                easing: Easing.ease,
+              },
+            },
+            close: {
+              animation: 'timing',
+              config: {
+                duration: 200,
+                easing: Easing.ease,
+              },
+            },
+          },
+        }}
+      >
         <Stack.Screen name="Tabs">
           {({ route }) => (
             <>
               {route.state?.routes[route.state.index]?.name !== 'NotesEditorPage' &&
                route.state?.routes[route.state.index]?.name !== 'FoldersPage' &&
-               route.state?.routes[route.state.index]?.name !== 'ChronologicalNotes' && <Header />}
+               route.state?.routes[route.state.index]?.name !== 'ChronologicalNotes' &&
+               route.state?.routes[route.state.index]?.name !== 'Account' &&
+               route.state?.routes[route.state.index]?.name !== 'AccountMain' &&
+               route.state?.routes[route.state.index]?.name !== 'NomsMain' &&
+               route.state?.routes[route.state.index]?.name !== 'AccountPage' &&
+               route.state?.routes[route.state.index]?.name !== 'Notifications' &&
+               route.state?.routes[route.state.index]?.name !== 'NotificationsPage' &&
+               route.state?.routes[route.state.index]?.name !== 'Account' &&
+               !route.state?.routes[route.state.index]?.name?.includes('Account') &&
+               <Header />}
               <Tab.Navigator
-                screenOptions={screenOptions}
+                screenOptions={{
+                  ...screenOptions({ route }),
+                  tabBarAnimation: 'fade',
+                  tabBarAnimationDuration: 200,
+                  presentation: 'transparentModal',
+                  cardStyleInterpolator: ({ current }) => ({
+                    cardStyle: {
+                      opacity: current.progress,
+                    },
+                  }),
+                }}
                 tabBar={props => <NavigationBar {...props} />}
               >
                 <Tab.Screen name="Home" component={HomeStack} />
+                <Tab.Screen 
+                  name="NomsPage" 
+                  component={NomsPage}
+                  options={{
+                    animation: 'fade',
+                    animationDuration: 200,
+                  }}
+                />
                 <Tab.Screen name="Account" component={AccountStack} />
-                <Tab.Screen name="Notifications" component={NotificationsPage} />
                 <Tab.Screen name="Create" component={CreatePage} />
               </Tab.Navigator>
             </>
           )}
         </Stack.Screen>
         <Stack.Screen name="UserAccountPage" component={UserAccountPage} />
+        <Stack.Screen name="NotificationsPage">
+          {(props) => (
+            <View style={{ flex: 1 }}>
+              <NotificationsPage {...props} />
+              <NavigationBar {...props} />
+            </View>
+          )}
+        </Stack.Screen>
         <Stack.Screen name="NotesEditorPage">
           {(props) => (
             <View style={{ flex: 1 }}>

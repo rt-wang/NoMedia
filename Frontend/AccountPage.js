@@ -133,8 +133,8 @@ const AccountPage = ({ navigation }) => {
           name: userData.name,
           username: userData.username,
           bio: userData.bio || '',
-          following: userData.following || 0,
-          followers: userData.followers || 0,
+          following: userData.following || 90,
+          followers: userData.followers || 62,
           authorities: JSON.parse(authorities)
         });
       }
@@ -316,33 +316,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    paddingRight: 16,
-    backgroundColor: '#000', // Add this to ensure the header has a background
+    paddingHorizontal: 16,
+    paddingTop: 8,
+    backgroundColor: '#000',
   },
   settingsButton: {
-    padding: 10,
-    marginTop: 14, // Adjusted to align with the username
+    padding: 8,
+    marginTop: 3,
   },
   personalInfo: {
     flex: 1,
-    padding: 12,
+    paddingVertical: 8,
   },
   name: {
     fontFamily: 'SFProText-Bold',
     fontSize: 24,
     color: '#fff',
-    marginBottom: 5,
+    marginBottom: 2,
   },
   username: {
     fontFamily: 'SFProText-Regular',
-    fontSize: 16,
+    fontSize: 15,
     color: '#687684',
+    marginBottom: 8,
   },
   bio: {
     fontFamily: 'SFProText-Regular',
-    fontSize: 16,
+    fontSize: 15,
     color: '#fff',
     marginTop: 8,
+    marginBottom: 8,
   },
   followInfo: {
     flexDirection: 'row',
@@ -350,44 +353,41 @@ const styles = StyleSheet.create({
   },
   followText: {
     fontFamily: 'SFProText-Regular',
-    fontSize: 14,
+    fontSize: 15,
     color: '#687684',
-    marginRight: 16,
+    marginRight: 20,
   },
   followCount: {
-    fontFamily: 'SFProText-Semibold', // Use the semibold font
-    color: '#fff', // This makes the number white
+    fontFamily: 'SFProText-Semibold',
+    color: '#fff',
   },
   stickyHeader: {
     backgroundColor: '#000',
     paddingTop: 8,
-    borderBottomWidth: 1,
+    borderBottomWidth: 0.5,
     borderBottomColor: '#333',
   },
   actionButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
-    paddingHorizontal: 16, // Add horizontal padding
+    marginBottom: 12,
+    paddingHorizontal: 16,
   },
   button: {
     backgroundColor: '#333',
-    paddingVertical: 6, // Increased vertical padding
-    paddingHorizontal: 0, // Remove horizontal padding
-    borderRadius: 10,
-    width: '48%', // Set width to 48% of container width
-    alignItems: 'center', // Center content horizontally
+    paddingVertical: 8,
+    borderRadius: 6,
+    width: '48%',
+    alignItems: 'center',
   },
   buttonText: {
     fontFamily: 'SFProText-Semibold',
     color: '#fff',
-    fontSize: 14, // Slightly increased font size
+    fontSize: 15,
   },
   contentTabs: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
   },
   tab: {
     paddingVertical: 12,
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontFamily: 'SFProText-Regular',
-    fontSize: 16,
+    fontSize: 15,
     color: '#687684',
   },
   activeTabText: {
@@ -444,8 +444,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 20,
-    paddingHorizontal: 16,
-  },
+  }
 });
 
 export default AccountPage;
