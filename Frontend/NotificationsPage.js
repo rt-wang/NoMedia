@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 const NotificationType = {
   NEW_FOLLOWER: 'NEW_FOLLOWER',
@@ -84,6 +85,22 @@ const NotificationItem = ({ item }) => {
   );
 };
 
+const NotificationsHeader = () => {
+  const navigation = useNavigation();
+  
+  return (
+    <View style={styles.headerContainer}>
+      <TouchableOpacity 
+        onPress={() => navigation.goBack()} 
+        style={styles.backButton}
+      >
+        <Ionicons name="arrow-back" size={24} color="#fff" />
+      </TouchableOpacity>
+      <Text style={styles.headerTitle}>Notifications</Text>
+    </View>
+  );
+};
+
 const NotificationsPage = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -115,6 +132,7 @@ const NotificationsPage = () => {
 
   return (
     <View style={styles.container}>
+      <NotificationsHeader />
       <FlatList
         data={notifications}
         renderItem={({ item }) => <NotificationItem item={item} />}
@@ -172,6 +190,25 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     padding: 16,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingBottom: 12,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#333',
+    backgroundColor: '#000',
+  },
+  backButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 24,
+    fontFamily: 'Athelas',
+    fontWeight: 'bold',
   },
 });
 
