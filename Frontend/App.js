@@ -38,6 +38,7 @@ import NotesEditorPage from './NotesEditorPage';
 import ChronologicalNotesPage from './ChronologicalNotesPage';
 import FoldersPage from './FoldersPage';
 import SentimentMatchingDemo from './SentimentMatchingDemo';
+import CollectionsPage from './CollectionsPage';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -203,6 +204,7 @@ const MainApp = () => {
                     animationDuration: 200,
                   }}
                 />
+                <Tab.Screen name="Collections" component={CollectionsPage} />
                 <Tab.Screen name="Account" component={AccountStack} />
                 <Tab.Screen name="Create" component={CreatePage} />
               </Tab.Navigator>

@@ -16,8 +16,8 @@ const NavigationBar = ({ state, descriptors, navigation: propNavigation }) => {
       navigation.navigate('Home', { screen: 'ForYou' });
     } else if (screen === 'NomsPage') {
       navigation.navigate('NomsPage');
-    } else if (screen === 'Saved') {
-      navigation.navigate('Saved');
+    } else if (screen === 'Collections') {
+      navigation.navigate('Collections');
     } else if (screen === 'NotesEditorPage') {
       navigation.navigate('NotesEditorPage');
     } else {
@@ -35,6 +35,9 @@ const NavigationBar = ({ state, descriptors, navigation: propNavigation }) => {
     }
     if (screenName === 'NotesEditorPage') {
       return currentRouteName === 'NotesEditorPage';
+    }
+    if (screenName === 'Collections') {
+      return currentRouteName === 'Collections';
     }
     return currentRouteName === screenName;
   };
@@ -73,12 +76,12 @@ const NavigationBar = ({ state, descriptors, navigation: propNavigation }) => {
       </TouchableOpacity>
       <TouchableOpacity 
         style={styles.iconContainer}
-        onPress={() => navigateTo('Saved')}
+        onPress={() => navigateTo('Collections')}
       >
         <Ionicons 
           name="bookmark-outline" 
           size={24} 
-          color={isActive('Saved') ? WHITE : LIGHT_GREY} 
+          color={isActive('Collections') ? WHITE : LIGHT_GREY} 
         />
       </TouchableOpacity>
     </View>
