@@ -3,8 +3,8 @@ import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-const LIGHT_GREY = '#CCCCCC';
-const WHITE = '#FFFFFF';
+const INACTIVE_COLOR = '#808080';  // Slightly lighter grey for non-selected icons
+const ACTIVE_COLOR = '#FFFFFF';    // White for selected icon
 const BLACK = '#000000';
 
 const NavigationBar = ({ state, descriptors, navigation: propNavigation }) => {
@@ -42,47 +42,41 @@ const NavigationBar = ({ state, descriptors, navigation: propNavigation }) => {
     return currentRouteName === screenName;
   };
 
+  const getIconProps = (screenName, iconName) => {
+    const active = isActive(screenName);
+    return {
+      name: active ? iconName : `${iconName}-outline`,  // Use filled icon when active
+      size: 24,  // Keep consistent size
+      color: active ? ACTIVE_COLOR : INACTIVE_COLOR,
+      style: active ? styles.activeIcon : styles.icon
+    };
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity 
         style={styles.iconContainer}
         onPress={() => navigateTo('NotesEditorPage')}
       >
-        <Ionicons 
-          name="document-text-outline" 
-          size={24} 
-          color={isActive('NotesEditorPage') ? WHITE : LIGHT_GREY} 
-        />
+        <Ionicons {...getIconProps('NotesEditorPage', 'document-text')} />
       </TouchableOpacity>
       <TouchableOpacity 
         style={styles.iconContainer}
         onPress={() => navigateTo('Home')}
       >
-        <Ionicons 
-          name="home" 
-          size={24} 
-          color={isActive('Home') ? WHITE : LIGHT_GREY} 
-        />
+        <Ionicons {...getIconProps('Home', 'home')} />
       </TouchableOpacity>
       <TouchableOpacity 
         style={styles.iconContainer}
         onPress={() => navigateTo('NomsPage')}
       >
-        <Ionicons 
-          name="people-outline" 
-          size={24} 
-          color={isActive('NomsPage') ? WHITE : LIGHT_GREY} 
-        />
+        <Ionicons {...getIconProps('NomsPage', 'people')} />
       </TouchableOpacity>
       <TouchableOpacity 
         style={styles.iconContainer}
         onPress={() => navigateTo('Collections')}
       >
-        <Ionicons 
-          name="bookmark-outline" 
-          size={24} 
-          color={isActive('Collections') ? WHITE : LIGHT_GREY} 
-        />
+        <Ionicons {...getIconProps('Collections', 'bookmark')} />
       </TouchableOpacity>
     </View>
   );
@@ -101,6 +95,15 @@ const styles = StyleSheet.create({
   iconContainer: {
     padding: 10,
     borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    opacity: 0.9,  // Less dim for inactive icons
+  },
+  activeIcon: {
+    transform: [{scale: 1.05}],  // Smaller scale difference
+    opacity: 1,    // Full opacity for active icon
   },
 });
 
